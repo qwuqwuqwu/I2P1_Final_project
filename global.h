@@ -25,7 +25,7 @@ typedef struct character
     int width, height; // the width and height of image
     bool dir; // left: false, right: true
     int state; // the state of character
-    ALLEGRO_BITMAP *img_move[2];
+    ALLEGRO_BITMAP *img_move[4];
     ALLEGRO_BITMAP *img_atk[2];
     ALLEGRO_SAMPLE_INSTANCE *atk_Sound;
     int anime; // counting the time of animation

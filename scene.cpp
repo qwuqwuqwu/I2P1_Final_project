@@ -12,6 +12,7 @@ ALLEGRO_FONT *font = NULL;
 ALLEGRO_BITMAP *g_background[ COUNOF_BACKGROUND ] = { NULL };
 ALLEGRO_BITMAP *Ground[ MAX_COUNTOF_GROUND ] = { NULL };
 ALLEGRO_BITMAP *Ground2[ MAX_COUNTOF_GROUND ] = { NULL };
+ALLEGRO_BITMAP *img;
 
 int g_nBackgroundWidth = 0;
 Pos g_Ground[ MAX_COUNTOF_GROUND ];
@@ -89,11 +90,15 @@ void GroundSetup( void ) {
 
     for( int i = 0; i < g_nGroundCount; i++ ) {
         if( g_Ground[ i ].type == 1 ) {
-            Ground[ i ] = al_load_bitmap("./image/ground100_10.png");
+            Ground[ i ] = al_load_bitmap("./image/grass_sur_med.png");
             Ground2[ i ] = al_load_bitmap("./image/ground_red_100_10.png");
         }
         else if( g_Ground[ i ].type == 2 ) {
-            Ground[ i ] = al_load_bitmap("./image/ground50_10.png");
+            Ground[ i ] = al_load_bitmap("./image/grass_med_med.png");
+            Ground2[ i ] = al_load_bitmap("./image/ground_red_50_10.png");
+        }
+        else if( g_Ground[ i ].type == 3 ) {
+            Ground[ i ] = al_load_bitmap("./image/bridge.png");
             Ground2[ i ] = al_load_bitmap("./image/ground_red_50_10.png");
         }
 
@@ -113,9 +118,9 @@ void menu_process(ALLEGRO_EVENT event){
             judge_next_window = true;
 }
 void menu_draw(){
-    al_clear_to_color(al_map_rgb(100,100,100));
-    al_draw_text(font, al_map_rgb(255,255,255), WIDTH/2, HEIGHT/2+120 , ALLEGRO_ALIGN_CENTRE, "Press 'Enter' to start");
-    al_draw_rectangle(WIDTH/2-150, 310, WIDTH/2+150, 350, al_map_rgb(255, 255, 255), 0);
+    img = al_load_bitmap("intro.jpg"); // ANS: load image
+    al_draw_bitmap(img, 0, 0, 0); // ANS: draw image
+
 }
 void menu_destroy(){
     al_destroy_font(font);
@@ -124,7 +129,7 @@ void menu_destroy(){
 // function of game_scene
 void game_scene_init(){
     for( int i = 0; i < COUNOF_BACKGROUND; i++ ) {
-        g_background[ i ] = al_load_bitmap("./image/test3.png");
+        g_background[ i ] = al_load_bitmap("./image/background1.png");
     }
     g_nBackgroundWidth = al_get_bitmap_width( g_background[ 0 ] );
 

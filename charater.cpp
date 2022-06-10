@@ -32,18 +32,18 @@ void CameraUpdate( float *CamPosition, int x, int y, int width, int height )
 
 void character_init( const int nTerrainWidth ){
     // load character images
-    for(int i = 1 ; i <= 2 ; i++){
+    for(int i = 1 ; i <= 4 ; i++){
         char temp[50];
-        sprintf( temp, "./image/char_move_small%d.png", i );
+        sprintf( temp, "./image/char_move%d.png", i );
         e_pchara->img_move[i-1] = al_load_bitmap(temp);
     }
     for(int i = 1 ; i <= 2 ; i++){
         char temp[50];
-        sprintf( temp, "./image/char_atk_small%d.png", i );
+        sprintf( temp, "./image/char_inhale%d.png", i );
         e_pchara->img_atk[i-1] = al_load_bitmap(temp);
     }
     // load effective sound
-    sample = al_load_sample("./sound/atk_sound.wav");
+    sample = al_load_sample("./sound/inhale.wav");
     e_pchara->atk_Sound  = al_create_sample_instance(sample);
     al_set_sample_instance_playmode(e_pchara->atk_Sound, ALLEGRO_PLAYMODE_ONCE);
     al_attach_sample_instance_to_mixer(e_pchara->atk_Sound, al_get_default_mixer());
@@ -58,7 +58,7 @@ void character_init( const int nTerrainWidth ){
     // initial the animation component
     e_pchara->state = STOP;
     e_pchara->anime = 0;
-    e_pchara->anime_time = 30;
+    e_pchara->anime_time = 15;
 
     // gravity
     e_pchara->y0 = e_pchara->y;
@@ -158,16 +158,30 @@ void character_draw( const int nGroundY ){
             al_draw_bitmap(e_pchara->img_move[0], e_pchara->x, e_pchara->y, 0);
     }else if( e_pchara->state == MOVE ){
         if( e_pchara->dir ){
-            if( e_pchara->anime < e_pchara->anime_time/2 ){
+            if( e_pchara->anime < e_pchara->anime_time/4 ){
                 al_draw_bitmap(e_pchara->img_move[0], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL);
-            }else{
+            }
+            else if( e_pchara->anime_time/4 <= e_pchara->anime && e_pchara->anime < e_pchara->anime_time/2){
                 al_draw_bitmap(e_pchara->img_move[1], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL);
             }
+            else if( e_pchara->anime_time/2 <= e_pchara->anime && e_pchara->anime < e_pchara->anime_time*3/4){
+                al_draw_bitmap(e_pchara->img_move[2], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL);
+            }
+            else{
+                al_draw_bitmap(e_pchara->img_move[3], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL);
+            }
         }else{
-            if( e_pchara->anime < e_pchara->anime_time/2 ){
+            if( e_pchara->anime < e_pchara->anime_time/4 ){
                 al_draw_bitmap(e_pchara->img_move[0], e_pchara->x, e_pchara->y, 0);
-            }else{
+            }
+            else if( e_pchara->anime_time/4 <= e_pchara->anime && e_pchara->anime < e_pchara->anime_time/2){
                 al_draw_bitmap(e_pchara->img_move[1], e_pchara->x, e_pchara->y, 0);
+            }
+            else if( e_pchara->anime_time/2 <= e_pchara->anime && e_pchara->anime < e_pchara->anime_time*3/4){
+                al_draw_bitmap(e_pchara->img_move[2], e_pchara->x, e_pchara->y, 0);
+            }
+            else{
+                al_draw_bitmap(e_pchara->img_move[3], e_pchara->x, e_pchara->y, 0);
             }
         }
     }else if( e_pchara->state == ATK ){
@@ -175,14 +189,14 @@ void character_draw( const int nGroundY ){
             if( e_pchara->anime < e_pchara->anime_time/2 ){
                 al_draw_bitmap(e_pchara->img_atk[0], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL);
             }else{
-                al_draw_bitmap(e_pchara->img_atk[1], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL);
+                al_draw_bitmap(e_pchara->img_atk[1], e_pchara->x, e_pchara->y-27, ALLEGRO_FLIP_HORIZONTAL);
                 al_play_sample_instance(e_pchara->atk_Sound);
             }
         }else{
             if( e_pchara->anime < e_pchara->anime_time/2 ){
                 al_draw_bitmap(e_pchara->img_atk[0], e_pchara->x, e_pchara->y, 0);
             }else{
-                al_draw_bitmap(e_pchara->img_atk[1], e_pchara->x, e_pchara->y, 0);
+                al_draw_bitmap(e_pchara->img_atk[1], e_pchara->x, e_pchara->y-27, 0);
                 al_play_sample_instance(e_pchara->atk_Sound);
             }
         }
