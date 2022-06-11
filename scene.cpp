@@ -22,6 +22,7 @@ void menu_process(ALLEGRO_EVENT event){
 }
 void menu_draw(){
     img = al_load_bitmap("intro.jpg"); // ANS: load image
+    assert( img != NULL );
     al_draw_bitmap(img, 0, 0, 0); // ANS: draw image
 
 }
@@ -33,6 +34,7 @@ void menu_destroy(){
 void game_scene_init(){
     for( int i = 0; i < COUNOF_BACKGROUND; i++ ) {
         g_background[ i ] = al_load_bitmap("./image/background1.png");
+        assert( g_background[ i ] != NULL );
     }
     g_nBackgroundWidth = al_get_bitmap_width( g_background[ 0 ] );
 

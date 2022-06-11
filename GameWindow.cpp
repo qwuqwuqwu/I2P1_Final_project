@@ -55,6 +55,7 @@ void game_init() {
     al_register_event_source(event_queue, al_get_timer_event_source( fps )) ;
     // initialize the icon on the display
     ALLEGRO_BITMAP *icon = al_load_bitmap("./image/icon.jpg");
+    assert( icon != NULL );
     al_set_display_icon(display, icon);
 
     e_pchara = ( Character * )malloc( sizeof( Character ) );

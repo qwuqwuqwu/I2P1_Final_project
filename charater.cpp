@@ -35,16 +35,19 @@ void character_init( const int nTerrainWidth ){
         char temp[50];
         sprintf( temp, "./image/char_move%d.png", i );
         e_pchara->img_move[i-1] = al_load_bitmap(temp);
+        assert( e_pchara->img_move[i-1] != NULL );
     }
     for(int i = 1 ; i <= 2; i++){
         char temp[50];
         sprintf( temp, "./image/char_inhale%d.png", i );
         e_pchara->img_atk[i-1] = al_load_bitmap(temp);
+        assert( e_pchara->img_atk[i-1] != NULL );
     }
     for(int i = 1 ; i <= 2; i++){
         char temp[50];
         sprintf( temp, "./image/char_transform_small%d.png", i );
         e_pchara->img_transform[i-1] = al_load_bitmap(temp);
+        assert( e_pchara->img_transform[i-1] != NULL );
     }
     // load effective sound
     sample = al_load_sample("./sound/inhale.wav");
@@ -87,6 +90,7 @@ void character_init( const int nTerrainWidth ){
                 char temp[ 50 ];
                 sprintf( temp, "./image/char_move_small%d.png", j + 1 );
                 e_pchara->img_SpecialAtk[ 4 * i + j ] = al_load_bitmap( temp );
+                assert( e_pchara->img_SpecialAtk[ 4 * i + j ] != NULL );
             }
             break;
 
@@ -95,6 +99,7 @@ void character_init( const int nTerrainWidth ){
                 char temp[ 50 ];
                 sprintf( temp, "./image/char_sword_move%d.png", j + 1 );
                 e_pchara->img_SpecialAtk[ 4 * i + j ] = al_load_bitmap( temp );
+                assert( e_pchara->img_SpecialAtk[ 4 * i + j ] != NULL );
             }
             break;
 
@@ -103,6 +108,7 @@ void character_init( const int nTerrainWidth ){
                 char temp[ 50 ];
                 sprintf( temp, "./image/char_sword_move%d.png", j + 1 );
                 e_pchara->img_SpecialAtk[ 4 * i + j ] = al_load_bitmap( temp );
+                assert( e_pchara->img_SpecialAtk[ 4 * i + j ] != NULL );
             }
             break;
 
@@ -111,6 +117,7 @@ void character_init( const int nTerrainWidth ){
                 char temp[ 50 ];
                 sprintf( temp, "./image/char_sword_move%d.png", j + 1 );
                 e_pchara->img_SpecialAtk[ 4 * i + j ] = al_load_bitmap( temp );
+                assert( e_pchara->img_SpecialAtk[ 4 * i + j ] != NULL );
             }
             break;
 
@@ -454,6 +461,7 @@ void character_init2(){
     char temp[50];
     sprintf( temp, "./image/char_move1.png");
     e_monster->img_move[0] = al_load_bitmap(temp);
+    assert( e_monster->img_move[0] != NULL );
 
     e_monster->width = al_get_bitmap_width(e_monster->img_move[0]);
     e_monster->height = al_get_bitmap_height(e_monster->img_move[0]);
