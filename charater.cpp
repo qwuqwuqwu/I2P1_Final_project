@@ -31,17 +31,17 @@ void CameraUpdate( float *CamPosition, int x, int y, int width, int height )
 
 void character_init( const int nTerrainWidth ){
     // load character images
-    for(int i = 1 ; i <= 4 ; i++){
+    for(int i = 1 ; i <= 4; i++){
         char temp[50];
         sprintf( temp, "./image/char_move%d.png", i );
         e_pchara->img_move[i-1] = al_load_bitmap(temp);
     }
-    for(int i = 1 ; i <= 2 ; i++){
+    for(int i = 1 ; i <= 2; i++){
         char temp[50];
         sprintf( temp, "./image/char_inhale%d.png", i );
         e_pchara->img_atk[i-1] = al_load_bitmap(temp);
     }
-    for(int i = 1 ; i <= 2 ; i++){
+    for(int i = 1 ; i <= 2; i++){
         char temp[50];
         sprintf( temp, "./image/char_transform_small%d.png", i );
         e_pchara->img_transform[i-1] = al_load_bitmap(temp);
@@ -55,7 +55,7 @@ void character_init( const int nTerrainWidth ){
     // initial the geometric information of character
     e_pchara->width = al_get_bitmap_width(e_pchara->img_move[0]);
     e_pchara->height = al_get_bitmap_height(e_pchara->img_move[0]);
-    e_pchara->x = WIDTH/2-100;
+    e_pchara->x = WIDTH/2-100; // todo: no magical number here!
     e_pchara->y = HEIGHT/2;
     e_pchara->dir = false;
     e_pchara->hp = 3;
@@ -64,7 +64,7 @@ void character_init( const int nTerrainWidth ){
     e_pchara->state = STOP;
     e_pchara->anime = 0;
     e_pchara->anime_time = 15;
-
+    e_pchara->x0 = e_pchara->x;
     // gravity
     e_pchara->y0 = e_pchara->y;
     e_pchara->vy = 0.0;
@@ -83,23 +83,35 @@ void character_init( const int nTerrainWidth ){
     for( int i = 0; i < ESA_NUM; i++ ){
         switch( i ) {
         case ESA_NORMAL:
-            e_pchara->img_SpecialAtk[ 2 * ESA_NORMAL ] = al_load_bitmap( "./image/char_move_small1.png" );
-            e_pchara->img_SpecialAtk[ 2 * ESA_NORMAL + 1 ] = al_load_bitmap( "./image/char_move_small2.png" );
+            for(int j = 0; j < 4; j++){
+                char temp[ 50 ];
+                sprintf( temp, "./image/char_move_small%d.png", j + 1 );
+                e_pchara->img_SpecialAtk[ 4 * i + j ] = al_load_bitmap( temp );
+            }
             break;
 
         case ESA_SWORD:
-            e_pchara->img_SpecialAtk[ 2 * ESA_SWORD ] = al_load_bitmap( "./image/char_move_sword1.png" );
-            e_pchara->img_SpecialAtk[ 2 * ESA_SWORD + 1 ] = al_load_bitmap( "./image/char_move_sword2.png" );
+            for(int j = 0; j < 4; j++){
+                char temp[ 50 ];
+                sprintf( temp, "./image/char_sword_move%d.png", j + 1 );
+                e_pchara->img_SpecialAtk[ 4 * i + j ] = al_load_bitmap( temp );
+            }
             break;
 
         case ESA_BOMB:
-            e_pchara->img_SpecialAtk[ 2 * ESA_BOMB ] = al_load_bitmap( "./image/char_move_bomb1.png" );
-            e_pchara->img_SpecialAtk[ 2 * ESA_BOMB + 1 ] = al_load_bitmap( "./image/char_move_bomb2.png" );
+            for(int j = 0; j < 4; j++){
+                char temp[ 50 ];
+                sprintf( temp, "./image/char_sword_move%d.png", j + 1 );
+                e_pchara->img_SpecialAtk[ 4 * i + j ] = al_load_bitmap( temp );
+            }
             break;
 
         case ESA_FIRE:
-            e_pchara->img_SpecialAtk[ 2 * ESA_FIRE ] = al_load_bitmap( "./image/char_move_fire1.png" );
-            e_pchara->img_SpecialAtk[ 2 * ESA_FIRE + 1 ] = al_load_bitmap( "./image/char_move_fire2.png" );
+            for(int j = 0; j < 4; j++){
+                char temp[ 50 ];
+                sprintf( temp, "./image/char_sword_move%d.png", j + 1 );
+                e_pchara->img_SpecialAtk[ 4 * i + j ] = al_load_bitmap( temp );
+            }
             break;
 
         default:
@@ -113,8 +125,14 @@ void charater_process(ALLEGRO_EVENT event){
     // process the animation
     if( event.type == ALLEGRO_EVENT_TIMER ){
         if( event.timer.source == fps ){
-            e_pchara->anime++;
-            e_pchara->anime %= e_pchara->anime_time;
+
+            if( e_pchara->state == ATK ) {
+                e_pchara->anime++;
+                e_pchara->anime %= e_pchara->anime_time;
+                if( e_pchara->anime == 0 ) {
+                    e_pchara->state = STOP;
+                }
+            }
 
             if( e_pchara->TransformStatus == ETS_TRANSFORMING ) {
                 e_pchara->nTransformCursor++;
@@ -173,8 +191,11 @@ void charater_update(){
     }else if( key_state[ALLEGRO_KEY_S] ){
         if(key_state[ALLEGRO_KEY_SPACE])
         {
-            e_pchara->dir?e_pchara->x += 10: e_pchara->x-= 10;
-            e_pchara->state = ATK;
+            if( e_pchara->state != ATK) {
+                //e_pchara->dir?e_pchara->x += 100: e_pchara->x-= 100;
+                e_pchara->x0 = e_pchara->x;
+                e_pchara->state = ATK;
+            }
         }
         else
         {
@@ -284,7 +305,24 @@ void character_checkTransform( void ) {
         e_pchara->state = STOP;
         e_pchara->TransformStatus = ETS_TRANSFORMING;
         e_pchara->nTransformCursor = 0;
+
         e_pchara->NextSpecailAtk = ESA_SWORD;
+    }
+}
+
+void character_attack( void )
+{
+    int nDeltaX = 0;
+    switch( e_pchara->state ) {
+    case ATK:
+        nDeltaX = ( e_pchara->dir ? 1 : -1 ) * e_pchara->anime * 10;
+        e_pchara->x = e_pchara->x0 + nDeltaX;
+        break;
+
+    case STOP:
+    default:
+        // do nothing
+        break;
     }
 }
 
@@ -303,82 +341,102 @@ void character_draw(){
     // check transform
     character_checkTransform();
 
+    character_attack();
 
     // check monster alive?
     charater_update2();
-    ALLEGRO_BITMAP *img_move[ 2 ] = { e_pchara->img_move[ 0 ], e_pchara->img_move[ 1 ] };
-    ALLEGRO_BITMAP *img_atk[ 2 ] = { e_pchara->img_atk[ 0 ], e_pchara->img_atk[ 1 ] };
-    if( e_pchara->TransformStatus == ETS_TRANSFORMED ) {
-        img_move[ 0 ] = e_pchara->img_SpecialAtk[ 2 * e_pchara->NowSpecialAtk ];
-        img_move[ 1 ] = e_pchara->img_SpecialAtk[ 2 * e_pchara->NowSpecialAtk + 1 ];
-    }
 
-    // with the state, draw corresponding image
-    switch( e_pchara->state ) {
-    case STOP:
-        if( e_pchara->dir ) {
-            if( e_pchara->anime < e_pchara->nTransformTime / 2 ) {
-                al_draw_bitmap(e_pchara->img_move[0], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL);
-            }
-            else if( e_pchara->anime_time/4 <= e_pchara->anime && e_pchara->anime < e_pchara->anime_time/2){
+    if( e_pchara->TransformStatus == ETS_TRANSFORMING ) {
+        if( e_pchara->dir ){
+            if( e_pchara->anime < e_pchara->nTransformTime / 2 ){
+                al_draw_bitmap(e_pchara->img_transform[ 0 ], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL );
+            }else{
                 al_draw_bitmap(e_pchara->img_transform[ 1 ], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL );
             }
-            else if( e_pchara->anime_time/2 <= e_pchara->anime && e_pchara->anime < e_pchara->anime_time*3/4){
-                al_draw_bitmap(e_pchara->img_move[2], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL);
-            }
-            else{
-                al_draw_bitmap(e_pchara->img_move[3], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL);
-            }
-        }
-        else {
-            if( e_pchara->anime < e_pchara->anime_time/4 ) {
-                al_draw_bitmap(e_pchara->img_move[0], e_pchara->x, e_pchara->y, 0);
-            }
-            else if( e_pchara->anime_time/4 <= e_pchara->anime && e_pchara->anime < e_pchara->anime_time/2){
+        }else{
+            if( e_pchara->anime < e_pchara->nTransformTime / 2 ){
+                al_draw_bitmap(e_pchara->img_transform[ 0 ], e_pchara->x, e_pchara->y, 0 );
+            }else{
                 al_draw_bitmap(e_pchara->img_transform[ 1 ], e_pchara->x, e_pchara->y, 0 );
             }
-            else if( e_pchara->anime_time/2 <= e_pchara->anime && e_pchara->anime < e_pchara->anime_time*3/4){
-                al_draw_bitmap(e_pchara->img_move[2], e_pchara->x, e_pchara->y, 0);
-            }
-            else{
-                al_draw_bitmap(e_pchara->img_move[3], e_pchara->x, e_pchara->y, 0);
-            }
         }
-        break;
+    }
+    else {
+        ALLEGRO_BITMAP *img_move[ 4 ] = { e_pchara->img_move[ 0 ], e_pchara->img_move[ 1 ], e_pchara->img_move[ 2 ], e_pchara->img_move[ 3 ] };
+        ALLEGRO_BITMAP *img_atk[ 2 ] = { e_pchara->img_atk[ 0 ], e_pchara->img_atk[ 1 ] };
 
-    case MOVE:
-        if( e_pchara->dir ) {
-            if( e_pchara->anime < e_pchara->anime_time/2 ){
-                al_draw_bitmap( img_move[ 0 ], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL);
-            }else{
-                al_draw_bitmap( img_move[ 1 ], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL);
+        if( e_pchara->TransformStatus == ETS_TRANSFORMED ) {
+            for( int i = 0; i < 4; i++ ) {
+                img_move[ i ] = e_pchara->img_SpecialAtk[ 4 * e_pchara->NowSpecialAtk + i ];
             }
         }
-        else {
-            al_draw_bitmap(e_pchara->img_atk[1], e_pchara->x, e_pchara->y-27, ALLEGRO_FLIP_HORIZONTAL);
-            al_play_sample_instance(e_pchara->atk_Sound);
-        }
-        break;
 
-    case ATK:
-        if( e_pchara->dir ) {
-            if( e_pchara->anime < e_pchara->anime_time/2 ){
-                al_draw_bitmap( img_atk[ 0 ], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL);
-                al_draw_bitmap( img_atk[ 0 ], e_pchara->x+50, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL);
-            }else{
-                al_draw_bitmap( img_atk[ 1 ], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL);
-                al_play_sample_instance(e_pchara->atk_Sound);
+        // with the state, draw corresponding image
+        switch( e_pchara->state ) {
+        case STOP:
+            if( e_pchara->dir ) {
+                al_draw_bitmap(img_move[0], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL);
             }
-        }
-        else {
-            al_draw_bitmap(e_pchara->img_atk[1], e_pchara->x, e_pchara->y-27, 0);
-            al_play_sample_instance(e_pchara->atk_Sound);
-        }
-        break;
-    default:
-        assert( false );
-        break;
-    } // end of switch
+            else {
+                al_draw_bitmap(img_move[0], e_pchara->x, e_pchara->y, 0);
+            }
+            break;
+
+        case MOVE:
+            if( e_pchara->dir ) {
+                if( e_pchara->anime < e_pchara->nTransformTime / 2 ) {
+                    al_draw_bitmap(img_move[0], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL);
+                }
+                else if( e_pchara->anime_time/4 <= e_pchara->anime && e_pchara->anime < e_pchara->anime_time/2){
+                    al_draw_bitmap(img_move[ 1 ], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL );
+                }
+                else if( e_pchara->anime_time/2 <= e_pchara->anime && e_pchara->anime < e_pchara->anime_time*3/4){
+                    al_draw_bitmap(img_move[2], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL);
+                }
+                else{
+                    al_draw_bitmap(img_move[3], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL);
+                }
+            }
+            else {
+                if( e_pchara->anime < e_pchara->anime_time/4 ) {
+                    al_draw_bitmap(img_move[0], e_pchara->x, e_pchara->y, 0);
+                }
+                else if( e_pchara->anime_time/4 <= e_pchara->anime && e_pchara->anime < e_pchara->anime_time/2){
+                    al_draw_bitmap(img_move[ 1 ], e_pchara->x, e_pchara->y, 0 );
+                }
+                else if( e_pchara->anime_time/2 <= e_pchara->anime && e_pchara->anime < e_pchara->anime_time*3/4){
+                    al_draw_bitmap(img_move[2], e_pchara->x, e_pchara->y, 0);
+                }
+                else{
+                    al_draw_bitmap(img_move[3], e_pchara->x, e_pchara->y, 0);
+                }
+            }
+            break;
+
+        case ATK:
+            if( e_pchara->dir ) {
+                if( e_pchara->anime < e_pchara->anime_time / 2 ) {
+                    al_draw_bitmap( img_atk[ 0 ], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL );
+                }else{
+                    al_draw_bitmap( img_atk[ 1 ], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL);
+                    al_play_sample_instance(e_pchara->atk_Sound);
+                }
+            }
+            else {
+                if( e_pchara->anime < e_pchara->anime_time / 2 ) {
+                    al_draw_bitmap( img_atk[ 0 ], e_pchara->x, e_pchara->y, 0 );
+                }else{
+                    al_draw_bitmap( img_atk[ 1 ], e_pchara->x, e_pchara->y, 0 );
+                    al_play_sample_instance(e_pchara->atk_Sound);
+                }
+            }
+            break;
+
+        default:
+            assert( false );
+            break;
+        } // end of switch
+    }
 }
 void character_destory(){
    // al_destroy_bitmap(e_pchara->img_atk[0]);

@@ -45,6 +45,7 @@ typedef struct character
     ALLEGRO_SAMPLE_INSTANCE *atk_Sound;
     int anime; // counting the time of animation
     int anime_time; // indicate how long the animation
+    int x0;
     int y0;
     float vy;
     int nJumpCount;

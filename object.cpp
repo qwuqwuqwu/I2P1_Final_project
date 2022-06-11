@@ -12,7 +12,6 @@ Pos g_Ground[ MAX_COUNTOF_GROUND ];
 int g_nGroundCount = 0;
 
 ALLEGRO_BITMAP *Ground[ MAX_COUNTOF_GROUND ] = { NULL };
-ALLEGRO_BITMAP *Ground2[ MAX_COUNTOF_GROUND ] = { NULL };
 
 int FindAndDrawClosestGroundY( void ){
     // find closest lower ground
@@ -25,8 +24,6 @@ int FindAndDrawClosestGroundY( void ){
     nClosestGroundIdx = FindClosestGround( nFoundGroundIdx, nFoundGroundCount, e_pchara->x + e_pchara->width / 2, e_pchara->y + e_pchara->height );
     if( nClosestGroundIdx != -1 ) {
         nGroundY = g_Ground[ nClosestGroundIdx ].y;
-        // draw the closest lower ground
-        al_draw_bitmap( Ground2[ nClosestGroundIdx ], g_Ground[ nClosestGroundIdx ].x, g_Ground[ nClosestGroundIdx ].y, 0 );
     }
 
     if( DEBUGPRINT_SCENE ) {
@@ -114,15 +111,12 @@ void GroundSetup( void )
     for( int i = 0; i < g_nGroundCount; i++ ) {
         if( g_Ground[ i ].type == 1 ) {
             Ground[ i ] = al_load_bitmap("./image/ground100_10.png");
-            Ground2[ i ] = al_load_bitmap("./image/ground_red_100_10.png");
         }
         else if( g_Ground[ i ].type == 2 ) {
             Ground[ i ] = al_load_bitmap("./image/ground50_10.png");
-            Ground2[ i ] = al_load_bitmap("./image/ground_red_50_10.png");
         }
         else if( g_Ground[ i ].type == 3 ) {
             Ground[ i ] = al_load_bitmap("./image/bridge.png");
-            Ground2[ i ] = al_load_bitmap("./image/ground_red_50_10.png");
         }
 
         g_Ground[ i ].nWidth = al_get_bitmap_width( Ground[ i ] );
@@ -148,7 +142,6 @@ void object_destroy( void ){
     // ground
     for( int i = 0; i < g_nGroundCount; i++ ) {
         al_destroy_bitmap( Ground[ i ] );
-        al_destroy_bitmap( Ground2[ i ] );
     }
 }
 

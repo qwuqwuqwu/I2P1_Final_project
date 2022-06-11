@@ -349,7 +349,7 @@
 	"charater.h"
 	"scene.h"
 
-1654939639 d:\project\c\finalproject\global.h
+1654942523 d:\project\c\finalproject\global.h
 	<stdio.h>
 	<allegro5/allegro.h>
 	<allegro5/allegro_primitives.h>
@@ -678,7 +678,7 @@
 1654313620 source:d:\project\c\finalproject\main.cpp
 	"GameWindow.h"
 
-1654940164 source:d:\project\c\finalproject\object.cpp
+1654940621 source:d:\project\c\finalproject\object.cpp
 	"object.h"
 
 1654939004 source:d:\project\c\finalproject\scene.cpp
@@ -687,7 +687,7 @@
 	<stdlib.h>
 	<limits.h>
 
-1654939733 source:d:\project\c\finalproject\charater.cpp
+1654943727 source:d:\project\c\finalproject\charater.cpp
 	<assert.h>
 	"charater.h"
 
