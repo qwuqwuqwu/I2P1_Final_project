@@ -94,8 +94,8 @@ int CompareGround( const void *plhs, const void *prhs ) {
     }
 }
 
-void GroundSetup( void ) {
-
+void GroundSetup( void )
+{
     FILE* fp = fopen( "./res/ground.txt", "r" );
     int nType = 0;
     int nPosX = 0;
@@ -118,6 +118,10 @@ void GroundSetup( void ) {
         }
         else if( g_Ground[ i ].type == 2 ) {
             Ground[ i ] = al_load_bitmap("./image/ground50_10.png");
+            Ground2[ i ] = al_load_bitmap("./image/ground_red_50_10.png");
+        }
+        else if( g_Ground[ i ].type == 3 ) {
+            Ground[ i ] = al_load_bitmap("./image/bridge.png");
             Ground2[ i ] = al_load_bitmap("./image/ground_red_50_10.png");
         }
 

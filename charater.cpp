@@ -1,3 +1,4 @@
+#include <assert.h>
 #include "charater.h"
 
 #define MAX_COUNTOF_CONTINUOUS_JUMP ( 2 )
@@ -11,8 +12,6 @@ ALLEGRO_SAMPLE *sample = NULL;
 float g_CameraPosition = 0.0;
 ALLEGRO_TRANSFORM camera;
 int g_nTerrainWidth = 0;
-
-Character *pCharacter;
 
 float g_Gravity = 9.8;
 float g_Tick = 0.2;
@@ -32,14 +31,14 @@ void CameraUpdate( float *CamPosition, int x, int y, int width, int height )
 
 void character_init( const int nTerrainWidth ){
     // load character images
-    for(int i = 1 ; i <= 2 ; i++){
+    for(int i = 1 ; i <= 4 ; i++){
         char temp[50];
-        sprintf( temp, "./image/char_move_small%d.png", i );
+        sprintf( temp, "./image/char_move%d.png", i );
         e_pchara->img_move[i-1] = al_load_bitmap(temp);
     }
     for(int i = 1 ; i <= 2 ; i++){
         char temp[50];
-        sprintf( temp, "./image/char_atk_small%d.png", i );
+        sprintf( temp, "./image/char_inhale%d.png", i );
         e_pchara->img_atk[i-1] = al_load_bitmap(temp);
     }
     for(int i = 1 ; i <= 2 ; i++){
@@ -48,7 +47,7 @@ void character_init( const int nTerrainWidth ){
         e_pchara->img_transform[i-1] = al_load_bitmap(temp);
     }
     // load effective sound
-    sample = al_load_sample("./sound/atk_sound.wav");
+    sample = al_load_sample("./sound/inhale.wav");
     e_pchara->atk_Sound  = al_create_sample_instance(sample);
     al_set_sample_instance_playmode(e_pchara->atk_Sound, ALLEGRO_PLAYMODE_ONCE);
     al_attach_sample_instance_to_mixer(e_pchara->atk_Sound, al_get_default_mixer());
@@ -64,7 +63,7 @@ void character_init( const int nTerrainWidth ){
     // initial the animation component
     e_pchara->state = STOP;
     e_pchara->anime = 0;
-    e_pchara->anime_time = 30;
+    e_pchara->anime_time = 15;
 
     // gravity
     e_pchara->y0 = e_pchara->y;
@@ -307,70 +306,79 @@ void character_draw(){
 
     // check monster alive?
     charater_update2();
+    ALLEGRO_BITMAP *img_move[ 2 ] = { e_pchara->img_move[ 0 ], e_pchara->img_move[ 1 ] };
+    ALLEGRO_BITMAP *img_atk[ 2 ] = { e_pchara->img_atk[ 0 ], e_pchara->img_atk[ 1 ] };
+    if( e_pchara->TransformStatus == ETS_TRANSFORMED ) {
+        img_move[ 0 ] = e_pchara->img_SpecialAtk[ 2 * e_pchara->NowSpecialAtk ];
+        img_move[ 1 ] = e_pchara->img_SpecialAtk[ 2 * e_pchara->NowSpecialAtk + 1 ];
+    }
 
-    if( e_pchara->TransformStatus == ETS_TRANSFORMING ) {
-        if( e_pchara->dir ){
-            if( e_pchara->anime < e_pchara->nTransformTime / 2 ){
-                al_draw_bitmap(e_pchara->img_transform[ 0 ], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL );
-            }else{
+    // with the state, draw corresponding image
+    switch( e_pchara->state ) {
+    case STOP:
+        if( e_pchara->dir ) {
+            if( e_pchara->anime < e_pchara->nTransformTime / 2 ) {
+                al_draw_bitmap(e_pchara->img_move[0], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL);
+            }
+            else if( e_pchara->anime_time/4 <= e_pchara->anime && e_pchara->anime < e_pchara->anime_time/2){
                 al_draw_bitmap(e_pchara->img_transform[ 1 ], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL );
             }
-        }else{
-            if( e_pchara->anime < e_pchara->nTransformTime / 2 ){
-                al_draw_bitmap(e_pchara->img_transform[ 0 ], e_pchara->x, e_pchara->y, 0 );
-            }else{
+            else if( e_pchara->anime_time/2 <= e_pchara->anime && e_pchara->anime < e_pchara->anime_time*3/4){
+                al_draw_bitmap(e_pchara->img_move[2], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL);
+            }
+            else{
+                al_draw_bitmap(e_pchara->img_move[3], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL);
+            }
+        }
+        else {
+            if( e_pchara->anime < e_pchara->anime_time/4 ) {
+                al_draw_bitmap(e_pchara->img_move[0], e_pchara->x, e_pchara->y, 0);
+            }
+            else if( e_pchara->anime_time/4 <= e_pchara->anime && e_pchara->anime < e_pchara->anime_time/2){
                 al_draw_bitmap(e_pchara->img_transform[ 1 ], e_pchara->x, e_pchara->y, 0 );
             }
+            else if( e_pchara->anime_time/2 <= e_pchara->anime && e_pchara->anime < e_pchara->anime_time*3/4){
+                al_draw_bitmap(e_pchara->img_move[2], e_pchara->x, e_pchara->y, 0);
+            }
+            else{
+                al_draw_bitmap(e_pchara->img_move[3], e_pchara->x, e_pchara->y, 0);
+            }
         }
-    }
-    else {
-        ALLEGRO_BITMAP *img_move[ 2 ] = { e_pchara->img_move[ 0 ], e_pchara->img_move[ 1 ] };
-        ALLEGRO_BITMAP *img_atk[ 2 ] = { e_pchara->img_atk[ 0 ], e_pchara->img_atk[ 1 ] };
-        if( e_pchara->TransformStatus == ETS_TRANSFORMED ) {
-            img_move[ 0 ] = e_pchara->img_SpecialAtk[ 2 * e_pchara->NowSpecialAtk ];
-            img_move[ 1 ] = e_pchara->img_SpecialAtk[ 2 * e_pchara->NowSpecialAtk + 1 ];
-        }
+        break;
 
-        // with the state, draw corresponding image
-        if( e_pchara->state == STOP ){
-            if( e_pchara->dir )
+    case MOVE:
+        if( e_pchara->dir ) {
+            if( e_pchara->anime < e_pchara->anime_time/2 ){
                 al_draw_bitmap( img_move[ 0 ], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL);
-            else
-                al_draw_bitmap( img_move[ 0 ], e_pchara->x, e_pchara->y, 0);
-        }else if( e_pchara->state == MOVE ){
-            if( e_pchara->dir ){
-                if( e_pchara->anime < e_pchara->anime_time/2 ){
-                    al_draw_bitmap( img_move[ 0 ], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL);
-                }else{
-                    al_draw_bitmap( img_move[ 1 ], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL);
-                }
             }else{
-                if( e_pchara->anime < e_pchara->anime_time/2 ){
-                    al_draw_bitmap( img_move[ 0 ], e_pchara->x, e_pchara->y, 0);
-                }else{
-                    al_draw_bitmap( img_move[ 1 ], e_pchara->x, e_pchara->y, 0);
-                }
-            }
-        }else if( e_pchara->state == ATK ){
-            if( e_pchara->dir ){
-                if( e_pchara->anime < e_pchara->anime_time/2 ){
-                    al_draw_bitmap( img_atk[ 0 ], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL);
-                    al_draw_bitmap( img_atk[ 0 ], e_pchara->x+50, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL);
-                }else{
-                    al_draw_bitmap( img_atk[ 1 ], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL);
-                    al_play_sample_instance(e_pchara->atk_Sound);
-                }
-            }else{
-                if( e_pchara->anime < e_pchara->anime_time/2 ){
-                    al_draw_bitmap( img_atk[ 0 ], e_pchara->x, e_pchara->y, 0);
-                    al_draw_bitmap( img_atk[ 0 ], e_pchara->x+50, e_pchara->y, 0);
-                }else{
-                    al_draw_bitmap( img_atk[ 1 ], e_pchara->x, e_pchara->y, 0);
-                    al_play_sample_instance(e_pchara->atk_Sound);
-                }
+                al_draw_bitmap( img_move[ 1 ], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL);
             }
         }
-    }
+        else {
+            al_draw_bitmap(e_pchara->img_atk[1], e_pchara->x, e_pchara->y-27, ALLEGRO_FLIP_HORIZONTAL);
+            al_play_sample_instance(e_pchara->atk_Sound);
+        }
+        break;
+
+    case ATK:
+        if( e_pchara->dir ) {
+            if( e_pchara->anime < e_pchara->anime_time/2 ){
+                al_draw_bitmap( img_atk[ 0 ], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL);
+                al_draw_bitmap( img_atk[ 0 ], e_pchara->x+50, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL);
+            }else{
+                al_draw_bitmap( img_atk[ 1 ], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL);
+                al_play_sample_instance(e_pchara->atk_Sound);
+            }
+        }
+        else {
+            al_draw_bitmap(e_pchara->img_atk[1], e_pchara->x, e_pchara->y-27, 0);
+            al_play_sample_instance(e_pchara->atk_Sound);
+        }
+        break;
+    default:
+        assert( false );
+        break;
+    } // end of switch
 }
 void character_destory(){
    // al_destroy_bitmap(e_pchara->img_atk[0]);
@@ -387,28 +395,28 @@ enum {ALIVE };
 void character_init2(){
     char temp[50];
     sprintf( temp, "./image/char_move1.png");
-    monster->img_move[0] = al_load_bitmap(temp);
+    e_monster->img_move[0] = al_load_bitmap(temp);
 
-    monster->width = al_get_bitmap_width(monster->img_move[0]);
-    monster->height = al_get_bitmap_height(monster->img_move[0]);
-    monster->x = WIDTH/2;
-    monster->y = HEIGHT/2+40;
-    monster->dir = true;
-    monster->hp = 2;
-    monster->amidie = 1;
+    e_monster->width = al_get_bitmap_width(e_monster->img_move[0]);
+    e_monster->height = al_get_bitmap_height(e_monster->img_move[0]);
+    e_monster->x = WIDTH/2;
+    e_monster->y = HEIGHT/2+40;
+    e_monster->dir = true;
+    e_monster->hp = 2;
+    e_monster->amidie = 1;
 
     // initial the animation component
-    monster->state = ALIVE;
-    monster->anime = 0;
-    monster->anime_time = 30;
+    e_monster->state = ALIVE;
+    e_monster->anime = 0;
+    e_monster->anime_time = 30;
 }
 
 void charater_process2(ALLEGRO_EVENT event){
     // process the animation                //1.處理動畫
     if( event.type == ALLEGRO_EVENT_TIMER ){ //根據fps+anime
         if( event.timer.source == fps ){
-            monster->anime++;
-            monster->anime %= monster->anime_time; //讓我們知道現在跑道time的哪一步
+            e_monster->anime++;
+            e_monster->anime %= e_monster->anime_time; //讓我們知道現在跑道time的哪一步
         }
 
     }
@@ -416,40 +424,40 @@ void charater_process2(ALLEGRO_EVENT event){
 }
 
 void character_destory2(){
-    al_destroy_bitmap(monster->img_move[0]);
+    al_destroy_bitmap(e_monster->img_move[0]);
 }
 
 void charater_update2(){
 
-     if( ( e_pchara->x - 60 <= monster->x ) && ( monster->x <= e_pchara->x + 60 ) &&
-         ( e_pchara->y - 60 <= monster->y ) && ( monster->y <= e_pchara->y + 60 ) ) {
-        monster->hp--;
+     if( ( e_pchara->x - 60 <= e_monster->x ) && ( e_monster->x <= e_pchara->x + 60 ) &&
+         ( e_pchara->y - 60 <= e_monster->y ) && ( e_monster->y <= e_pchara->y + 60 ) ) {
+        e_monster->hp--;
      }
 
-     if( monster->hp <= 0 && monster->amidie == 1 ) {
+     if( e_monster->hp <= 0 && e_monster->amidie == 1 ) {
         //如果死掉
         character_destory2();
-        monster->amidie = 0;
+        e_monster->amidie = 0;
      }
 }
 
 void character_draw2(){
 
     // with the state, draw corresponding image
-    if( monster->state == ALIVE ) {
+    if( e_monster->state == ALIVE ) {
         //如果活著
-        if( monster->dir )
+        if( e_monster->dir )
         {
-            if(monster->x >= WIDTH/2+50){monster->dir=false;al_draw_bitmap(monster->img_move[0], monster->x, monster->y, 0);}
-            al_draw_bitmap(monster->img_move[0], monster->x, monster->y, ALLEGRO_FLIP_HORIZONTAL);
-            monster->x += 1;
+            if(e_monster->x >= WIDTH/2+50){e_monster->dir=false;al_draw_bitmap(e_monster->img_move[0], e_monster->x, e_monster->y, 0);}
+            al_draw_bitmap(e_monster->img_move[0], e_monster->x, e_monster->y, ALLEGRO_FLIP_HORIZONTAL);
+            e_monster->x += 1;
         }
         else
         {
         //{
-            if(monster->x <= WIDTH/2){monster->dir=true;al_draw_bitmap(monster->img_move[0], monster->x, monster->y, ALLEGRO_FLIP_HORIZONTAL);}
-            al_draw_bitmap(monster->img_move[0], monster->x, monster->y, 0);
-            monster->x -= 1;
+            if(e_monster->x <= WIDTH/2){e_monster->dir=true;al_draw_bitmap(e_monster->img_move[0], e_monster->x, e_monster->y, ALLEGRO_FLIP_HORIZONTAL);}
+            al_draw_bitmap(e_monster->img_move[0], e_monster->x, e_monster->y, 0);
+            e_monster->x -= 1;
 
         //}
         }

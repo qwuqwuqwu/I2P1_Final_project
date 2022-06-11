@@ -13,4 +13,4 @@ ALLEGRO_EVENT_QUEUE *event_queue = NULL;
 ALLEGRO_TIMER *fps = NULL;
 
 Character *e_pchara = NULL;
-Mon *monster = NULL;
+Mon *e_monster = NULL;
