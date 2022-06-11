@@ -45,6 +45,10 @@
 		<Unit filename="global.cpp" />
 		<Unit filename="global.h" />
 		<Unit filename="main.cpp" />
+		<Unit filename="object.cpp">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="object.h" />
 		<Unit filename="scene.cpp" />
 		<Unit filename="scene.h" />
 		<Extensions />

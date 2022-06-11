@@ -58,6 +58,7 @@ void game_init() {
     al_set_display_icon(display, icon);
 
     e_pchara = ( Character * )malloc( sizeof( Character ) );
+    monster = ( Mon * )malloc( sizeof( Mon ) );
 }
 
 void game_begin() {
@@ -100,6 +101,7 @@ int process_event(){
         menu_process(event);
     }else if( window == 2 ){
         charater_process(event);
+        charater_process2(event);
     }
 
     // Shutdown our program
@@ -128,14 +130,20 @@ int game_run() {
     if ( !al_is_event_queue_empty(event_queue) ) {
         error = process_event();
     }
+
     return error;
 }
 
 void game_destroy() {
     // Make sure you destroy all things
     free( e_pchara );
+    free( monster );
 
     al_destroy_event_queue(event_queue);
     al_destroy_display(display);
     game_scene_destroy();
 }
+
+
+
+
