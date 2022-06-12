@@ -88,7 +88,7 @@ void character_init( const int nTerrainWidth ){
         case ESA_NORMAL:
             for(int j = 0; j < 4; j++){
                 char temp[ 50 ];
-                sprintf( temp, "./image/char_move_small%d.png", j + 1 );
+                sprintf( temp, "./image/char_move%d.png", j + 1 );
                 e_pchara->img_SpecialAtk[ 4 * i + j ] = al_load_bitmap( temp );
                 assert( e_pchara->img_SpecialAtk[ 4 * i + j ] != NULL );
             }
