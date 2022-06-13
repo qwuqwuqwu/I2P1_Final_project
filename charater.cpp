@@ -17,6 +17,7 @@ float g_Gravity = 9.8;
 float g_Tick = 0.2;
 
 // yo
+// yo
 
 void CameraUpdate( float *CamPosition, int x, int y, int width, int height )
 {
@@ -215,7 +216,7 @@ void charater_update(){
         e_pchara->x += 3;
         e_pchara->state = MOVE;
 
-    /*}else if( key_state[ALLEGRO_KEY_SPACE] ){   //§lªº§Þ¯à
+    /*}else if( key_state[ALLEGRO_KEY_SPACE] ){   //å¸çš„æŠ€èƒ½
         e_pchara->state = ATK;*/
 
 
@@ -479,11 +480,11 @@ void character_init2(){
 }
 
 void charater_process2(ALLEGRO_EVENT event){
-    // process the animation                //1.³B²z°Êµe
-    if( event.type == ALLEGRO_EVENT_TIMER ){ //®Ú¾Úfps+anime
+    // process the animation                //1.è™•ç†å‹•ç•«
+    if( event.type == ALLEGRO_EVENT_TIMER ){ //æ ¹æ“šfps+anime
         if( event.timer.source == fps ){
             e_monster->anime++;
-            e_monster->anime %= e_monster->anime_time; //Åý§Ú­Ìª¾¹D²{¦b¶]¹Dtimeªº­þ¤@¨B
+            e_monster->anime %= e_monster->anime_time; //è®“æˆ‘å€‘çŸ¥é“ç¾åœ¨è·‘é“timeçš„å“ªä¸€æ­¥
         }
 
     }
@@ -502,7 +503,7 @@ void charater_update2(){
      }
 
      if( e_monster->hp <= 0 && e_monster->amidie == 1 ) {
-        //¦pªG¦º±¼
+        //å¦‚æžœæ­»æŽ‰
         character_destory2();
         e_monster->amidie = 0;
      }
@@ -512,7 +513,7 @@ void character_draw2(){
 
     // with the state, draw corresponding image
     if( e_monster->state == ALIVE ) {
-        //¦pªG¬¡µÛ
+        //å¦‚æžœæ´»è‘—
         if( e_monster->dir )
         {
             if(e_monster->x >= WIDTH/2+50){e_monster->dir=false;al_draw_bitmap(e_monster->img_move[0], e_monster->x, e_monster->y, 0);}
