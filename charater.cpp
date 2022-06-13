@@ -16,6 +16,7 @@ int g_nTerrainWidth = 0;
 float g_Gravity = 9.8;
 float g_Tick = 0.2;
 
+// yo
 
 void CameraUpdate( float *CamPosition, int x, int y, int width, int height )
 {
