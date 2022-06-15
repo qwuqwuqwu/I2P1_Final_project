@@ -59,7 +59,7 @@ void game_init() {
     al_set_display_icon(display, icon);
 
     e_pchara = ( Character * )malloc( sizeof( Character ) );
-    e_monster = ( Mon * )malloc( sizeof( Mon ) );
+    //e_monster = ( Mon * )malloc( sizeof( Mon ) );
 }
 
 void game_begin() {
@@ -138,7 +138,7 @@ int game_run() {
 void game_destroy() {
     // Make sure you destroy all things
     free( e_pchara );
-    free( e_monster );
+    //free( e_monster );
 
     al_destroy_event_queue(event_queue);
     al_destroy_display(display);

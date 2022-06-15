@@ -10,6 +10,8 @@
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_ttf.h>
 
+#define NUMOF_TRANSFORM_IMG ( 3 )
+
 // note that you can't assign initial value here!
 extern const float FPS;
 extern const int WIDTH;
@@ -19,12 +21,6 @@ extern bool judge_next_window;
 extern ALLEGRO_EVENT_QUEUE *event_queue;
 extern ALLEGRO_TIMER *fps;
 
-enum ETransformStatus {
-    ETS_NORMAL = 0,
-    ETS_TRANSFORMING = 1,
-    ETS_TRANSFORMED = 2,
-    ETS_NUM = 3
-};
 
 enum ESpecialAtk {
     ESA_NORMAL = 0,
@@ -34,31 +30,46 @@ enum ESpecialAtk {
     ESA_NUM = 4
 };
 
+// the state of character
+enum ECharacterState {
+    ECS_STOP = 0,
+    ECS_MOVE = 1,
+    ECS_ATK = 2,
+    ECS_INHALE = 3,
+    ECS_TRANSFORMING = 4,
+};
+
 typedef struct character
 {
     int x, y; // the position of image
     int width, height; // the width and height of image
     bool dir; // left: false, right: true
-    int state; // the state of character
-    ALLEGRO_BITMAP *img_move[4];
+    ECharacterState state; // the state of character
+    int nSubState;
+    ALLEGRO_BITMAP *img_move[ 4 ];
+    ALLEGRO_BITMAP *img_inhale[ 2 ];
     ALLEGRO_BITMAP *img_atk[2];
     ALLEGRO_SAMPLE_INSTANCE *atk_Sound;
     int anime; // counting the time of animation
     int anime_time; // indicate how long the animation
+
+    int nAtkCursor; // counting the time of animation
+    int nAtkTime; // indicate how long the animation
+    int nInhaleCursor; // counting the time of animation
+    int nInhaleTime; // indicate how long the animation
     int x0;
     int y0;
     float vy;
     int nJumpCount;
     float FallingTick;
     int hp;
-    ETransformStatus TransformStatus;
     int nTransformCursor;
     int nTransformTime;
-    ALLEGRO_BITMAP *img_transform[ 2 ];
+    ALLEGRO_BITMAP *img_transform[ NUMOF_TRANSFORM_IMG ];
 
     ESpecialAtk NowSpecialAtk;
     ESpecialAtk NextSpecailAtk;
-    ALLEGRO_BITMAP *img_SpecialAtk[ 2 * ESA_NUM ];
+    ALLEGRO_BITMAP *img_SpecialAtk[ 4 * ESA_NUM ];
 } Character;
 
 typedef struct mon
@@ -87,6 +98,13 @@ typedef struct t_pos {
     ALLEGRO_BITMAP *img;
 } Pos;
 
+typedef struct _Position {
+    int w;
+    int e;
+    int n;
+    int s;
+} Position;
+
 extern Character *e_pchara;
-extern Mon *e_monster;
+extern Mon e_monster[ 100 ];
 #endif
