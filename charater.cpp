@@ -104,7 +104,7 @@ void character_init( const int nTerrainWidth ){
 
     // transform status
     e_pchara->nTransformCursor = 0;
-    e_pchara->nTransformTime = 60;
+    e_pchara->nTransformTime = 30;
     e_pchara->NowSpecialAtk = ESA_NORMAL;
     e_pchara->NextSpecailAtk = ESA_NORMAL;
 
@@ -284,7 +284,7 @@ void charater_update(){
     }
     // inhale
     else if( key_state[ ALLEGRO_KEY_SPACE ] ) {   //吸的技能
-        if( g_bCDing == false && e_pchara->state != ECS_INHALE ) {
+        if( g_bCDing == false && e_pchara->state != ECS_INHALE && e_pchara->state != ECS_TRANSFORMING ) {
             e_pchara->nInhaleCursor = 0;
             e_pchara->state = ECS_INHALE;
             e_pchara->x0 = e_pchara->x;
@@ -372,12 +372,10 @@ void character_checkTransform( void ) {
 //        printf( "character_checkTransform\n" );
         return;
     }
-    // given monster position
-    Position MonsterPos;
-    MonsterPos.e = 640;
-    MonsterPos.w = 560;
-    MonsterPos.n = 320;
-    MonsterPos.s = 480;
+
+    if( e_pchara->state != ECS_INHALE ) {
+        return;
+    }
 
     Position CharacterPos;
     CharacterPos.w = e_pchara->x;
@@ -385,12 +383,30 @@ void character_checkTransform( void ) {
     CharacterPos.n = e_pchara->y;
     CharacterPos.s = e_pchara->y + e_pchara->height;
 
-    if( character_checkOverlap( &CharacterPos, &MonsterPos ) == true ) {
-        printf( "aaaaaaa\n" );
-        e_pchara->state = ECS_TRANSFORMING;
-        e_pchara->nTransformCursor = 0;
-        e_pchara->NextSpecailAtk = ESA_SWORD;
+    for( int i = 0; i < MONSTER_NUMBERS; i++ ) {
+        if( e_monster[ i ].state == EMS_ALIVE ) {
+            // given monster position
+            Position MonsterPos;
+            MonsterPos.e = e_monster[ i ].x + e_monster[ i ].width;
+            MonsterPos.w = e_monster[ i ].x;
+            MonsterPos.n = e_monster[ i ].y;
+            MonsterPos.s = e_monster[ i ].y + e_monster[ i ].height;
+
+            if( character_checkOverlap( &CharacterPos, &MonsterPos ) == true ) {
+                printf( "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n" );
+                e_pchara->state = ECS_TRANSFORMING;
+                e_pchara->nTransformCursor = 0;
+                e_pchara->NextSpecailAtk = ESA_SWORD;
+
+                e_pchara->nInhaleCursor = 0;
+
+                e_monster[ i ].state = EMS_DIE;
+                e_monster[ i ].hp = 0;
+                break;
+            }
+        }
     }
+
 //    printf( "character_checkTransform\n" );
 }
 
@@ -571,7 +587,7 @@ void character_draw(){
     al_translate_transform( &camera, -g_CameraPosition, 0 );
     al_use_transform( &camera );
 
-    int nGroundY = FindAndDrawClosestGroundY();
+    int nGroundY = FindAndDrawClosestGroundY( e_pchara->x + e_pchara->width / 2, e_pchara->y + e_pchara->height );
 
     character_gravity( nGroundY );
 
@@ -662,8 +678,6 @@ void character_destory(){
 
 //==============================================================================================
 
-enum {ALIVE, DIE };
-
 void character_init2(){
 //    printf( "character_init2\n" );
 
@@ -671,13 +685,14 @@ void character_init2(){
     int nPosX = 0;
     int nPosY = 0;
     int nset= 1;
-    while( fscanf( fp, "%d%d", &nPosX, &nPosY ) != EOF && nset <= MONSTER_NUMBERS ) {
+    while( fscanf( fp, "%d%d", &nPosX, &nPosY ) != EOF && nset < MONSTER_NUMBERS ) {
         e_monster[ nset ].x = nPosX;
         e_monster[ nset ].y = nPosY;
         nset++;
-    }                          //記得關檔
+    }
+    fclose( fp ); //記得關檔
 
-    for( int n = 1; n <= MONSTER_NUMBERS; n++ ) {
+    for( int n = 0; n < MONSTER_NUMBERS; n++ ) {
         char temp[ 50 ];
         sprintf( temp, "./image/char_move1.png");
         e_monster[ n ].img_move[ 0 ] = al_load_bitmap( temp );
@@ -689,11 +704,15 @@ void character_init2(){
         e_monster[ n ].y = HEIGHT/2+40;*/
         e_monster[ n ].dir = true;
         e_monster[ n ].hp = 2;
-        e_monster[ n ].state = ALIVE;
+        e_monster[ n ].state = EMS_ALIVE;
 
         e_monster[ n ].anime = 0;
         e_monster[ n ].anime_time = 30;
 
+        // gravity
+        e_monster[ n ].y0 = e_monster[ n ].y;
+        e_monster[ n ].vy = 0.0;
+        e_monster[ n ].FallingTick = 0.0;
     }
 //    printf( "character_init2\n" );
 }
@@ -703,7 +722,7 @@ void charater_process2(ALLEGRO_EVENT event){
     // process the animation                //1.處理動畫
     if( event.type == ALLEGRO_EVENT_TIMER ){ //根據fps+anime
         if( event.timer.source == fps ){
-            for( int n = 1; n <= MONSTER_NUMBERS; n++ ){
+            for( int n = 0; n < MONSTER_NUMBERS; n++ ){
                 e_monster[ n ].anime++;
                 e_monster[ n ].anime %= e_monster[ n ].anime_time; //讓我們知道現在跑道time的哪一步
             }
@@ -715,8 +734,8 @@ void charater_process2(ALLEGRO_EVENT event){
 void character_destory2()
 {
 //    printf( "character_destory2\n" );
-    for( int n = 1; n <= MONSTER_NUMBERS; n++ ) {
-        if( e_monster[ n ].state == ALIVE ) {
+    for( int n = 0; n < MONSTER_NUMBERS; n++ ) {
+        if( e_monster[ n ].state == EMS_ALIVE ) {
             al_destroy_bitmap( e_monster[ n ].img_move[ 0 ] );
         }
     }
@@ -726,8 +745,8 @@ void character_destory2()
 void charater_update2()
 {
 //    printf( "charater_update2\n" );
-    for( int n = 1; n <= MONSTER_NUMBERS; n++ ) {
-        if( e_monster[ n ].state == ALIVE )
+    for( int n = 0; n < MONSTER_NUMBERS; n++ ) {
+        if( e_monster[ n ].state == EMS_ALIVE )
         {
             if( ( e_pchara->x - 60 <= e_monster[ n ].x ) && ( e_monster[ n ].x <= e_pchara->x + 60 ) &&
                 ( e_pchara->y - 60 <= e_monster[ n ].y ) && ( e_monster[ n ].y <= e_pchara->y + 60 ) ) {
@@ -737,18 +756,51 @@ void charater_update2()
             if( e_monster[ n ].hp <= 0 ) {
                 //如果死掉
                 al_destroy_bitmap( e_monster[ n ].img_move[ 0 ]);
-                e_monster[ n ].state = DIE;
+                e_monster[ n ].state = EMS_DIE;
             }
         }
     }
 //    printf( "charater_update2\n" );
 }
 
+void monster_gravity( int nMonsterIdx, int nGroundY ) {
+//    printf( "monster_gravity\n" );
+    if( nGroundY == -1 ) {
+        nGroundY = HEIGHT;
+    }
+
+    // ticktock
+    e_monster[ nMonsterIdx ].FallingTick += g_Tick;
+
+    // velocity;
+    e_monster[ nMonsterIdx ].vy += g_Gravity * g_Tick;
+    // position
+    e_monster[ nMonsterIdx ].y =
+        e_monster[ nMonsterIdx ].y0
+        + ( int )( e_monster[ nMonsterIdx ].vy * e_monster[ nMonsterIdx ].FallingTick + ( 0.5 * g_Gravity * ( e_monster[ nMonsterIdx ].FallingTick * e_monster[ nMonsterIdx ].FallingTick ) ) );
+
+
+    if( ( e_monster[ nMonsterIdx ].y + e_monster[ nMonsterIdx ].height ) >= nGroundY ) {
+        e_monster[ nMonsterIdx ].y = nGroundY - e_monster[ nMonsterIdx ].height;
+        e_monster[ nMonsterIdx ].y0 = e_monster[ nMonsterIdx ].y;
+        e_monster[ nMonsterIdx ].vy = 0.0;
+        e_monster[ nMonsterIdx ].FallingTick = 0;
+    }
+    else {
+        // do nothing
+    }
+//    printf( "monster_gravity\n" );
+}
+
 void character_draw2(){
 //    printf( "character_draw2\n" );
-    for( int n = 1; n <= MONSTER_NUMBERS; n++ ) {
+    for( int n = 0; n < MONSTER_NUMBERS; n++ ) {
     // with the state, draw corresponding image
-        if( e_monster[ n ].state == ALIVE ) {
+        if( e_monster[ n ].state == EMS_ALIVE ) {
+
+            int nGroundY = FindAndDrawClosestGroundY( e_monster[ n ].x + e_monster[ n ].width / 2, e_monster[ n ].y + e_monster[ n ].height );
+
+            monster_gravity( n, nGroundY );
         //如果活著
             if( e_monster[ n ].dir ) {
                 if( e_monster[ n ].x >= WIDTH / 2 + 50 ) {

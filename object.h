@@ -1,5 +1,5 @@
 #include "global.h"
-int FindAndDrawClosestGroundY( void );
+int FindAndDrawClosestGroundY( int nMid, int nToe );
 int FindClosestGround( int *pGroundIdx, int nGroundCount, const int x, const int nToe );
 bool IsInGroundRange( int nGroundIdx, const int x );
 void FindGround( int *pnFoundGroundIdx, int *pnFoundCount, int x );

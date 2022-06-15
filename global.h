@@ -39,6 +39,12 @@ enum ECharacterState {
     ECS_TRANSFORMING = 4,
 };
 
+// the state of monster
+enum EMonsterState {
+    EMS_ALIVE = 0,
+    EMS_DIE = 1,
+};
+
 typedef struct character
 {
     int x, y; // the position of image
@@ -85,6 +91,10 @@ typedef struct mon
     int anime_time; // indicate how long the animation
     int hp;
     int amidie;
+
+    int y0;
+    float vy;
+    float FallingTick;
 } Mon;
 
 // structure to represent ground

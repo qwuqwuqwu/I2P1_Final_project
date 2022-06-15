@@ -5,7 +5,7 @@
 #define MAX_COUNTOF_FOUNDGROUND     ( 40 )
 #define MAX_COUNTOF_GROUND          ( 600 )
 
-// the state of character
+// the state of object
 enum {NORMAL = 0, HIGHLIGHT};
 
 Pos g_Ground[ MAX_COUNTOF_GROUND ];
@@ -13,27 +13,27 @@ int g_nGroundCount = 0;
 
 ALLEGRO_BITMAP *Ground[ MAX_COUNTOF_GROUND ] = { NULL };
 
-int FindAndDrawClosestGroundY( void ){
+int FindAndDrawClosestGroundY( int nMid, int nToe ){
     // find closest lower ground
     int nFoundGroundIdx[ MAX_COUNTOF_FOUNDGROUND ] = { 0 };
     int nFoundGroundCount = 0;
-    FindGround( nFoundGroundIdx, &nFoundGroundCount, e_pchara->x + e_pchara->width / 2 );
+    FindGround( nFoundGroundIdx, &nFoundGroundCount, nMid );
 
     int nClosestGroundIdx = -1;
     int nGroundY = -1;
-    nClosestGroundIdx = FindClosestGround( nFoundGroundIdx, nFoundGroundCount, e_pchara->x + e_pchara->width / 2, e_pchara->y + e_pchara->height );
+    nClosestGroundIdx = FindClosestGround( nFoundGroundIdx, nFoundGroundCount, nMid, nToe );
     if( nClosestGroundIdx != -1 ) {
         nGroundY = g_Ground[ nClosestGroundIdx ].y;
     }
 
-    if( DEBUGPRINT_SCENE ) {
-        printf( "chara x = %d, y = %d\n", e_pchara->x, e_pchara->y );
-        for( int i = 0; i < nFoundGroundCount; i++ ) {
-            printf( "*************************************Ground %d: x = %d, y = %d, width = %d, height = %d\n",
-                    i, g_Ground[ nFoundGroundIdx[ i ] ].x, g_Ground[ nFoundGroundIdx[ i ] ].y,
-                    g_Ground[ nFoundGroundIdx[ i ] ].nWidth, g_Ground[ nFoundGroundIdx[ i ] ].nHeight );
-        }
-    }
+//    if( DEBUGPRINT_SCENE ) {
+//        printf( "obj x = %d, y = %d\n", e_pchara->x, e_pchara->y );
+//        for( int i = 0; i < nFoundGroundCount; i++ ) {
+//            printf( "*************************************Ground %d: x = %d, y = %d, width = %d, height = %d\n",
+//                    i, g_Ground[ nFoundGroundIdx[ i ] ].x, g_Ground[ nFoundGroundIdx[ i ] ].y,
+//                    g_Ground[ nFoundGroundIdx[ i ] ].nWidth, g_Ground[ nFoundGroundIdx[ i ] ].nHeight );
+//        }
+//    }
     return nGroundY;
 }
 
