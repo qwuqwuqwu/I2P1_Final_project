@@ -55,7 +55,7 @@ void character_init( const int nTerrainWidth ){
     // inhale
     for(int i = 1 ; i <= 2; i++){
         char temp[ 50 ];
-        sprintf( temp, "./image/char_inhale2%d.png", i );
+        sprintf( temp, "./image/char_inhale%d.png", i );
         e_pchara->img_inhale[ i - 1 ] = al_load_bitmap( temp );
         assert( e_pchara->img_inhale[ i - 1 ] != NULL );
         g_nImgInhaleWidth[ i - 1 ] = al_get_bitmap_width( e_pchara->img_inhale[ i - 1 ] );
@@ -133,7 +133,7 @@ void character_init( const int nTerrainWidth ){
         case ESA_BOMB:
             for(int j = 0; j < 4; j++){
                 char temp[ 50 ];
-                sprintf( temp, "./image/char_sword_move%d.png", j + 1 );
+                sprintf( temp, "./image/char_bomb_move%d.png", j + 1 );
                 e_pchara->img_SpecialAtk[ 4 * i + j ] = al_load_bitmap( temp );
                 assert( e_pchara->img_SpecialAtk[ 4 * i + j ] != NULL );
             }
@@ -142,7 +142,7 @@ void character_init( const int nTerrainWidth ){
         case ESA_FIRE:
             for(int j = 0; j < 4; j++){
                 char temp[ 50 ];
-                sprintf( temp, "./image/char_sword_move%d.png", j + 1 );
+                sprintf( temp, "./image/char_fire_move%d.png", j + 1 );
                 e_pchara->img_SpecialAtk[ 4 * i + j ] = al_load_bitmap( temp );
                 assert( e_pchara->img_SpecialAtk[ 4 * i + j ] != NULL );
             }

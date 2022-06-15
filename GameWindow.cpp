@@ -37,7 +37,7 @@ void game_init() {
     // create event queue
     event_queue = al_create_event_queue();
     // Initialize Allegro settings
-    al_set_window_position(display, 0, 0);
+    al_set_window_position(display, 640, 280);
     al_set_window_title(display, title);
     al_init_primitives_addon();
     al_init_font_addon(); // initialize the font addon
@@ -64,7 +64,7 @@ void game_init() {
 
 void game_begin() {
     // Load sound
-    intro = al_load_sample("./sound/float.mp3");
+    intro = al_load_sample("./sound/overworld.mp3");
     al_reserve_samples(20);
     sample_instance = al_create_sample_instance(intro);
     // Loop the song until the display closes
@@ -72,7 +72,7 @@ void game_begin() {
     al_restore_default_mixer();
     al_attach_sample_instance_to_mixer(sample_instance, al_get_default_mixer());
     // set the volume of instance
-    al_set_sample_instance_gain(sample_instance, 0.5 );
+    al_set_sample_instance_gain(sample_instance, 1 );
     al_play_sample_instance(sample_instance);
     al_start_timer(fps);
     // initialize the menu before entering the loop
