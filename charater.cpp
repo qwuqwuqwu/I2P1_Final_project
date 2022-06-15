@@ -283,7 +283,7 @@ void charater_update(){
 
     }
     // inhale
-    else if( key_state[ ALLEGRO_KEY_SPACE ] ) {   //§lªº§Þ¯à
+    else if( key_state[ ALLEGRO_KEY_SPACE ] ) {   //å¸çš„æŠ€èƒ½
         if( g_bCDing == false && e_pchara->state != ECS_INHALE ) {
             e_pchara->nInhaleCursor = 0;
             e_pchara->state = ECS_INHALE;
@@ -675,7 +675,7 @@ void character_init2(){
         e_monster[ nset ].x = nPosX;
         e_monster[ nset ].y = nPosY;
         nset++;
-    }                          //°O±oÃöÀÉ
+    }                          //è¨˜å¾—é—œæª”
 
     for( int n = 1; n <= MONSTER_NUMBERS; n++ ) {
         char temp[ 50 ];
@@ -700,12 +700,12 @@ void character_init2(){
 
 void charater_process2(ALLEGRO_EVENT event){
 //    printf( "charater_process2\n" );
-    // process the animation                //1.³B²z°Êµe
-    if( event.type == ALLEGRO_EVENT_TIMER ){ //®Ú¾Úfps+anime
+    // process the animation                //1.è™•ç†å‹•ç•«
+    if( event.type == ALLEGRO_EVENT_TIMER ){ //æ ¹æ“šfps+anime
         if( event.timer.source == fps ){
             for( int n = 1; n <= MONSTER_NUMBERS; n++ ){
                 e_monster[ n ].anime++;
-                e_monster[ n ].anime %= e_monster[ n ].anime_time; //Åý§Ú­Ìª¾¹D²{¦b¶]¹Dtimeªº­þ¤@¨B
+                e_monster[ n ].anime %= e_monster[ n ].anime_time; //è®“æˆ‘å€‘çŸ¥é“ç¾åœ¨è·‘é“timeçš„å“ªä¸€æ­¥
             }
         }
     }
@@ -735,7 +735,7 @@ void charater_update2()
             }
 
             if( e_monster[ n ].hp <= 0 ) {
-                //¦pªG¦º±¼
+                //å¦‚æžœæ­»æŽ‰
                 al_destroy_bitmap( e_monster[ n ].img_move[ 0 ]);
                 e_monster[ n ].state = DIE;
             }
@@ -749,7 +749,7 @@ void character_draw2(){
     for( int n = 1; n <= MONSTER_NUMBERS; n++ ) {
     // with the state, draw corresponding image
         if( e_monster[ n ].state == ALIVE ) {
-        //¦pªG¬¡µÛ
+        //å¦‚æžœæ´»è‘—
             if( e_monster[ n ].dir ) {
                 if( e_monster[ n ].x >= WIDTH / 2 + 50 ) {
                     e_monster[ n ].dir = false;
