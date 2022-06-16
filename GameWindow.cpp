@@ -56,7 +56,7 @@ void game_init() {
     al_register_event_source(event_queue, al_get_keyboard_event_source());
     al_register_event_source(event_queue, al_get_mouse_event_source());
     fps  = al_create_timer( 1.0 / FPS );
-    al_register_event_source(event_queue, al_get_timer_event_source( fps )) ;
+    //al_register_event_source(event_queue, al_get_timer_event_source( fps )) ;
     // initialize the icon on the display
     ALLEGRO_BITMAP *icon = al_load_bitmap("./image/icon.jpg");
     assert( icon != NULL );
@@ -88,7 +88,6 @@ void init_video(){
     al_register_event_source(queue, temp);
     al_register_event_source(queue, al_get_display_event_source(display));
     al_register_event_source(queue, al_get_timer_event_source(fps));
-
 }
 
 void video_display(ALLEGRO_VIDEO *video) {
@@ -120,8 +119,11 @@ void video_begin(){
 }
 
 void game_begin() {
+
+    // intro video
     init_video();
     video_begin();
+
     while( 1 ){
         al_wait_for_event(queue, &event);
         if( event.type == ALLEGRO_EVENT_TIMER ) {
@@ -130,10 +132,13 @@ void game_begin() {
             al_close_video(video);
             break;
         } else if( event.type == ALLEGRO_EVENT_VIDEO_FINISHED ) {
+            al_close_video(video);
             break;
         }
     }
     al_destroy_event_queue(queue);
+
+    al_register_event_source(event_queue, al_get_timer_event_source( fps )) ;
     // Load sound
     intro = al_load_sample("./sound/overworld.mp3");
     al_reserve_samples(20);
@@ -149,6 +154,7 @@ void game_begin() {
     // initialize the menu before entering the loop
     menu_init();
 }
+
 void game_update(){
     if( judge_next_window ){
         if( window == 1 ){
