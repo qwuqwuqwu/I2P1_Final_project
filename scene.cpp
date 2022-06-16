@@ -21,7 +21,7 @@ void menu_process(ALLEGRO_EVENT event){
             judge_next_window = true;
 }
 void menu_draw(){
-    img = al_load_bitmap("intro.jpg"); // ANS: load image
+    img = al_load_bitmap("intro.png"); // ANS: load image
     assert( img != NULL );
     al_draw_bitmap(img, 0, 0, 0); // ANS: draw image
 
