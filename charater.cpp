@@ -14,13 +14,6 @@ int g_nTerrainWidth = 0;
 float g_Gravity = 9.8;
 float g_Tick = 0.2;
 
-//int g_nImgMoveWidth[ ESA_NUM ];
-//int g_nImgMoveHeight[ ESA_NUM ];
-//int g_nImgTransformWidth;
-//int g_nImgTransformHeight;
-//int g_nImgInhaleWidth[ 2 * ESA_NUM ];
-//int g_nImgInhaleHeight[ 2 * ESA_NUM ];
-
 ECharacterState g_LastState;
 int g_nLastSubState;
 
