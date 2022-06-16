@@ -14,19 +14,19 @@ int g_nTerrainWidth = 0;
 float g_Gravity = 9.8;
 float g_Tick = 0.2;
 
-int g_nImgMoveWidth[ ESA_NUM ];
-int g_nImgMoveHeight[ ESA_NUM ];
-int g_nImgTransformWidth;
-int g_nImgTransformHeight;
-int g_nImgInhaleWidth[ 2 * ESA_NUM ];
-int g_nImgInhaleHeight[ 2 * ESA_NUM ];
+//int g_nImgMoveWidth[ ESA_NUM ];
+//int g_nImgMoveHeight[ ESA_NUM ];
+//int g_nImgTransformWidth;
+//int g_nImgTransformHeight;
+//int g_nImgInhaleWidth[ 2 * ESA_NUM ];
+//int g_nImgInhaleHeight[ 2 * ESA_NUM ];
 
 ECharacterState g_LastState;
 int g_nLastSubState;
 
 bool g_bCDing = false;
 int g_nCDCursor = 0;
-int g_nCDTime = 50;
+int g_nCDTime = 20;
 
 void CameraUpdate( float *CamPosition, int x, int y, int width, int height )
 {
@@ -46,28 +46,161 @@ void character_init( const int nTerrainWidth ){
 //    printf( "character_init\n" );
 
     // load character images
-    for(int i = 1 ; i <= 4; i++){
-        char temp[50];
-        sprintf( temp, "./image/char_move%d.png", i );
-        e_pchara->img_move[i-1] = al_load_bitmap(temp);
-        assert( e_pchara->img_move[i-1] != NULL );
-    }
     // inhale
-    for(int i = 1 ; i <= 2; i++){
+    for( int i = 0; i < 2; i++ ) {
         char temp[ 50 ];
-        sprintf( temp, "./image/char_inhale%d.png", i );
-        e_pchara->img_inhale[ i - 1 ] = al_load_bitmap( temp );
-        assert( e_pchara->img_inhale[ i - 1 ] != NULL );
-        g_nImgInhaleWidth[ i - 1 ] = al_get_bitmap_width( e_pchara->img_inhale[ i - 1 ] );
-        g_nImgInhaleHeight[ i - 1 ] = al_get_bitmap_height( e_pchara->img_inhale[ i - 1 ] );
+        sprintf( temp, "./image/char_inhale%d.png", i + 1 );
+        e_pchara->img_inhale[ i ] = al_load_bitmap( temp );
+        assert( e_pchara->img_inhale[ i ] != NULL );
     }
 
-    for( int i = 0; i < NUMOF_TRANSFORM_IMG; i++ ) {
-        char temp[ 50 ];
-        sprintf( temp, "./image/char_to_sword%d.png", i + 1 );
-        e_pchara->img_transform[ i ] = al_load_bitmap( temp );
-        assert( e_pchara->img_transform[ i ] != NULL );
+    for( int i = 0; i < ESA_NUM; i++ ){
+        printf( "i = %d\n", i );
+        switch( i ) {
+        case ESA_NORMAL:
+            // special attack
+            for(int j = 0; j < 2; j++){
+                char temp[ 50 ];
+                sprintf( temp, "./image/char_slide%d.png", j + 1 );
+                e_pchara->img_store_SpecialAtk[ 2 * i + j ] = al_load_bitmap( temp );
+                assert( e_pchara->img_store_SpecialAtk[ 2 * i + j ] != NULL );
+                e_pchara->img_atk[ j ] = e_pchara->img_store_SpecialAtk[ 2 * i + j ];
+            }
+
+            // move
+            for(int j = 0; j < 4; j++){
+                char temp[ 50 ];
+                sprintf( temp, "./image/char_move%d.png", j + 1 );
+                e_pchara->img_store_move[ 4 * i + j ] = al_load_bitmap( temp );
+                assert( e_pchara->img_store_move[ 4 * i + j ] != NULL );
+                e_pchara->img_move[ j ] = e_pchara->img_store_move[ 4 * i + j ];
+            }
+
+            // slide
+            for(int j = 0; j < 2; j++){
+                char temp[ 50 ];
+                sprintf( temp, "./image/char_slide%d.png", j + 1 );
+                e_pchara->img_store_slide[ 2 * i + j ] = al_load_bitmap( temp );
+                assert( e_pchara->img_store_slide[ 2 * i + j ] != NULL );
+                e_pchara->img_slide[ j ] = e_pchara->img_store_slide[ 2 * i + j ];
+            }
+
+            // transform
+            // do nothing
+            break;
+
+        case ESA_SWORD:
+            // special attack
+            for(int j = 0; j < 2; j++){
+                char temp[ 50 ];
+                sprintf( temp, "./image/char_slash%d.png", j + 1 );
+                e_pchara->img_store_SpecialAtk[ 2 * i + j ] = al_load_bitmap( temp );
+                assert( e_pchara->img_store_SpecialAtk[ 2 * i + j ] != NULL );
+            }
+
+            // move
+            for(int j = 0; j < 4; j++){
+                char temp[ 50 ];
+                sprintf( temp, "./image/char_sword_move%d.png", j + 1 );
+                e_pchara->img_store_move[ 4 * i + j ] = al_load_bitmap( temp );
+                assert( e_pchara->img_store_move[ 4 * i + j ] != NULL );
+            }
+
+            // slide
+            for(int j = 0; j < 2; j++){
+                char temp[ 50 ];
+                sprintf( temp, "./image/char_sword_slide%d.png", j + 1 );
+                e_pchara->img_store_slide[ 2 * i + j ] = al_load_bitmap( temp );
+                assert( e_pchara->img_store_slide[ 2 * i + j ] != NULL );
+            }
+
+            // transform
+            for(int j = 0; j < 3; j++){
+                char temp[ 50 ];
+                sprintf( temp, "./image/char_to_sword%d.png", j + 1 );
+                e_pchara->img_store_transform[ 3 * i + j ] = al_load_bitmap( temp );
+                assert( e_pchara->img_store_transform[ 3 * i + j ] != NULL );
+            }
+            break;
+
+        case ESA_BOMB:
+            // special attack
+            for(int j = 0; j < 2; j++){
+                char temp[ 50 ];
+                sprintf( temp, "./image/char_throw%d.png", j + 1 );
+                e_pchara->img_store_SpecialAtk[ 2 * i + j ] = al_load_bitmap( temp );
+                assert( e_pchara->img_store_SpecialAtk[ 2 * i + j ] != NULL );
+            }
+
+            // move
+            for(int j = 0; j < 4; j++){
+                char temp[ 50 ];
+                sprintf( temp, "./image/char_bomb_move%d.png", j + 1 );
+                e_pchara->img_store_move[ 4 * i + j ] = al_load_bitmap( temp );
+                assert( e_pchara->img_store_move[ 4 * i + j ] != NULL );
+            }
+
+            // slide
+            for(int j = 0; j < 2; j++){
+                char temp[ 50 ];
+                sprintf( temp, "./image/char_bomb_slide%d.png", j + 1 );
+                e_pchara->img_store_slide[ 2 * i + j ] = al_load_bitmap( temp );
+                assert( e_pchara->img_store_slide[ 2 * i + j ] != NULL );
+            }
+
+            // transform
+            for(int j = 0; j < 3; j++){
+                char temp[ 50 ];
+                sprintf( temp, "./image/char_to_bomb%d.png", j + 1 );
+                e_pchara->img_store_transform[ 3 * i + j ] = al_load_bitmap( temp );
+                assert( e_pchara->img_store_transform[ 3 * i + j ] != NULL );
+            }
+            break;
+
+        case ESA_FIRE:
+            // special attack
+            for(int j = 0; j < 2; j++){
+                char temp[ 50 ];
+                sprintf( temp, "./image/char_firespit%d.png", j + 1 );
+                e_pchara->img_store_SpecialAtk[ 2 * i + j ] = al_load_bitmap( temp );
+                assert( e_pchara->img_store_SpecialAtk[ 2 * i + j ] != NULL );
+            }
+
+            // move
+            for(int j = 0; j < 4; j++){
+                char temp[ 50 ];
+                sprintf( temp, "./image/char_fire_move%d.png", j + 1 );
+                e_pchara->img_store_move[ 4 * i + j ] = al_load_bitmap( temp );
+                assert( e_pchara->img_store_move[ 4 * i + j ] != NULL );
+            }
+
+            // slide
+            for(int j = 0; j < 2; j++){
+                char temp[ 50 ];
+                sprintf( temp, "./image/char_fire_slide%d.png", j + 1 );
+                e_pchara->img_store_slide[ 2 * i + j ] = al_load_bitmap( temp );
+                assert( e_pchara->img_store_slide[ 2 * i + j ] != NULL );
+            }
+
+            // transform
+            for(int j = 0; j < 3; j++){
+                char temp[ 50 ];
+                sprintf( temp, "./image/char_to_fire%d.png", j + 1 );
+                e_pchara->img_store_transform[ 3 * i + j ] = al_load_bitmap( temp );
+                assert( e_pchara->img_store_transform[ 3 * i + j ] != NULL );
+            }
+            break;
+
+        default:
+            assert( false );
+            break;
+        }
+        printf( "i = %d\n", i );
+
+//        g_nImgMoveWidth[ i ] = al_get_bitmap_width( e_pchara->img_SpecialAtk[ 4 * i ] );
+//        g_nImgMoveHeight[ i ] = al_get_bitmap_height( e_pchara->img_SpecialAtk[ 4 * i ] );
     }
+
     // load effective sound
     sample = al_load_sample("./sound/inhale.wav");
     e_pchara->atk_Sound  = al_create_sample_instance(sample);
@@ -88,7 +221,9 @@ void character_init( const int nTerrainWidth ){
     e_pchara->anime = 0;
     e_pchara->anime_time = 20;
     e_pchara->nAtkCursor = 0;
-    e_pchara->nAtkTime = 15;
+    e_pchara->nAtkTime = 20;
+    e_pchara->nSlideCursor = 0;
+    e_pchara->nSlideTime = 20;
     e_pchara->nInhaleCursor = 0;
     e_pchara->nInhaleTime = 10;
 
@@ -109,63 +244,16 @@ void character_init( const int nTerrainWidth ){
     e_pchara->NextSpecailAtk = ESA_NORMAL;
 
 //    printf( "test\n" );
-    for( int i = 0; i < ESA_NUM; i++ ){
-//        printf( "i = %d\n", i );
-        switch( i ) {
-        case ESA_NORMAL:
-            for(int j = 0; j < 4; j++){
-                char temp[ 50 ];
-                sprintf( temp, "./image/char_move%d.png", j + 1 );
-                e_pchara->img_SpecialAtk[ 4 * i + j ] = al_load_bitmap( temp );
-                assert( e_pchara->img_SpecialAtk[ 4 * i + j ] != NULL );
-            }
-            break;
 
-        case ESA_SWORD:
-            for(int j = 0; j < 4; j++){
-                char temp[ 50 ];
-                sprintf( temp, "./image/char_sword_move%d.png", j + 1 );
-                e_pchara->img_SpecialAtk[ 4 * i + j ] = al_load_bitmap( temp );
-                assert( e_pchara->img_SpecialAtk[ 4 * i + j ] != NULL );
-            }
-            break;
-
-        case ESA_BOMB:
-            for(int j = 0; j < 4; j++){
-                char temp[ 50 ];
-                sprintf( temp, "./image/char_bomb_move%d.png", j + 1 );
-                e_pchara->img_SpecialAtk[ 4 * i + j ] = al_load_bitmap( temp );
-                assert( e_pchara->img_SpecialAtk[ 4 * i + j ] != NULL );
-            }
-            break;
-
-        case ESA_FIRE:
-            for(int j = 0; j < 4; j++){
-                char temp[ 50 ];
-                sprintf( temp, "./image/char_fire_move%d.png", j + 1 );
-                e_pchara->img_SpecialAtk[ 4 * i + j ] = al_load_bitmap( temp );
-                assert( e_pchara->img_SpecialAtk[ 4 * i + j ] != NULL );
-            }
-            break;
-
-        default:
-            assert( false );
-            break;
-        }
-//        printf( "i = %d\n", i );
-
-        g_nImgMoveWidth[ i ] = al_get_bitmap_width( e_pchara->img_SpecialAtk[ 4 * i ] );
-        g_nImgMoveHeight[ i ] = al_get_bitmap_height( e_pchara->img_SpecialAtk[ 4 * i ] );
-    }
 //    printf( "Character init success\n" );
-//    printf( "character_init\n" );
+    printf( "character_init\n" );
 }
 
 void charater_process(ALLEGRO_EVENT event){
 //    printf( "charater_process\n" );
     // process the animation
-    if( event.type == ALLEGRO_EVENT_TIMER ){
-        if( event.timer.source == fps ){
+    if( event.type == ALLEGRO_EVENT_TIMER ) {
+        if( event.timer.source == fps ) {
 
             if( g_bCDing == true ) {
                 g_nCDCursor = ( g_nCDCursor + 1 ) % g_nCDTime;
@@ -188,6 +276,16 @@ void charater_process(ALLEGRO_EVENT event){
                 e_pchara->nAtkCursor %= e_pchara->nAtkTime;
 
                 if( e_pchara->nAtkCursor == 0 ) {
+                    g_bCDing = true;
+                    e_pchara->state = ECS_STOP;
+                }
+            }
+
+            if( e_pchara->state == ECS_SLIDE ) {
+                e_pchara->nSlideCursor++;
+                e_pchara->nSlideCursor %= e_pchara->nSlideTime;
+
+                if( e_pchara->nSlideCursor == 0 ) {
                     g_bCDing = true;
                     e_pchara->state = ECS_STOP;
                 }
@@ -282,6 +380,20 @@ void charater_update(){
         e_pchara->state = ECS_MOVE;
 
     }
+    // atack
+    else if( key_state[ ALLEGRO_KEY_V ] ) {
+        if( g_bCDing == false && e_pchara->state != ECS_ATK ) {
+            e_pchara->x0 = e_pchara->x;
+            e_pchara->state = ECS_ATK;
+        }
+    }
+    // slide
+    else if( key_state[ ALLEGRO_KEY_C ] ) {
+        if( g_bCDing == false && e_pchara->state != ECS_SLIDE ) {
+            e_pchara->x0 = e_pchara->x;
+            e_pchara->state = ECS_SLIDE;
+        }
+    }
     // inhale
     else if( key_state[ ALLEGRO_KEY_SPACE ] ) {   //吸的技能
         if( g_bCDing == false && e_pchara->state != ECS_INHALE && e_pchara->state != ECS_TRANSFORMING ) {
@@ -290,18 +402,12 @@ void charater_update(){
             e_pchara->x0 = e_pchara->x;
         }
     }
-    else if( e_pchara->anime == e_pchara->anime_time - 1 ) {
-        e_pchara->anime = 0;
-        e_pchara->state = ECS_STOP;
-    }else if ( e_pchara->anime == 0 ){
-        e_pchara->state = ECS_STOP;
-    }
 //    printf( "charater_update\n" );
 }
 
 void character_gravity( int nGroundY ) {
 //    printf( "character_gravity\n" );
-    if( e_pchara->state == ECS_MOVE || e_pchara->state == ECS_STOP ) {
+    if( e_pchara->state == ECS_MOVE || e_pchara->state == ECS_STOP || e_pchara->state == ECS_ATK || e_pchara->state == ECS_SLIDE ) {
         if( nGroundY == -1 ) {
             nGroundY = HEIGHT;
         }
@@ -393,15 +499,15 @@ void character_checkTransform( void ) {
             MonsterPos.s = e_monster[ i ].y + e_monster[ i ].height;
 
             if( character_checkOverlap( &CharacterPos, &MonsterPos ) == true ) {
-                printf( "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n" );
                 e_pchara->state = ECS_TRANSFORMING;
                 e_pchara->nTransformCursor = 0;
-                e_pchara->NextSpecailAtk = ESA_SWORD;
+                e_pchara->NextSpecailAtk = ( ESpecialAtk )( i + 1 );
 
                 e_pchara->nInhaleCursor = 0;
 
                 e_monster[ i ].state = EMS_DIE;
                 e_monster[ i ].hp = 0;
+                printf( "Next Special Attack is %d\n", e_pchara->NextSpecailAtk );
                 break;
             }
         }
@@ -415,7 +521,32 @@ void character_StateChangeImage( void )
 //    printf( "character_StateChangeImage\n" );
     ECharacterState NewState = e_pchara->state;
 
+    // update image
+//    printf( "update image\n" );
+    if( NewState != g_LastState ) {
+        // special attack
+        for(int j = 0; j < 2; j++){
+            e_pchara->img_atk[ j ] = e_pchara->img_store_SpecialAtk[ 2 * e_pchara->NowSpecialAtk + j ];
+        }
+
+        // move
+        for(int j = 0; j < 4; j++){
+            e_pchara->img_move[ j ] = e_pchara->img_store_move[ 4 * e_pchara->NowSpecialAtk + j ];
+        }
+
+        // slide
+        for(int j = 0; j < 2; j++){
+            e_pchara->img_slide[ j ] = e_pchara->img_store_slide[ 2 * e_pchara->NowSpecialAtk + j ];
+        }
+
+        // transform
+        for(int j = 0; j < 3; j++){
+            e_pchara->img_transform[ j ] = e_pchara->img_store_transform[ 3 * e_pchara->NextSpecailAtk + j ];
+        }
+    }
+
     // update substate
+//    printf( "update substate\n" );
     switch( NewState ) {
     case ECS_STOP:
         if( NewState != g_LastState ) {
@@ -427,10 +558,6 @@ void character_StateChangeImage( void )
     case ECS_MOVE:
         if( NewState != g_LastState ) {
             e_pchara->nSubState = 0;
-            // update image
-            for( int i = 0; i < 4; i++ ) {
-                e_pchara->img_move[ i ] = e_pchara->img_SpecialAtk[ 4 * e_pchara->NowSpecialAtk + i ];
-            }
         }
 
         if( e_pchara->anime < e_pchara->anime_time / 4 ) {
@@ -470,18 +597,42 @@ void character_StateChangeImage( void )
         else if( e_pchara->nTransformCursor < e_pchara->nTransformTime * 2 / 3 ) {
             e_pchara->nSubState = 1;
         }
-        else{
+        else {
             e_pchara->nSubState = 2;
         }
+        break;
 
-        //assert( false );
+    case ECS_ATK:
+        if( NewState != g_LastState ) {
+            e_pchara->nSubState = 0;
+        }
+        if( e_pchara->nAtkCursor < e_pchara->nAtkTime / 2 ) {
+            e_pchara->nSubState = 0;
+        }
+        else {
+            e_pchara->nSubState = 1;
+        }
+        break;
+
+    case ECS_SLIDE:
+        if( NewState != g_LastState ) {
+            e_pchara->nSubState = 0;
+        }
+        if( e_pchara->nSlideCursor < e_pchara->nSlideTime / 2 ) {
+            e_pchara->nSubState = 0;
+        }
+        else {
+            e_pchara->nSubState = 1;
+        }
         break;
 
     default:
+        assert( false );
         break;
     }
 
     // update xy
+//    printf( "update xy\n" );
     switch( NewState ) {
     case ECS_STOP:
         // change state
@@ -490,8 +641,8 @@ void character_StateChangeImage( void )
             e_pchara->y -= nHeight - e_pchara->height;
             e_pchara->height = nHeight;
         }
-        printf( "New height is %d\n", e_pchara->height );
         break;
+
     case ECS_MOVE:
         // change state
         if( g_LastState != NewState ) {
@@ -537,18 +688,50 @@ void character_StateChangeImage( void )
             e_pchara->y -= nHeight - e_pchara->height;
             e_pchara->height = nHeight;
         }
-//        printf( "New height is %d\n", e_pchara->height );
+        break;
+
+    case ECS_ATK:
+        // change state
+        if( g_LastState != NewState ) {
+            int nHeight = al_get_bitmap_height( e_pchara->img_atk[ 0 ] );
+            e_pchara->y -= nHeight - e_pchara->height;
+            e_pchara->height = nHeight;
+        }
+
+        // change substate
+        if( g_LastState == NewState && g_nLastSubState != e_pchara->nSubState ) {
+            int nHeight = al_get_bitmap_height( e_pchara->img_atk[ e_pchara->nSubState ] );
+            e_pchara->y -= nHeight - e_pchara->height;
+            e_pchara->height = nHeight;
+        }
+        break;
+
+    case ECS_SLIDE:
+        // change state
+        if( g_LastState != NewState ) {
+            int nHeight = al_get_bitmap_height( e_pchara->img_slide[ 0 ] );
+            e_pchara->y -= nHeight - e_pchara->height;
+            e_pchara->height = nHeight;
+        }
+
+        // change substate
+        if( g_LastState == NewState && g_nLastSubState != e_pchara->nSubState ) {
+            int nHeight = al_get_bitmap_height( e_pchara->img_slide[ e_pchara->nSubState ] );
+            e_pchara->y -= nHeight - e_pchara->height;
+            e_pchara->height = nHeight;
+        }
+        break;
 
     default:
-        //assert( false );
+        assert( false );
         break;
     }
 
 
     g_LastState = NewState;
     g_nLastSubState = e_pchara->nSubState;
-    printf( "State = %d, SubState = %d\n", g_LastState, g_nLastSubState );
-    printf( "Character at x = %d, y = %d\n", e_pchara->x, e_pchara->y );
+//    printf( "State = %d, SubState = %d\n", g_LastState, g_nLastSubState );
+//    printf( "Character at x = %d, y = %d\n", e_pchara->x, e_pchara->y );
 //    printf( "character_StateChangeImage\n" );
 }
 
@@ -569,6 +752,11 @@ void character_attack( void )
 
     case ECS_INHALE:
         nDeltaX = ( e_pchara->dir ? 1 : -1 ) * e_pchara->nInhaleCursor * 10;
+        e_pchara->x = e_pchara->x0 + nDeltaX;
+        break;
+
+    case ECS_SLIDE:
+        nDeltaX = ( e_pchara->dir ? 1 : -1 ) * e_pchara->nSlideCursor * 5;
         e_pchara->x = e_pchara->x0 + nDeltaX;
         break;
 
@@ -599,11 +787,11 @@ void character_draw(){
     character_attack();
 
     // check monster alive?
-    charater_update2();
+    //charater_update2();
 
     character_StateChangeImage();
 
-    printf( "character_draw\n" );
+//    printf( "character_draw\n" );
 
     // with the state, draw corresponding image
     switch( e_pchara->state ) {
@@ -649,11 +837,29 @@ void character_draw(){
         }
         break;
 
+    case ECS_ATK:
+        if( e_pchara->dir ) {
+            al_draw_bitmap( e_pchara->img_atk[ e_pchara->nSubState ], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL );
+        }
+        else {
+            al_draw_bitmap( e_pchara->img_atk[ e_pchara->nSubState ], e_pchara->x, e_pchara->y, 0 );
+        }
+        break;
+
+    case ECS_SLIDE:
+        if( e_pchara->dir ) {
+            al_draw_bitmap( e_pchara->img_slide[ e_pchara->nSubState ], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL );
+        }
+        else {
+            al_draw_bitmap( e_pchara->img_slide[ e_pchara->nSubState ], e_pchara->x, e_pchara->y, 0 );
+        }
+        break;
+
     default:
         assert( false );
         break;
     } // end of switch
-    printf( "character_draw\n" );
+//    printf( "character_draw\n" );
 }
 void character_destory(){
 //    printf( "character_destory\n" );
@@ -803,7 +1009,7 @@ void character_draw2(){
             monster_gravity( n, nGroundY );
         //如果活著
             if( e_monster[ n ].dir ) {
-                if( e_monster[ n ].x >= WIDTH / 2 + 50 ) {
+                if( e_monster[ n ].x >= WIDTH / 2 + 50 + n * 240 ) {
                     e_monster[ n ].dir = false;
                     al_draw_bitmap( e_monster[ n ].img_move[ 0 ], e_monster[ n ].x, e_monster[ n ].y, 0 );
                 }
@@ -811,7 +1017,7 @@ void character_draw2(){
                 e_monster[ n ].x += 1;
             }
             else {
-                if( e_monster[ n ].x <= WIDTH / 2 ) {
+                if( e_monster[ n ].x <= WIDTH / 2 + n * 240 ) {
                     e_monster[ n ].dir = true;
                     al_draw_bitmap( e_monster[ n ].img_move[ 0 ], e_monster[ n ].x, e_monster[ n ].y, ALLEGRO_FLIP_HORIZONTAL );
                 }

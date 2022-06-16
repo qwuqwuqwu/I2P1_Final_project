@@ -37,7 +37,8 @@ enum ECharacterState {
     ECS_MOVE = 1,
     ECS_ATK = 2,
     ECS_INHALE = 3,
-    ECS_TRANSFORMING = 4,
+    ECS_SLIDE = 4,
+    ECS_TRANSFORMING = 5,
 };
 
 // the state of monster
@@ -53,15 +54,12 @@ typedef struct character
     bool dir; // left: false, right: true
     ECharacterState state; // the state of character
     int nSubState;
-    ALLEGRO_BITMAP *img_move[ 4 ];
-    ALLEGRO_BITMAP *img_inhale[ 2 ];
-    ALLEGRO_BITMAP *img_atk[2];
-    ALLEGRO_SAMPLE_INSTANCE *atk_Sound;
     int anime; // counting the time of animation
     int anime_time; // indicate how long the animation
-
     int nAtkCursor; // counting the time of animation
     int nAtkTime; // indicate how long the animation
+    int nSlideCursor;
+    int nSlideTime;
     int nInhaleCursor; // counting the time of animation
     int nInhaleTime; // indicate how long the animation
     int x0;
@@ -72,11 +70,25 @@ typedef struct character
     int hp;
     int nTransformCursor;
     int nTransformTime;
-    ALLEGRO_BITMAP *img_transform[ NUMOF_TRANSFORM_IMG ];
 
     ESpecialAtk NowSpecialAtk;
     ESpecialAtk NextSpecailAtk;
-    ALLEGRO_BITMAP *img_SpecialAtk[ 4 * ESA_NUM ];
+
+    // bit map
+    ALLEGRO_BITMAP *img_inhale[ 2 ];
+
+    ALLEGRO_BITMAP *img_atk[ 2 ];
+    ALLEGRO_BITMAP *img_move[ 4 ];
+    ALLEGRO_BITMAP *img_slide[ 2 ];
+    ALLEGRO_BITMAP *img_transform[ 3 ];
+
+    // bit map store
+    ALLEGRO_BITMAP *img_store_SpecialAtk[ 2 * ESA_NUM ];
+    ALLEGRO_BITMAP *img_store_move[ 4 * ESA_NUM ];
+    ALLEGRO_BITMAP *img_store_slide[ 2 * ESA_NUM ];
+    ALLEGRO_BITMAP *img_store_transform[ NUMOF_TRANSFORM_IMG * ESA_NUM ];
+
+    ALLEGRO_SAMPLE_INSTANCE *atk_Sound;
 } Character;
 
 typedef struct mon
