@@ -101,9 +101,9 @@ void video_display(ALLEGRO_VIDEO *video) {
     // rescale the frame into the size of screen
     al_draw_scaled_bitmap(frame,
                           // the rescale position of the frame
-                          0, 0,
+                          107, 0,
                           // the width and height you want to rescale
-                          al_get_bitmap_width(frame),
+                          al_get_bitmap_width(frame)-214,
                           al_get_bitmap_height(frame),
                           // the position of result image
                           0, 0,
