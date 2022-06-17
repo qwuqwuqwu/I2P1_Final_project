@@ -20,6 +20,7 @@ int g_nLastSubState;
 bool g_bCDing = false;
 int g_nCDCursor = 0;
 int g_nCDTime = 20;
+int camera_move = 1;
 
 void CameraUpdate( float *CamPosition, int x, int y, int width, int height )
 {
@@ -31,6 +32,7 @@ void CameraUpdate( float *CamPosition, int x, int y, int width, int height )
     }
     else if( *CamPosition >= ( g_nTerrainWidth - WIDTH ) ) {
         *CamPosition = ( float )( g_nTerrainWidth - WIDTH);
+        camera_move = 0;
     }
 //    printf( "CameraUpdate\n" );
 }
@@ -763,7 +765,8 @@ void character_attack( void )
 
 void character_draw(){
 //    printf( "character_draw\n" );
-    CameraUpdate( &g_CameraPosition, e_pchara->x, e_pchara->y, e_pchara->width, e_pchara->height );
+    if (camera_move == 1)
+        CameraUpdate( &g_CameraPosition, e_pchara->x, e_pchara->y, e_pchara->width, e_pchara->height );
     al_identity_transform( &camera );
     al_translate_transform( &camera, -g_CameraPosition, 0 );
     al_use_transform( &camera );
