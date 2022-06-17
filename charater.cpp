@@ -363,34 +363,21 @@ void charater_update(){
         e_pchara->dir = false;
         e_pchara->x -= 5;
         e_pchara->state = ECS_MOVE;
-    }else if( key_state[ALLEGRO_KEY_S] ){
-        if(key_state[ALLEGRO_KEY_SPACE])
-        {
-            if( e_pchara->state != ECS_ATK) {
-                //e_pchara->dir?e_pchara->x += 100: e_pchara->x-= 100;
-                e_pchara->x0 = e_pchara->x;
-                e_pchara->state = ECS_ATK;
-            }
-        }
-        else
-        {
-            e_pchara->y += 10;
-            e_pchara->state = ECS_MOVE;
-        }
-    }else if( key_state[ALLEGRO_KEY_D] ){
+    }
+    else if( key_state[ALLEGRO_KEY_D] ){
         e_pchara->dir = true;
         e_pchara->x += 5;
         e_pchara->state = ECS_MOVE;
 
     }
-    // atack
+    // attack v
     else if( key_state[ ALLEGRO_KEY_V ] ) {
         if( g_bCDing == false && e_pchara->state != ECS_ATK ) {
             e_pchara->x0 = e_pchara->x;
             e_pchara->state = ECS_ATK;
         }
     }
-    // slide
+    // slide c
     else if( key_state[ ALLEGRO_KEY_C ] ) {
         if( g_bCDing == false && e_pchara->state != ECS_SLIDE ) {
             e_pchara->x0 = e_pchara->x;
@@ -809,10 +796,11 @@ void character_attack( void )
 //    printf( "character_attack\n" );
 }
 
-void character_draw(){
+void character_draw()
+{
 //    printf( "character_draw\n" );
 
-    int nGroundY = FindAndDrawClosestGroundY( e_pchara->x + e_pchara->width / 2, e_pchara->y + e_pchara->height );
+    int nGroundY = FindAndDrawClosestGroundY( e_pchara->x, e_pchara->x + e_pchara->width, e_pchara->y + e_pchara->height );
 
     character_gravity( nGroundY );
 
@@ -827,6 +815,7 @@ void character_draw(){
     character_StateChangeImage();
 
     character_BoundryCheck();
+
 	if( camera_move == 1 ) {
     	CameraUpdate( &g_CameraPosition, e_pchara->x, e_pchara->y, e_pchara->width, e_pchara->height, e_pchara->nTestWidth );
     	al_identity_transform( &camera );
@@ -984,9 +973,7 @@ void character_destory2()
 {
 //    printf( "character_destory2\n" );
     for( int n = 0; n < MONSTER_NUMBERS; n++ ) {
-        if( e_monster[ n ].state == EMS_ALIVE ) {
-            al_destroy_bitmap( e_monster[ n ].img_move[ 0 ] );
-        }
+        al_destroy_bitmap( e_monster[ n ].img_move[ 0 ] );
     }
 //    printf( "character_destory2\n" );
 }
@@ -1047,7 +1034,7 @@ void character_draw2(){
     // with the state, draw corresponding image
         if( e_monster[ n ].state == EMS_ALIVE ) {
 
-            int nGroundY = FindAndDrawClosestGroundY( e_monster[ n ].x + e_monster[ n ].width / 2, e_monster[ n ].y + e_monster[ n ].height );
+            int nGroundY = FindAndDrawClosestGroundY( e_monster[ n ].x, e_monster[ n ].x + e_monster[ n ].width, e_monster[ n ].y + e_monster[ n ].height );
 
             monster_gravity( n, nGroundY );
         //如果活著

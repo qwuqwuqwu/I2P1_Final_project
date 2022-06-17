@@ -13,15 +13,15 @@ int g_nGroundCount = 0;
 
 ALLEGRO_BITMAP *Ground[ MAX_COUNTOF_GROUND ] = { NULL };
 
-int FindAndDrawClosestGroundY( int nMid, int nToe ){
+int FindAndDrawClosestGroundY( const int w, const int e, const int s ){
     // find closest lower ground
     int nFoundGroundIdx[ MAX_COUNTOF_FOUNDGROUND ] = { 0 };
     int nFoundGroundCount = 0;
-    FindGround( nFoundGroundIdx, &nFoundGroundCount, nMid );
+    FindGround( nFoundGroundIdx, &nFoundGroundCount, w, e );
 
     int nClosestGroundIdx = -1;
     int nGroundY = -1;
-    nClosestGroundIdx = FindClosestGround( nFoundGroundIdx, nFoundGroundCount, nMid, nToe );
+    nClosestGroundIdx = FindClosestGround( nFoundGroundIdx, nFoundGroundCount, s );
     if( nClosestGroundIdx != -1 ) {
         nGroundY = g_Ground[ nClosestGroundIdx ].y;
     }
@@ -37,31 +37,32 @@ int FindAndDrawClosestGroundY( int nMid, int nToe ){
     return nGroundY;
 }
 
-int FindClosestGround( int *pGroundIdx, int nGroundCount, const int x, const int nToe ) {
+int FindClosestGround( int *pGroundIdx, int nGroundCount, const int s ) {
     int nMinY = INT_MAX;
     int nClosestGroundIdx = -1;
+
     for( int i = 0; i < nGroundCount; i++ ) {
-        if( ( g_Ground[ pGroundIdx[ i ] ].x <= x ) && ( x <= ( g_Ground[ pGroundIdx[ i ] ].x + g_Ground[ pGroundIdx[ i ] ].nWidth ) ) ) {
-            if( g_Ground[ pGroundIdx[ i ] ].y >= nToe && g_Ground[ pGroundIdx[ i ] ].y < nMinY ) {
-                nMinY = g_Ground[ pGroundIdx[ i ] ].y;
-                nClosestGroundIdx = pGroundIdx[ i ];
-            }
+        if( g_Ground[ pGroundIdx[ i ] ].y >= s && g_Ground[ pGroundIdx[ i ] ].y < nMinY ) {
+            nMinY = g_Ground[ pGroundIdx[ i ] ].y;
+            nClosestGroundIdx = pGroundIdx[ i ];
         }
     }
     return nClosestGroundIdx;
 }
 
-bool IsInGroundRange( int nGroundIdx, const int x ) {
-    if( ( g_Ground[ nGroundIdx ].x <= x ) && ( x <= ( g_Ground[ nGroundIdx ].x + g_Ground[ nGroundIdx ].nWidth ) ) ) {
-        return true;
+bool IsInGroundRange( int nGroundIdx, const int w, const int e ) {
+    int gw = g_Ground[ nGroundIdx ].x;
+    int ge = g_Ground[ nGroundIdx ].x + g_Ground[ nGroundIdx ].nWidth;
+    if( ( w < gw && e < gw ) || ( w > ge && e > ge ) ) {
+        return false;
     }
-    return false;
+    return true;
 }
 
-void FindGround( int *pnFoundGroundIdx, int *pnFoundCount, int x ) {
+void FindGround( int *pnFoundGroundIdx, int *pnFoundCount, int w, int e ) {
     int j = 0;
     for( int i = 0; i < g_nGroundCount; i++ ) {
-        if( IsInGroundRange( i, x ) == true ) {
+        if( IsInGroundRange( i, w, e ) == true ) {
             pnFoundGroundIdx[ j++ ] = i;
             *pnFoundCount = j;
         }
