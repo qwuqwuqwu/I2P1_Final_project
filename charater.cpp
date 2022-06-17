@@ -4,6 +4,8 @@
 #define MAX_COUNTOF_CONTINUOUS_JUMP ( 2 )
 #define JUMP_VY ( -90 )
 #define MONSTER_NUMBERS ( 3 )
+//note
+
 
 ALLEGRO_SAMPLE *sample = NULL;
 
