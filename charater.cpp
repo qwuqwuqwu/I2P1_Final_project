@@ -341,17 +341,17 @@ void charater_update(){
 
         if( key_state[ALLEGRO_KEY_A] ) {
             e_pchara->dir = false;
-            e_pchara->x -= 3;
+            e_pchara->x -= 5;
         }
         else if( key_state[ALLEGRO_KEY_D] ) {
             e_pchara->dir = true;
-            e_pchara->x += 3;
+            e_pchara->x += 5;
         }
         e_pchara->state = ECS_MOVE;
 
     }else if( key_state[ALLEGRO_KEY_A] ){
         e_pchara->dir = false;
-        e_pchara->x -= 3;
+        e_pchara->x -= 5;
         e_pchara->state = ECS_MOVE;
     }else if( key_state[ALLEGRO_KEY_S] ){
         if(key_state[ALLEGRO_KEY_SPACE])
@@ -369,7 +369,7 @@ void charater_update(){
         }
     }else if( key_state[ALLEGRO_KEY_D] ){
         e_pchara->dir = true;
-        e_pchara->x += 3;
+        e_pchara->x += 5;
         e_pchara->state = ECS_MOVE;
 
     }

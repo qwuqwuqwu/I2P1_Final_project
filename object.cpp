@@ -118,11 +118,23 @@ void GroundSetup( void )
             assert( Ground[ i ] != NULL );
         }
         else if( g_Ground[ i ].type == 3 ) {
-            Ground[ i ] = al_load_bitmap("./image/bridge.png");
+            Ground[ i ] = al_load_bitmap("./image/cloud_long.png");
             assert( Ground[ i ] != NULL );
         }
         else if( g_Ground[ i ].type == 4 ) {
-            Ground[ i ] = al_load_bitmap("./image/cloud_long.png");
+            Ground[ i ] = al_load_bitmap("./image/bridge.png");
+            assert( Ground[ i ] != NULL );
+        }
+        else if( g_Ground[ i ].type == 5 ) {
+            Ground[ i ] = al_load_bitmap("./image/bridge_five.png");
+            assert( Ground[ i ] != NULL );
+        }
+        else if( g_Ground[ i ].type == 6 ) {
+            Ground[ i ] = al_load_bitmap("./image/stone1.png");
+            assert( Ground[ i ] != NULL );
+        }
+        else if( g_Ground[ i ].type == 7 ) {
+            Ground[ i ] = al_load_bitmap("./image/stone2.png");
             assert( Ground[ i ] != NULL );
         }
 
