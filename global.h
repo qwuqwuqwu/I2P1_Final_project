@@ -52,12 +52,13 @@ typedef struct _Character {
 	bool dir; // left: false, right: true
     int x, y; // the position of image
     int width, height; // the width and height of image
+    int nTestWidth;
     ECharacterState state; // the state of character
     int nSubState;
 	int hp;
     ESpecialAtk NowSpecialAtk;
     ESpecialAtk NextSpecailAtk;
-	
+
 	// cursor and time
     int anime; 				// counting the time of animation
     int anime_time; 		// indicate how long the animation
@@ -69,9 +70,10 @@ typedef struct _Character {
     int nInhaleTime; 		// inhale duration
 	int nTransformCursor;	// transform cursor
     int nTransformTime;		// transform duration
-	
+
 	// moving variable
     int x0;
+    int nDeltaX;
     int y0;
     float vy;
     int nJumpCount;
