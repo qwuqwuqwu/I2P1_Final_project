@@ -7,7 +7,7 @@
 
 #define SLIDE_RATE  ( 3 )
 #define ATK_RATE    ( 3 )
-#define HP          ( 5 )
+#define HP          ( 7 )
 
 //note
 
@@ -66,6 +66,13 @@ void character_init( const int nTerrainWidth ){
         assert( e_pchara->img_inhale[ i ] != NULL );
     }
 
+    for(int i = 0; i < 7; i++){
+        char temp[ 50 ];
+        sprintf( temp, "./image/hp%d.png", i );
+        e_pchara->img_store_HP[ i ] = al_load_bitmap( temp );
+        assert( e_pchara->img_store_HP[ i ] != NULL );
+        }
+
     for( int i = 0; i < ESA_NUM; i++ ){
         printf( "i = %d\n", i );
         switch( i ) {
@@ -104,6 +111,8 @@ void character_init( const int nTerrainWidth ){
             g_nWordHeight = al_get_bitmap_height( e_pchara->img_store_AtkWord[ i ] );
             // do nothing
             break;
+
+
 
         case ESA_SWORD:
             // special attack
@@ -991,7 +1000,16 @@ void character_draw()
     	al_use_transform( &camera );
 	}
 
-//    printf( "character_draw\n" );
+	if(e_pchara->hp >=6){al_draw_bitmap(e_pchara->img_store_HP[6],g_CameraPosition+280, HEIGHT - g_nWordHeight-20, 0);}
+	else if(e_pchara->hp ==5){al_draw_bitmap(e_pchara->img_store_HP[5],g_CameraPosition+280, HEIGHT - g_nWordHeight-20, 0);}
+	else if(e_pchara->hp ==4){al_draw_bitmap(e_pchara->img_store_HP[4],g_CameraPosition+280, HEIGHT - g_nWordHeight-20, 0);}
+    else if(e_pchara->hp ==3){al_draw_bitmap(e_pchara->img_store_HP[3],g_CameraPosition+280, HEIGHT - g_nWordHeight-20, 0);}
+    else if(e_pchara->hp ==2){al_draw_bitmap(e_pchara->img_store_HP[2],g_CameraPosition+280, HEIGHT - g_nWordHeight-20, 0);}
+    else if(e_pchara->hp ==1){al_draw_bitmap(e_pchara->img_store_HP[1],g_CameraPosition+280, HEIGHT - g_nWordHeight-20, 0);}
+    else {al_draw_bitmap(e_pchara->img_store_HP[0],g_CameraPosition+280, HEIGHT - g_nWordHeight-20, 0);}
+
+
+    //    printf( "character_draw\n" );
 
     // with the state, draw corresponding image
     switch( e_pchara->state ) {
@@ -1110,19 +1128,22 @@ void character_init2(){
     FILE* fp = fopen( "./res/monster.txt", "r" );
     int nPosX = 0;
     int nPosY = 0;
+    int nType = 0;
     int nset= 1;
-    while( fscanf( fp, "%d%d", &nPosX, &nPosY ) != EOF && nset < MONSTER_NUMBERS ) {
+    while( fscanf( fp, "%d%d%d", &nPosX, &nPosY,&nType ) != EOF && nset < MONSTER_NUMBERS ) {
         e_monster[ nset ].x = nPosX;
         e_monster[ nset ].y = nPosY;
+        e_monster[ nset ].type = nType;
         nset++;
     }
     fclose( fp ); //記得關檔
 
     for( int n = 0; n < MONSTER_NUMBERS; n++ ) {
         char temp[ 50 ];
-        sprintf( temp, "./image/char_move1.png");
-        e_monster[ n ].img_move[ 0 ] = al_load_bitmap( temp );
-        assert( e_monster[ n ].img_move[ 0 ] != NULL );
+    //    if(e_monster)
+            sprintf( temp, "./image/char_move1.png");
+            e_monster[ n ].img_move[ 0 ] = al_load_bitmap( temp );
+            assert( e_monster[ n ].img_move[ 0 ] != NULL );
 
         e_monster[ n ].width = al_get_bitmap_width( e_monster[ n ].img_move[ 0 ] );
         e_monster[ n ].height = al_get_bitmap_height( e_monster[ n ].img_move[ 0 ] );
