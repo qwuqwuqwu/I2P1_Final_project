@@ -47,7 +47,7 @@ void CameraUpdate( float *CamPosition, int x, int y, int width, int height, int 
     if( *CamPosition < 0 ) {
         *CamPosition = 0.0;
     }
-    else if( *CamPosition >= ( g_nTerrainWidth - WIDTH ) ) {
+    else if( *CamPosition >= ( g_nTerrainWidth - 5 * WIDTH / 4 ) ) {
         *CamPosition = ( float )( g_nTerrainWidth - WIDTH);
         camera_move = 0;
     }
