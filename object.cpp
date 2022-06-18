@@ -5,6 +5,7 @@
 #define MAX_COUNTOF_FOUNDGROUND     ( 40 )
 #define MAX_COUNTOF_GROUND          ( 600 )
 #define MAX_COUNTOF_FOOD            ( 100 )
+#define MAX_COUNTOF_CANDY           ( 100 )
 
 // the state of object
 enum {NORMAL = 0, HIGHLIGHT};
@@ -12,15 +13,18 @@ enum {NORMAL = 0, HIGHLIGHT};
 Pos g_Ground[ MAX_COUNTOF_GROUND ];
 Bom g_Bomb;
 Pos g_Food[ MAX_COUNTOF_FOOD ];
+Pos g_Candy[ MAX_COUNTOF_CANDY ];
 
 int g_nGroundCount = 0;
 int g_nFoodCount = 0;
+int g_nCandyCount = 0;
 
 ALLEGRO_BITMAP *Ground[ MAX_COUNTOF_GROUND ] = { NULL };
 ALLEGRO_BITMAP *g_BombMap = NULL;
 ALLEGRO_BITMAP *g_ExplodeMap[ 3 ] = { NULL };
 
 ALLEGRO_BITMAP *g_FoodMap[ MAX_COUNTOF_FOOD ] = { NULL };
+ALLEGRO_BITMAP *g_CandyMap[ MAX_COUNTOF_CANDY ] = { NULL };
 
 bool CheckOverlap( const Position *plhs, const Position *prhs ) {
 //    printf( "character_checkOverlap\n" );
@@ -335,6 +339,7 @@ void BombSetup( void )
 
 void FoodSetup( void )
 {
+    printf( "FoodSetup\n" );
     FILE* fp = fopen( "./res/food.txt", "r" );
     int nPosX = 0;
     int nPosY = 0;
@@ -345,42 +350,39 @@ void FoodSetup( void )
         g_nFoodCount++;
     }
 
-    for( int i = 0; i < g_nGroundCount; i++ ) {
+    for( int i = 0; i < g_nFoodCount; i++ ) {
         g_FoodMap[ i ] = al_load_bitmap( "./image/food.png" );
         assert( g_FoodMap[ i ] != NULL );
 
         g_Food[ i ].nWidth = al_get_bitmap_width( g_FoodMap[ i ] );
         g_Food[ i ].nHeight = al_get_bitmap_height( g_FoodMap[ i ] );
     }
+
+    fclose( fp );
 }
 
 void CandySetup( void )
 {
-//    g_BombMap = al_load_bitmap("./image/bomb.png");
-//    assert( g_BombMap != NULL );
-//
-//    g_Bomb.img = g_BombMap;
-//    g_Bomb.nSubState = 0;
-//    g_Bomb.x = 0;
-//    g_Bomb.y = 0;
-//    g_Bomb.y0 = 0;
-//    g_Bomb.dir = true;
-//    g_Bomb.FallingTick = 0;
-//    g_Bomb.state = EBS_IDLE;
-//    g_Bomb.vy = 0.0;
-//    g_Bomb.width = al_get_bitmap_width( g_BombMap );
-//    g_Bomb.height = al_get_bitmap_height( g_BombMap );
-//    g_Bomb.nExplodeCursor = 0;
-//    g_Bomb.nExplodeTime = 30;
-//
-//    for( int i = 0; i < 3; i++ ) {
-//        char temp[ 50 ];
-//        sprintf( temp, "./image/explode%d.png", i + 1 );
-//        g_ExplodeMap[ i ] = al_load_bitmap( temp );
-//
-//        assert( g_ExplodeMap[ i ] != NULL );
-//        g_Bomb.img_explode[ i ] = g_ExplodeMap[ i ];
-//    }
+    printf( "CandySetup\n" );
+    FILE* fp = fopen( "./res/candy.txt", "r" );
+    int nPosX = 0;
+    int nPosY = 0;
+    while( fscanf( fp, "%d%d", &nPosX, &nPosY ) != EOF && g_nCandyCount <= MAX_COUNTOF_CANDY ) {
+        g_Candy[ g_nCandyCount ].state = EFS_IDLE;
+        g_Candy[ g_nCandyCount ].x = nPosX;
+        g_Candy[ g_nCandyCount ].y = nPosY;
+        g_nCandyCount++;
+    }
+
+    for( int i = 0; i < g_nCandyCount; i++ ) {
+        g_CandyMap[ i ] = al_load_bitmap( "./image/candy.png" );
+        assert( g_CandyMap[ i ] != NULL );
+
+        g_Candy[ i ].nWidth = al_get_bitmap_width( g_CandyMap[ i ] );
+        g_Candy[ i ].nHeight = al_get_bitmap_height( g_CandyMap[ i ] );
+    }
+
+    fclose( fp );
 }
 
 void BombThrow( const int x, const int y, const bool bDir )
@@ -397,12 +399,12 @@ void BombThrow( const int x, const int y, const bool bDir )
     g_Bomb.state = EBS_FLY;
 }
 
-bool EatFood( const Position *plhs, int *pFoodCount, int *pCandyCount )
+bool Eat( const Position *plhs, int *pFoodCount, int *pCandyCount )
 {
-    // eat food
     *pFoodCount = 0;
     *pCandyCount = 0;
 
+    // eat food
     for( int i = 0; i < g_nFoodCount; i++ ) {
         if( g_Food[ i ].state == EFS_IDLE ) {
             Position FoodPos;
@@ -420,6 +422,21 @@ bool EatFood( const Position *plhs, int *pFoodCount, int *pCandyCount )
     }
 
     // eat candy
+    for( int i = 0; i < g_nCandyCount; i++ ) {
+        if( g_Candy[ i ].state == EFS_IDLE ) {
+            Position CandyPos;
+            CandyPos.e = g_Candy[ i ].x + g_Candy[ i ].nWidth;
+            CandyPos.s = g_Candy[ i ].y + g_Candy[ i ].nHeight;
+            CandyPos.w = g_Candy[ i ].x;
+            CandyPos.n = g_Candy[ i ].y;
+
+            bool bOverlaped = CheckOverlap( plhs, &CandyPos );
+            if( bOverlaped == true ) {
+                g_Candy[ i ].state = EFS_EATEN;
+                *pCandyCount++;
+            }
+        }
+    }
 }
 
 bool BombUpdate( void )
@@ -470,8 +487,8 @@ bool BombUpdate( void )
 void object_init( void ){
     GroundSetup();
     BombSetup();
-//    FoodSetup();
-//    CandySetup();
+    FoodSetup();
+    CandySetup();
 }
 
 void object_draw( void ){
@@ -496,6 +513,20 @@ void object_draw( void ){
         }
         else {
             al_draw_bitmap( g_Bomb.img_explode[ g_Bomb.nSubState ], g_Bomb.x, g_Bomb.y, ALLEGRO_FLIP_HORIZONTAL );
+        }
+    }
+
+    // draw food
+    for( int i = 0; i < g_nFoodCount; i++ ) {
+        if( g_Food[ i ].state == EFS_IDLE ) {
+            al_draw_bitmap( g_FoodMap[ i ], g_Food[ i ].x, g_Food[ i ].y, 0 );
+        }
+    }
+
+    // draw candy
+    for( int i = 0; i < g_nCandyCount; i++ ) {
+        if( g_Candy[ i ].state == EFS_IDLE ) {
+            al_draw_bitmap( g_CandyMap[ i ], g_Candy[ i ].x, g_Candy[ i ].y, 0 );
         }
     }
 }
