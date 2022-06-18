@@ -18,6 +18,8 @@
 extern const float FPS;
 extern const int WIDTH;
 extern const int HEIGHT;
+extern float g_Gravity;
+extern float g_Tick;
 extern bool key_state[ ALLEGRO_KEY_MAX ];
 extern bool judge_next_window;
 extern ALLEGRO_EVENT_QUEUE *event_queue;
@@ -72,6 +74,12 @@ enum EBlockType {
     EBT_LONGBRIDGE = 5,
     EBT_STONE1 = 6,
     EBT_STONE2 = 7,
+};
+
+enum EBombState {
+    EBS_IDLE = 1,
+    EBS_FLY = 2,
+    EBS_EXPLODE = 3,
 };
 
 typedef struct _Character {
@@ -147,6 +155,25 @@ typedef struct _Mon {
     float FallingTick;
 } Mon;
 
+typedef struct _Bomb {
+    int x, y; // the position of image
+    int width, height; // the width and height of image
+    bool dir; // left: false, right: true
+    int nSubState;
+    EBombState state; // the state of character
+    ALLEGRO_BITMAP *img;
+    ALLEGRO_BITMAP *img_explode[ 3 ];
+
+    int nExplodeCursor;
+    int nExplodeTime;
+
+    int y0;
+    int x0;
+    float vy;
+    float vx;
+    float FallingTick;
+} Bom;
+
 // structure to represent ground
 typedef struct t_pos {
     int state;
@@ -168,4 +195,5 @@ typedef struct _Position {
 extern Character *e_pchara;
 extern Mon e_monster[ 100 ];
 extern ALLEGRO_SAMPLE_INSTANCE *g_pMenuSampleInstance;
+
 #endif

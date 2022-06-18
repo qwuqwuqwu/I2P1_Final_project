@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <limits.h>
 
-#define COUNOF_BACKGROUND           ( 32 )
+#define COUNOF_BACKGROUND           ( 33 )
 
 ALLEGRO_FONT *font = NULL;
 ALLEGRO_BITMAP *g_background[ COUNOF_BACKGROUND ] = { NULL };
