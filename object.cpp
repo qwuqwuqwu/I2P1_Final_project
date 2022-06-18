@@ -122,7 +122,7 @@ bool CheckBlocker( Position *pPos, const bool bDir )
 
         bool bOverlap = AdvCheckOverlap( pPos, &Ground, &nOrientation, &nClampValue );
 
-        if( bOverlap == true && ( g_Ground[ i ].type == EBT_GRASS || g_Ground[ i ].type == EBT_STONE1 || g_Ground[ i ].type == EBT_STONE2 ) ) {
+        if( bOverlap == true && ( g_Ground[ i ].type == EBT_GRASS || g_Ground[ i ].type == EBT_STONE1 || g_Ground[ i ].type == EBT_STONE2 || g_Ground[ i ].type == EBT_WALL ) ) {
             bClamped = true;
 //            printf( "******** clamped dir = %d, value = %d\n", nOrientation, nClampValue );
             switch( nOrientation ) {
@@ -282,6 +282,10 @@ void GroundSetup( void )
         }
         else if( g_Ground[ i ].type == 7 ) {
             Ground[ i ] = al_load_bitmap("./image/stone2.png");
+            assert( Ground[ i ] != NULL );
+        }
+        else if( g_Ground[ i ].type == 8 ) {
+            Ground[ i ] = al_load_bitmap("./image/wall.png");
             assert( Ground[ i ] != NULL );
         }
 

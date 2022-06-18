@@ -67,6 +67,7 @@ enum EBlockType {
     EBT_LONGBRIDGE = 5,
     EBT_STONE1 = 6,
     EBT_STONE2 = 7,
+    EBT_WALL = 8,
 };
 
 enum EBombState {
