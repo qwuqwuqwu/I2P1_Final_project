@@ -118,7 +118,7 @@ bool CheckBlocker( Position *pPos, const bool bDir )
 
         bool bOverlap = AdvCheckOverlap( pPos, &Ground, &nOrientation, &nClampValue );
 
-        if( bOverlap == true ) {
+        if( bOverlap == true && ( g_Ground[ i ].type == EBT_GRASS || g_Ground[ i ].type == EBT_STONE1 || g_Ground[ i ].type == EBT_STONE2 ) ) {
             bClamped = true;
             printf( "******** clamped dir = %d, value = %d\n", nOrientation, nClampValue );
             switch( nOrientation ) {

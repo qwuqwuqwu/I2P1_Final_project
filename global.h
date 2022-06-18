@@ -57,6 +57,16 @@ enum EMonsterState {
     EMS_DIE = 1,
 };
 
+enum EBlockType {
+    EBT_GRASS = 1,
+    EBT_CLOUD = 2,
+    EBT_LONGCLOUD = 3,
+    EBT_BRIDGE = 4,
+    EBT_LONGBRIDGE = 5,
+    EBT_STONE1 = 6,
+    EBT_STONE2 = 7,
+};
+
 typedef struct _Character {
 	bool dir; // left: false, right: true
     int x, y; // the position of image

@@ -899,6 +899,7 @@ void character_draw()
 
     character_StateChangeImage();
 
+
     character_BoundryCheck();
     character_CheckBlocker();
 
