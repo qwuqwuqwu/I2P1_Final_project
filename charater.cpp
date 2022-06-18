@@ -67,7 +67,7 @@ void character_init( const int nTerrainWidth ){
 
     for(int i = 0; i < 7; i++){
         char temp[ 50 ];
-        sprintf( temp, "./image/hp%d.png", i );
+        sprintf( temp, "./image/hp_full.png", i );
         e_pchara->img_store_HP[ i ] = al_load_bitmap( temp );
         assert( e_pchara->img_store_HP[ i ] != NULL );
         }
