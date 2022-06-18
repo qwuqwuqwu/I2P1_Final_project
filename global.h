@@ -59,6 +59,7 @@ enum EOrientationDirection {
 enum EMonsterState {
     EMS_ALIVE = 0,
     EMS_DIE = 1,
+    EMS_ATK = 2,
 };
 
 enum EMonsterType {
@@ -155,6 +156,10 @@ typedef struct _Mon {
     bool dir; // left: false, right: true
     int state; // the state of character
     int type;
+    int nAtkCursor; 		// attack cursor
+    int nAtkTime; 			// attack duration
+    int nAtkanime; 		// attack cursor
+    int nAtkanime_time;
     ALLEGRO_BITMAP *img_move[ 3 ];
     ALLEGRO_BITMAP *img_atk[ 3 ];
     int anime; // counting the time of animation
