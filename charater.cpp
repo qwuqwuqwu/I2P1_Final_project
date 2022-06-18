@@ -356,6 +356,10 @@ void charater_process(ALLEGRO_EVENT event){
 void charater_update(){
 //    printf( "charater_update\n" );
     // use the idea of finite state machine to deal with different state
+
+    if( e_pchara->state == ECS_INHALE ) {
+        return;
+    }
     if( key_state[ALLEGRO_KEY_W] ) {
         if( e_pchara->nJumpCount < MAX_COUNTOF_CONTINUOUS_JUMP ) {
             // 1. prevent second jump before certain time of the first jump
@@ -435,7 +439,7 @@ void charater_update(){
 }
 
 void character_gravity( int nGroundY ) {
-//    printf( "character_gravity\n" );
+    printf( "character_gravity\n" );
     if( e_pchara->state == ECS_MOVE || e_pchara->state == ECS_STOP || e_pchara->state == ECS_ATK || e_pchara->state == ECS_SLIDE ) {
         if( nGroundY == -2 ) {
             nGroundY = HEIGHT;
@@ -688,10 +692,11 @@ void character_StateChangeImage( void )
     case ECS_STOP:
         // change state
         if( g_LastState != NewState ) {
+            e_pchara->nMoveHeight = e_pchara->height;
+
             int nHeight = al_get_bitmap_height( e_pchara->img_move[ 0 ] );
             e_pchara->y -= ( nHeight - e_pchara->height ) / 2;
             e_pchara->height = nHeight;
-            e_pchara->nMoveHeight = e_pchara->height;
             e_pchara->nMoveY = e_pchara->y;
 
             if( e_pchara->dir == false ) {
@@ -711,10 +716,10 @@ void character_StateChangeImage( void )
     case ECS_MOVE:
         // change state
         if( g_LastState != NewState ) {
+            e_pchara->nMoveHeight = e_pchara->height;
             int nHeight = al_get_bitmap_height( e_pchara->img_move[ 0 ] );
             e_pchara->y -= ( nHeight - e_pchara->height ) / 2;
             e_pchara->height = nHeight;
-            e_pchara->nMoveHeight = e_pchara->height;
             e_pchara->nMoveY = e_pchara->y;
 
             if( e_pchara->dir == false ) {
@@ -731,11 +736,13 @@ void character_StateChangeImage( void )
         }
         // change substate
         if( g_LastState == NewState && g_nLastSubState != e_pchara->nSubState ) {
+            printf( "height is %d\n", e_pchara->height );
+            e_pchara->nMoveHeight = e_pchara->height;
             int nHeight = al_get_bitmap_height( e_pchara->img_move[ e_pchara->nSubState ] );
             e_pchara->y -= ( nHeight - e_pchara->height ) / 2;
             e_pchara->height = nHeight;
-            e_pchara->nMoveHeight = e_pchara->height;
             e_pchara->nMoveY = e_pchara->y;
+            printf( "New height is %d\n", e_pchara->height );
 
             if( e_pchara->dir == false ) {
                 int nWidth = al_get_bitmap_width( e_pchara->img_move[ e_pchara->nSubState ] );
@@ -899,8 +906,17 @@ void character_attack( void )
 void character_draw()
 {
 //    printf( "character_draw\n" );
+//    printf( "e_pchara->substate = %d, e_pchara->y = %d, e_pchara->s = %d, e_pchara->height = %d, e_pchara->nMoveHeight = %d\n",
+//           e_pchara->nSubState, e_pchara->y, e_pchara->y + ( e_pchara->height + e_pchara->nMoveHeight ) / 2, e_pchara->height, e_pchara->nMoveHeight );
 
-    int nGroundY = FindAndDrawClosestGroundY( e_pchara->x, e_pchara->x + e_pchara->width, e_pchara->y + ( e_pchara->height + e_pchara->nMoveHeight ) / 2 );
+    int nTemp = 0;
+    if( e_pchara->height > e_pchara->nMoveHeight ) {
+        nTemp = e_pchara->y + ( e_pchara->height + e_pchara->nMoveHeight ) / 2;
+    }
+    else {
+        nTemp = e_pchara->y + e_pchara->height;
+    }
+    int nGroundY = FindAndDrawClosestGroundY( e_pchara->x, e_pchara->x + e_pchara->width, nTemp );
 
     character_gravity( nGroundY );
 
@@ -910,7 +926,7 @@ void character_draw()
     character_attack();
 
     // check monster alive?
-    //charater_update2();
+//    charater_update2();
 
     character_StateChangeImage();
 
