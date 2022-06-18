@@ -501,7 +501,7 @@ void object_draw( void ){
     }
 
     BombUpdate();
-    printf( "bomb state = %d\n", g_Bomb.state );
+//    printf( "bomb state = %d\n", g_Bomb.state );
     if( g_Bomb.state == EBS_FLY ) {
         if( g_Bomb.dir == false ) {
             al_draw_bitmap( g_Bomb.img, g_Bomb.x, g_Bomb.y, 0 );

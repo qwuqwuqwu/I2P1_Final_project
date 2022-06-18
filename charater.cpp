@@ -20,8 +20,6 @@ float g_CameraPosition = 0.0;
 ALLEGRO_TRANSFORM camera;
 int g_nTerrainWidth = 0;
 
-
-
 ECharacterState g_LastState;
 int g_nLastSubState;
 
@@ -31,9 +29,9 @@ int g_nCDTime = 20;
 int camera_move = 1;
 
 int g_nWordHeight = 0;
-bool g_Injure = false;
-int g_InjureCursor = 0;
-int g_InjureTime = 100;
+bool g_bImmortal = false;
+int g_nImortalCursor = 0;
+int g_nImortalTime = 120;
 
 void CameraUpdate( float *CamPosition, int x, int y, int width, int height, int nMoveWidth )
 {
@@ -281,6 +279,8 @@ void character_init( const int nTerrainWidth ){
     e_pchara->nSlideTime = 20;
     e_pchara->nInhaleCursor = 0;
     e_pchara->nInhaleTime = 10;
+    e_pchara->nInjuredCursor = 0;
+    e_pchara->nInjuredTime = 120;
 
     e_pchara->x0 = e_pchara->x;
     e_pchara->nDeltaX = 0;
@@ -320,15 +320,10 @@ void charater_process(ALLEGRO_EVENT event){
                 }
             }
 
-            if( g_Injure == true ) {
-                g_InjureCursor = ( g_InjureCursor + 1 ) % g_InjureTime;
-
-                if( g_InjureCursor == 0 ) {
-                    g_Injure = false;
-                }
-                else if( g_InjureCursor == 2 ) {
-                    e_pchara->hp -=1;
-                    printf("%d\n",e_pchara->hp);
+            if( g_bImmortal == true ) {
+                g_nImortalCursor = ( g_nImortalCursor + 1 ) % g_nImortalTime;
+                if( g_nImortalCursor == 0 ) {
+                    g_bImmortal = false;
                 }
             }
 
@@ -382,13 +377,27 @@ void charater_process(ALLEGRO_EVENT event){
                 }
             }
             if( e_pchara->state == ECS_INJURED ) {
-                e_pchara->anime++;
-                e_pchara->anime %= e_pchara->anime_time;
+                e_pchara->nInjuredCursor++;
+                e_pchara->nInjuredCursor %= e_pchara->nInjuredTime;
+                printf( "e_pchara->nInjuredCursor = %d\n", e_pchara->nInjuredCursor );
 
-                if( e_pchara->anime == 0 ) {
+                if( e_pchara->nInjuredCursor == 0 ) {
                     e_pchara->state = ECS_STOP;
                 }
             }
+
+//            if( g_bInjure == true ) {
+//                g_InjureCursor = ( g_InjureCursor + 1 ) % g_InjureTime;
+//
+//                if( g_InjureCursor == 0 ) {
+//                    g_Injure = false;
+//                }
+//                else if( g_InjureCursor == 2 ) {
+//                    e_pchara->hp -=1;
+//                    printf("%d\n",e_pchara->hp);
+//                }
+//            }
+
         }
     // process the keyboard event
     }
@@ -593,12 +602,14 @@ void character_eat( void )
     Eat( &CharacterPos, &nFoodCount, &nCandyCount );
     if( nFoodCount != 0 ) {
         // should return to full blood
-        e_pchara->hp = HP;
+        e_pchara->hp = HP - 1;
         printf( "Full blood!\n" );
     }
 
     if( nCandyCount != 0 ) {
         // immortal status
+        g_bImmortal = true;
+        g_nImortalCursor = 0;
     }
 }
 
@@ -975,7 +986,7 @@ void character_StateChangeImage( void )
 
     g_LastState = NewState;
     g_nLastSubState = e_pchara->nSubState;
-//    printf( "State = %d, SubState = %d\n", g_LastState, g_nLastSubState );
+    printf( "%d %d | ", g_LastState, g_nLastSubState );
 //    printf( "Character at x = %d, y = %d\n", e_pchara->x, e_pchara->y );
 //    printf( "character_StateChangeImage\n" );
 }
@@ -1065,6 +1076,24 @@ void character_draw()
     //    printf( "character_draw\n" );
 
     // with the state, draw corresponding image
+
+    if( g_bImmortal == true ) {
+        if( g_nImortalCursor % 5 > 2 ) {
+            charactor_show();
+        }
+    }
+    else {
+        charactor_show();
+    }
+
+
+    al_draw_bitmap( e_pchara->img_atkWord, g_CameraPosition, HEIGHT - g_nWordHeight, 0 );
+
+//    printf( "character_draw\n" );
+}
+
+void charactor_show( void )
+{
     switch( e_pchara->state ) {
     case ECS_STOP:
         if( e_pchara->dir ) {
@@ -1144,10 +1173,9 @@ void character_draw()
 
     case ECS_INJURED:
         //printf("%d\n",e_pchara->anime);
-        g_Injure = true;
-        if(e_pchara->anime<5){
+        if( e_pchara->nInjuredCursor < 5 ) {
             if( e_pchara->dir ) {
-                al_draw_bitmap( e_pchara->img_move[ e_pchara->nSubState ], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL);
+                al_draw_bitmap( e_pchara->img_move[ e_pchara->nSubState ], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL );
             }
             else {
                 al_draw_bitmap( e_pchara->img_move[ e_pchara->nSubState ], e_pchara->x, e_pchara->y, 0);
@@ -1162,10 +1190,9 @@ void character_draw()
         break;
     } // end of switch
 
-    al_draw_bitmap( e_pchara->img_atkWord, g_CameraPosition, HEIGHT - g_nWordHeight, 0 );
-
-//    printf( "character_draw\n" );
 }
+
+
 void character_destory(){
 //    printf( "character_destory\n" );
    // al_destroy_bitmap(e_pchara->img_atk[0]);
@@ -1270,8 +1297,17 @@ void charater_update2()
             MonsterPosNoAtk.s = e_monster[ i ].y + e_monster[ i ].height - 8;
 
             if( CheckOverlap( &CharacterPosNoAtk, &MonsterPosNoAtk ) == true ) {
-                if( e_pchara->state != ECS_ATK || e_pchara->state != ECS_INHALE ||e_pchara->state != ECS_SLIDE){
+                if( g_bImmortal == true || e_pchara->state == ECS_ATK || e_pchara->state == ECS_INHALE || e_pchara->state == ECS_SLIDE ) {
+                    // do nothing
+                }
+                else {
+                    printf( "%d ", e_pchara->state );
+                    g_bImmortal = true;
+                    g_nImortalCursor = 0;
                     e_pchara->state = ECS_INJURED;
+                    e_pchara->nInjuredCursor = 0;
+                    e_pchara->hp--;
+                    printf( "yo\n" );
                 }
             }
 

@@ -5,6 +5,7 @@ void character_init( const int nTerrainWidth );
 void charater_process( ALLEGRO_EVENT event );
 void charater_update();
 void character_predraw( int nGroundY );
+void charactor_show( void );
 void character_draw();
 void character_destory();
 

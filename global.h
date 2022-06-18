@@ -112,6 +112,8 @@ typedef struct _Character {
     int nInhaleTime; 		// inhale duration
 	int nTransformCursor;	// transform cursor
     int nTransformTime;		// transform duration
+    int nInjuredCursor;     // injured cursor
+    int nInjuredTime;       // injured time
 
 	// moving variable
     int x0;
