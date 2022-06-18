@@ -12,6 +12,7 @@
 
 #define GAME_TERMINATE ( -1 )
 #define NUMOF_TRANSFORM_IMG ( 3 )
+#define HP          ( 6 )
 
 
 // note that you can't assign initial value here!
@@ -142,7 +143,7 @@ typedef struct _Character {
     ALLEGRO_BITMAP *img_store_slide[ 2 * ESA_NUM ];
     ALLEGRO_BITMAP *img_store_transform[ NUMOF_TRANSFORM_IMG * ESA_NUM ];
     ALLEGRO_BITMAP *img_store_AtkWord[ ESA_NUM ];
-    ALLEGRO_BITMAP *img_store_HP[ 10 ];
+    ALLEGRO_BITMAP *img_store_HP[ HP + 1 ];
 
     ALLEGRO_SAMPLE_INSTANCE *atk_Sound;
 } Character;

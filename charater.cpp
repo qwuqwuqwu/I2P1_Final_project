@@ -7,7 +7,6 @@
 
 #define SLIDE_RATE  ( 3 )
 #define ATK_RATE    ( 3 )
-#define HP          ( 7 )
 
 //note
 
@@ -77,12 +76,13 @@ void character_init( const int nTerrainWidth ){
         assert( e_pchara->img_inhale[ i ] != NULL );
     }
 
-    for(int i = 0; i < 7; i++){
+    // hp
+    for(int i = 0; i <= HP; i++){
         char temp[ 50 ];
         sprintf( temp, "./image/hp%d.png", i );
         e_pchara->img_store_HP[ i ] = al_load_bitmap( temp );
         assert( e_pchara->img_store_HP[ i ] != NULL );
-        }
+    }
 
     for( int i = 0; i < ESA_NUM; i++ ){
         printf( "i = %d\n", i );
@@ -385,19 +385,6 @@ void charater_process(ALLEGRO_EVENT event){
                     e_pchara->state = ECS_STOP;
                 }
             }
-
-//            if( g_bInjure == true ) {
-//                g_InjureCursor = ( g_InjureCursor + 1 ) % g_InjureTime;
-//
-//                if( g_InjureCursor == 0 ) {
-//                    g_Injure = false;
-//                }
-//                else if( g_InjureCursor == 2 ) {
-//                    e_pchara->hp -=1;
-//                    printf("%d\n",e_pchara->hp);
-//                }
-//            }
-
         }
     // process the keyboard event
     }
@@ -602,7 +589,7 @@ void character_eat( void )
     Eat( &CharacterPos, &nFoodCount, &nCandyCount );
     if( nFoodCount != 0 ) {
         // should return to full blood
-        e_pchara->hp = HP - 1;
+        e_pchara->hp = HP;
         printf( "Full blood!\n" );
     }
 
@@ -1025,6 +1012,17 @@ void character_attack( void )
 //    printf( "character_attack\n" );
 }
 
+void character_drawhp( void )
+{
+    if(e_pchara->hp >=6){al_draw_bitmap(e_pchara->img_store_HP[ 6 ],g_CameraPosition+280, HEIGHT - g_nWordHeight-20, 0);}
+	else if(e_pchara->hp ==5){al_draw_bitmap(e_pchara->img_store_HP[ 5 ],g_CameraPosition+280, HEIGHT - g_nWordHeight-20, 0);}
+	else if(e_pchara->hp ==4){al_draw_bitmap(e_pchara->img_store_HP[ 4 ],g_CameraPosition+280, HEIGHT - g_nWordHeight-20, 0);}
+    else if(e_pchara->hp ==3){al_draw_bitmap(e_pchara->img_store_HP[ 3 ],g_CameraPosition+280, HEIGHT - g_nWordHeight-20, 0);}
+    else if(e_pchara->hp ==2){al_draw_bitmap(e_pchara->img_store_HP[ 2 ],g_CameraPosition+280, HEIGHT - g_nWordHeight-20, 0);}
+    else if(e_pchara->hp ==1){al_draw_bitmap(e_pchara->img_store_HP[ 1 ],g_CameraPosition+280, HEIGHT - g_nWordHeight-20, 0);}
+    else {al_draw_bitmap(e_pchara->img_store_HP[ 0 ],g_CameraPosition+280, HEIGHT - g_nWordHeight-20, 0);}
+}
+
 void character_draw()
 {
 //    printf( "character_draw\n" );
@@ -1064,15 +1062,8 @@ void character_draw()
     	al_use_transform( &camera );
 	}
 
-	if(e_pchara->hp >=6){al_draw_bitmap(e_pchara->img_store_HP[6],g_CameraPosition+280, HEIGHT - g_nWordHeight-20, 0);}
-	else if(e_pchara->hp ==5){al_draw_bitmap(e_pchara->img_store_HP[5],g_CameraPosition+280, HEIGHT - g_nWordHeight-20, 0);}
-	else if(e_pchara->hp ==4){al_draw_bitmap(e_pchara->img_store_HP[4],g_CameraPosition+280, HEIGHT - g_nWordHeight-20, 0);}
-    else if(e_pchara->hp ==3){al_draw_bitmap(e_pchara->img_store_HP[3],g_CameraPosition+280, HEIGHT - g_nWordHeight-20, 0);}
-    else if(e_pchara->hp ==2){al_draw_bitmap(e_pchara->img_store_HP[2],g_CameraPosition+280, HEIGHT - g_nWordHeight-20, 0);}
-    else if(e_pchara->hp ==1){al_draw_bitmap(e_pchara->img_store_HP[1],g_CameraPosition+280, HEIGHT - g_nWordHeight-20, 0);}
-    else {al_draw_bitmap(e_pchara->img_store_HP[0],g_CameraPosition+280, HEIGHT - g_nWordHeight-20, 0);}
 
-
+    character_drawhp();
     //    printf( "character_draw\n" );
 
     // with the state, draw corresponding image
@@ -1284,8 +1275,7 @@ void character_destory2()
 void charater_update2()
 {
     for( int i = 0; i < MONSTER_NUMBERS; i++ ) {
-        if( e_monster[ i ].state == EMS_ALIVE )
-        {
+        if( e_monster[ i ].state == EMS_ALIVE ) {
             Position CharacterPosNoAtk,MonsterPosNoAtk;
             CharacterPosNoAtk.w = e_pchara->x;
             CharacterPosNoAtk.e = e_pchara->x + e_pchara->width;
@@ -1313,7 +1303,7 @@ void charater_update2()
 
             if( e_monster[ i ].hp <= 0 ) {
                 //如果死掉
-                al_destroy_bitmap( e_monster[ i ].img_move[ 0 ]);
+                al_destroy_bitmap( e_monster[ i ].img_move[ 0 ] );
                 e_monster[ i ].state = EMS_DIE;
             }
         }
