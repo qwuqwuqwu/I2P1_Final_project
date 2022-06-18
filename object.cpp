@@ -13,6 +13,144 @@ int g_nGroundCount = 0;
 
 ALLEGRO_BITMAP *Ground[ MAX_COUNTOF_GROUND ] = { NULL };
 
+bool CheckOverlap( const Position *plhs, const Position *prhs ) {
+//    printf( "character_checkOverlap\n" );
+    if( ( plhs->w < prhs->w && plhs->e < prhs->w ) ||
+        ( plhs->w > prhs->e && plhs->e > prhs->e ) ) {
+//            printf( "character_checkOverlap\n" );
+            return false;
+    }
+
+    if( ( plhs->n < prhs->n && plhs->s < prhs->n ) ||
+        ( plhs->n > prhs->s && plhs->s > prhs->s ) ) {
+//            printf( "character_checkOverlap\n" );
+            return false;
+    }
+
+//    printf( "character_checkOverlap\n" );
+    return true;
+}
+
+int CompSide( const void * lhs, const void *rhs )
+{
+    int *LHS = ( int * )lhs;
+    int *RHS = ( int * )rhs;
+    if( *LHS < *RHS ) {
+        return -1;
+    }
+    else if( *LHS > *RHS ) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+bool AdvCheckOverlap( const Position *plhs, const Position *prhs, EOrientationDirection *pOrientation, int *pClampValue ) {
+//    printf( "character_checkOverlap\n" );
+    if( ( plhs->w < prhs->w && plhs->e < prhs->w ) ||
+        ( plhs->w > prhs->e && plhs->e > prhs->e ) ) {
+//            printf( "character_checkOverlap\n" );
+            return false;
+    }
+
+    if( ( plhs->n < prhs->n && plhs->s < prhs->n ) ||
+        ( plhs->n > prhs->s && plhs->s > prhs->s ) ) {
+//            printf( "character_checkOverlap\n" );
+            return false;
+    }
+
+    // vertical
+    int nNS[ 4 ] = { plhs->n, plhs->s, prhs->n, prhs->s };
+    qsort( nNS, 4, sizeof( int ), CompSide );
+
+    // horizontal
+    int nWE[ 4 ] = { plhs->w, plhs->e, prhs->w, prhs->e };
+    qsort( nWE, 4, sizeof( int ), CompSide );
+
+    // clamp we
+    if( ( nNS[ 2 ] - nNS[ 1 ] ) > ( nWE[ 2 ] - nWE[ 1 ] ) ) {
+        // clamp e
+        if( plhs->e >= prhs->w && plhs->e < prhs->e ) {
+            *pOrientation =  EOD_E;
+            *pClampValue = prhs->w - 2;
+        }
+        // clamp w
+        else {
+            *pOrientation =  EOD_W;
+            *pClampValue = prhs->e + 2;
+        }
+    }
+    // clamp ns
+    else {
+        // clamp s
+        if( plhs->s >= prhs->n && plhs->s < prhs->s ) {
+            *pOrientation =  EOD_S;
+            *pClampValue = prhs->n - 2;
+        }
+        // clamp n
+        else {
+            *pOrientation =  EOD_N;
+            *pClampValue = prhs->s + 2;
+        }
+    }
+
+
+    return true;
+}
+
+bool CheckBlocker( Position *pPos, const bool bDir )
+{
+    // assume not inside the blocker
+    bool bClamped = false;
+    int nWidth = pPos->e - pPos->w;
+    int nHeight = pPos->s - pPos->n;
+
+    for( int i = 0; i < g_nGroundCount; i++ ) {
+        Position Ground;
+        Ground.w = g_Ground[ i ].x;
+        Ground.e = g_Ground[ i ].x + g_Ground[ i ].nWidth;
+        Ground.n = g_Ground[ i ].y;
+        Ground.s = g_Ground[ i ].y + g_Ground[ i ].nHeight;
+
+        EOrientationDirection nOrientation = EOD_E;
+        int nClampValue = 0;
+
+        bool bOverlap = AdvCheckOverlap( pPos, &Ground, &nOrientation, &nClampValue );
+
+        if( bOverlap == true ) {
+            bClamped = true;
+            printf( "******** clamped dir = %d, value = %d\n", nOrientation, nClampValue );
+            switch( nOrientation ) {
+            case EOD_E:
+                pPos->e = nClampValue;
+                pPos->w = pPos->e - nWidth;
+                break;
+
+            case EOD_S:
+                pPos->s = nClampValue;
+                pPos->n = pPos->s - nHeight;
+                break;
+
+            case EOD_W:
+                pPos->w = nClampValue;
+                pPos->e = pPos->w + nWidth;
+                break;
+
+            case EOD_N:
+                pPos->n = nClampValue;
+                pPos->s = pPos->n + nHeight;
+                break;
+
+            default:
+                assert( false );
+                break;
+            }
+        }
+    }
+    return bClamped;
+}
+
 int FindAndDrawClosestGroundY( const int w, const int e, const int s ){
     // find closest lower ground
     int nFoundGroundIdx[ MAX_COUNTOF_FOUNDGROUND ] = { 0 };
@@ -34,7 +172,7 @@ int FindAndDrawClosestGroundY( const int w, const int e, const int s ){
 //                    g_Ground[ nFoundGroundIdx[ i ] ].nWidth, g_Ground[ nFoundGroundIdx[ i ] ].nHeight );
 //        }
 //    }
-    return nGroundY;
+    return nGroundY - 1;
 }
 
 int FindClosestGround( int *pGroundIdx, int nGroundCount, const int s ) {

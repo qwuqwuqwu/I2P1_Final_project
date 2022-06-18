@@ -42,6 +42,15 @@ enum ECharacterState {
 	ECS_INJURED = 6,
 };
 
+// the orientation
+enum EOrientationDirection {
+    EOD_E = 0,
+    EOD_S = 1,
+    EOD_W = 2,
+    EOD_N = 3,
+    EOC_NUM = 4,
+};
+
 // the state of monster
 enum EMonsterState {
     EMS_ALIVE = 0,
@@ -52,7 +61,9 @@ typedef struct _Character {
 	bool dir; // left: false, right: true
     int x, y; // the position of image
     int width, height; // the width and height of image
-    int nTestWidth;
+    int nMoveWidth;
+    int nMoveHeight;
+    int nMoveY;
     ECharacterState state; // the state of character
     int nSubState;
 	int hp;
@@ -78,6 +89,9 @@ typedef struct _Character {
     float vy;
     int nJumpCount;
     float FallingTick;
+
+    int nSlideRate;
+    int nAtkRate;
 
     // bit map
     ALLEGRO_BITMAP *img_inhale[ 2 ];

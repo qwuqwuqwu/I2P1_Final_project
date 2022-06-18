@@ -1,4 +1,9 @@
 #include "global.h"
+bool CheckOverlap( const Position *plhs, const Position *prhs );
+int CompSide( const void * lhs, const void *rhs );
+int CompSide( const void * lhs, const void *rhs );
+bool AdvCheckOverlap( const Position *plhs, const Position *prhs, EOrientationDirection *pOrientation, int *pClampValue );
+bool CheckBlocker( Position *pPos, const bool bDir );
 int FindAndDrawClosestGroundY( const int w, const int e, const int s );
 int FindClosestGround( int *pGroundIdx, int nGroundCount, const int s );
 bool IsInGroundRange( int nGroundIdx, const int w, const int e );

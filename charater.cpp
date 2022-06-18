@@ -4,6 +4,9 @@
 #define MAX_COUNTOF_CONTINUOUS_JUMP ( 2 )
 #define JUMP_VY ( -90 )
 #define MONSTER_NUMBERS ( 3 )
+
+#define SLIDE_RATE  ( 3 )
+#define ATK_RATE    ( 3 )
 //note
 
 
@@ -24,14 +27,14 @@ int g_nCDCursor = 0;
 int g_nCDTime = 20;
 int camera_move = 1;
 
-void CameraUpdate( float *CamPosition, int x, int y, int width, int height, int nTestWidth )
+void CameraUpdate( float *CamPosition, int x, int y, int width, int height, int nMoveWidth )
 {
 //    printf( "CameraUpdate\n" );
     if( e_pchara->dir == false && ( e_pchara->state == ECS_ATK || e_pchara->state == ECS_SLIDE ) ) {
-        *CamPosition = -( WIDTH / 2 ) + ( x + width - nTestWidth / 2 );
+        *CamPosition = -( WIDTH / 2 ) + ( x + width - nMoveWidth / 2 );
     }
     else {
-        *CamPosition = -( WIDTH / 2 ) + ( x + nTestWidth / 2 );
+        *CamPosition = -( WIDTH / 2 ) + ( x + nMoveWidth / 2 );
     }
 
 
@@ -212,10 +215,12 @@ void character_init( const int nTerrainWidth ){
 
     // initial the geometric information of character
     e_pchara->width = al_get_bitmap_width(e_pchara->img_move[0]);
-    e_pchara->nTestWidth = e_pchara->width;
+    e_pchara->nMoveWidth = e_pchara->width;
     e_pchara->height = al_get_bitmap_height(e_pchara->img_move[0]);
+    e_pchara->nMoveHeight = e_pchara->height;
     e_pchara->x = WIDTH/2-100; // todo: no magical number here!
     e_pchara->y = HEIGHT/2;
+    e_pchara->nMoveY = e_pchara->y;
     e_pchara->dir = false;
     e_pchara->hp = 3;
 
@@ -238,6 +243,8 @@ void character_init( const int nTerrainWidth ){
     e_pchara->vy = 0.0;
     e_pchara->FallingTick = 0.0;
     e_pchara->nJumpCount = 0;
+    e_pchara->nSlideRate = SLIDE_RATE;
+    e_pchara->nAtkRate = ATK_RATE;
 
     // terrain width
     g_nTerrainWidth = nTerrainWidth;
@@ -377,6 +384,7 @@ void charater_update(){
         if( g_bCDing == false && e_pchara->state != ECS_ATK ) {
             e_pchara->x0 = e_pchara->x;
             e_pchara->state = ECS_ATK;
+            e_pchara->nAtkRate = ATK_RATE;
         }
     }
     // slide c
@@ -384,6 +392,7 @@ void charater_update(){
         if( g_bCDing == false && e_pchara->state != ECS_SLIDE ) {
             e_pchara->x0 = e_pchara->x;
             e_pchara->state = ECS_SLIDE;
+            e_pchara->nSlideRate = SLIDE_RATE;
         }
     }
     // inhale
@@ -400,7 +409,7 @@ void charater_update(){
 void character_gravity( int nGroundY ) {
 //    printf( "character_gravity\n" );
     if( e_pchara->state == ECS_MOVE || e_pchara->state == ECS_STOP || e_pchara->state == ECS_ATK || e_pchara->state == ECS_SLIDE ) {
-        if( nGroundY == -1 ) {
+        if( nGroundY == -2 ) {
             nGroundY = HEIGHT;
         }
 
@@ -414,8 +423,8 @@ void character_gravity( int nGroundY ) {
             + ( int )(e_pchara->vy * e_pchara->FallingTick + ( 0.5 * g_Gravity * ( e_pchara->FallingTick * e_pchara->FallingTick ) ) );
 
 
-        if( ( e_pchara->y + e_pchara->height ) >= nGroundY ) {
-            e_pchara->y = nGroundY - e_pchara->height;
+        if( ( e_pchara->y + ( e_pchara->height + e_pchara->nMoveHeight ) / 2 ) >= nGroundY ) {
+            e_pchara->y = nGroundY - ( e_pchara->height + e_pchara->nMoveHeight ) / 2;
             e_pchara->y0 = e_pchara->y;
             e_pchara->vy = 0.0;
             e_pchara->FallingTick = 0;
@@ -430,6 +439,7 @@ void character_gravity( int nGroundY ) {
 
 void character_BoundryCheck( void ) {
 //    printf( "character_BoundryCheck\n" );
+
     if( e_pchara->state == ECS_ATK || e_pchara->state == ECS_SLIDE ) {
         return;
     }
@@ -450,22 +460,38 @@ void character_BoundryCheck( void ) {
 //    printf( "character_BoundryCheck\n" );
 }
 
-bool character_checkOverlap( const Position *plhs, const Position *prhs ) {
-//    printf( "character_checkOverlap\n" );
-    if( ( plhs->w < prhs->w && plhs->e < prhs->w ) ||
-        ( plhs->w > prhs->e && plhs->e > prhs->e ) ) {
-//            printf( "character_checkOverlap\n" );
-            return false;
+void character_CheckBlocker( void )
+{
+    if( e_pchara->state == ECS_ATK || e_pchara->state == ECS_SLIDE ) {
+        return;
     }
 
-    if( ( plhs->n < prhs->n && plhs->s < prhs->n ) ||
-        ( plhs->n > prhs->s && plhs->s > prhs->s ) ) {
-//            printf( "character_checkOverlap\n" );
-            return false;
+    Position pos;
+    if( e_pchara->dir == false ) {
+        pos.e = e_pchara->x + e_pchara->width;
+        pos.w = pos.e - e_pchara->nMoveWidth;
+    }
+    else {
+        pos.w = e_pchara->x;
+        pos.e = e_pchara->x + e_pchara->nMoveWidth;
     }
 
-//    printf( "character_checkOverlap\n" );
-    return true;
+    pos.n = e_pchara->y + e_pchara->height / 2 - e_pchara->nMoveHeight / 2;
+    pos.s = e_pchara->y + e_pchara->height / 2 + e_pchara->nMoveHeight / 2;
+
+    bool bClamped = CheckBlocker( &pos, e_pchara->dir );
+
+    // update x, y
+    if( bClamped == true ) {
+        if( e_pchara->y < pos.n ) {
+            e_pchara->vy = 0;
+        }
+        e_pchara->x = pos.w;
+        e_pchara->y = pos.n;
+        e_pchara->nSlideRate = 0;
+        e_pchara->nAtkRate = 0;
+    }
+
 }
 
 void character_checkTransform( void ) {
@@ -494,7 +520,7 @@ void character_checkTransform( void ) {
             MonsterPos.n = e_monster[ i ].y;
             MonsterPos.s = e_monster[ i ].y + e_monster[ i ].height;
 
-            if( character_checkOverlap( &CharacterPos, &MonsterPos ) == true ) {
+            if( CheckOverlap( &CharacterPos, &MonsterPos ) == true ) {
                 e_pchara->state = ECS_TRANSFORMING;
                 e_pchara->nTransformCursor = 0;
                 e_pchara->NextSpecailAtk = ( ESpecialAtk )( i + 1 );
@@ -529,7 +555,7 @@ void character_StateChangeImage( void )
         for(int j = 0; j < 4; j++){
             e_pchara->img_move[ j ] = e_pchara->img_store_move[ 4 * e_pchara->NowSpecialAtk + j ];
         }
-        e_pchara->nTestWidth = al_get_bitmap_width( e_pchara->img_move[ 0 ] );
+        e_pchara->nMoveWidth = al_get_bitmap_width( e_pchara->img_move[ 0 ] );
 
         // slide
         for(int j = 0; j < 2; j++){
@@ -635,13 +661,21 @@ void character_StateChangeImage( void )
         // change state
         if( g_LastState != NewState ) {
             int nHeight = al_get_bitmap_height( e_pchara->img_move[ 0 ] );
-            e_pchara->y -= nHeight - e_pchara->height;
+            e_pchara->y -= ( nHeight - e_pchara->height ) / 2;
             e_pchara->height = nHeight;
+            e_pchara->nMoveHeight = e_pchara->height;
+            e_pchara->nMoveY = e_pchara->y;
 
             if( e_pchara->dir == false ) {
                 int nWidth = al_get_bitmap_width( e_pchara->img_move[ 0 ] );
                 e_pchara->x -= nWidth - e_pchara->width;
                 e_pchara->width = nWidth;
+                e_pchara->nMoveWidth = e_pchara->width;
+            }
+            else {
+                int nWidth = al_get_bitmap_width( e_pchara->img_move[ 0 ] );
+                e_pchara->width = nWidth;
+                e_pchara->nMoveWidth = e_pchara->width;
             }
         }
         break;
@@ -650,14 +684,42 @@ void character_StateChangeImage( void )
         // change state
         if( g_LastState != NewState ) {
             int nHeight = al_get_bitmap_height( e_pchara->img_move[ 0 ] );
-            e_pchara->y -= nHeight - e_pchara->height;
+            e_pchara->y -= ( nHeight - e_pchara->height ) / 2;
             e_pchara->height = nHeight;
+            e_pchara->nMoveHeight = e_pchara->height;
+            e_pchara->nMoveY = e_pchara->y;
+
+            if( e_pchara->dir == false ) {
+                int nWidth = al_get_bitmap_width( e_pchara->img_move[ 0 ] );
+                e_pchara->x -= nWidth - e_pchara->width;
+                e_pchara->width = nWidth;
+                e_pchara->nMoveWidth = e_pchara->width;
+            }
+            else {
+                int nWidth = al_get_bitmap_width( e_pchara->img_move[ 0 ] );
+                e_pchara->width = nWidth;
+                e_pchara->nMoveWidth = e_pchara->width;
+            }
         }
         // change substate
         if( g_LastState == NewState && g_nLastSubState != e_pchara->nSubState ) {
             int nHeight = al_get_bitmap_height( e_pchara->img_move[ e_pchara->nSubState ] );
-            e_pchara->y -= nHeight - e_pchara->height;
+            e_pchara->y -= ( nHeight - e_pchara->height ) / 2;
             e_pchara->height = nHeight;
+            e_pchara->nMoveHeight = e_pchara->height;
+            e_pchara->nMoveY = e_pchara->y;
+
+            if( e_pchara->dir == false ) {
+                int nWidth = al_get_bitmap_width( e_pchara->img_move[ e_pchara->nSubState ] );
+                e_pchara->x -= nWidth - e_pchara->width;
+                e_pchara->width = nWidth;
+                e_pchara->nMoveWidth = e_pchara->width;
+            }
+            else {
+                int nWidth = al_get_bitmap_width( e_pchara->img_move[ e_pchara->nSubState ] );
+                e_pchara->width = nWidth;
+                e_pchara->nMoveWidth = e_pchara->width;
+            }
         }
         break;
 
@@ -665,14 +727,14 @@ void character_StateChangeImage( void )
         // change state
         if( g_LastState != NewState ) {
             int nHeight = al_get_bitmap_height( e_pchara->img_inhale[ 0 ] );
-            e_pchara->y -= nHeight - e_pchara->height;
+            e_pchara->y -= ( nHeight - e_pchara->height ) / 2;
             e_pchara->height = nHeight;
         }
 
         // change substate
         if( g_LastState == NewState && g_nLastSubState != e_pchara->nSubState ) {
             int nHeight = al_get_bitmap_height( e_pchara->img_inhale[ e_pchara->nSubState ] );
-            e_pchara->y -= nHeight - e_pchara->height;
+            e_pchara->y -= ( nHeight - e_pchara->height ) / 2;
             e_pchara->height = nHeight;
         }
 //        printf( "New height is %d\n", e_pchara->height );
@@ -682,13 +744,13 @@ void character_StateChangeImage( void )
         // change state
         if( g_LastState != NewState ) {
             int nHeight = al_get_bitmap_height( e_pchara->img_transform[ 0 ] );
-            e_pchara->y -= nHeight - e_pchara->height;
+            e_pchara->y -= ( nHeight - e_pchara->height ) / 2;
             e_pchara->height = nHeight;
         }
         // change substate
         if( g_LastState == NewState && g_nLastSubState != e_pchara->nSubState ) {
             int nHeight = al_get_bitmap_height( e_pchara->img_transform[ e_pchara->nSubState ] );
-            e_pchara->y -= nHeight - e_pchara->height;
+            e_pchara->y -= ( nHeight - e_pchara->height ) / 2;
             e_pchara->height = nHeight;
         }
         break;
@@ -697,7 +759,7 @@ void character_StateChangeImage( void )
         // change state
         if( g_LastState != NewState ) {
             int nHeight = al_get_bitmap_height( e_pchara->img_atk[ 0 ] );
-            e_pchara->y -= nHeight - e_pchara->height;
+            e_pchara->y -= ( nHeight - e_pchara->height ) / 2;
             e_pchara->height = nHeight;
 
             if( e_pchara->dir == false ) {
@@ -705,17 +767,25 @@ void character_StateChangeImage( void )
                 e_pchara->x0 -= nWidth - e_pchara->width;
                 e_pchara->width = nWidth;
             }
+            else {
+                int nWidth = al_get_bitmap_width( e_pchara->img_atk[ 0 ] );
+                e_pchara->width = nWidth;
+            }
         }
 
         // change substate
         if( g_LastState == NewState && g_nLastSubState != e_pchara->nSubState ) {
             int nHeight = al_get_bitmap_height( e_pchara->img_atk[ e_pchara->nSubState ] );
-            e_pchara->y -= nHeight - e_pchara->height;
+            e_pchara->y -= ( nHeight - e_pchara->height ) / 2;
             e_pchara->height = nHeight;
 
             if( e_pchara->dir == false ) {
-                int nWidth = al_get_bitmap_width( e_pchara->img_atk[ 1 ] );
+                int nWidth = al_get_bitmap_width( e_pchara->img_atk[ e_pchara->nSubState ] );
                 e_pchara->x0 -= nWidth - e_pchara->width;
+                e_pchara->width = nWidth;
+            }
+            else {
+                int nWidth = al_get_bitmap_width( e_pchara->img_atk[ e_pchara->nSubState ] );
                 e_pchara->width = nWidth;
             }
         }
@@ -727,7 +797,7 @@ void character_StateChangeImage( void )
         // change state
         if( g_LastState != NewState ) {
             int nHeight = al_get_bitmap_height( e_pchara->img_slide[ 0 ] );
-            e_pchara->y -= nHeight - e_pchara->height;
+            e_pchara->y -= ( nHeight - e_pchara->height );
             e_pchara->height = nHeight;
 
             if( e_pchara->dir == false ) {
@@ -740,7 +810,7 @@ void character_StateChangeImage( void )
         // change substate
         if( g_LastState == NewState && g_nLastSubState != e_pchara->nSubState ) {
             int nHeight = al_get_bitmap_height( e_pchara->img_slide[ e_pchara->nSubState ] );
-            e_pchara->y -= nHeight - e_pchara->height;
+            e_pchara->y -= ( nHeight - e_pchara->height );
             e_pchara->height = nHeight;
 
             if( e_pchara->dir == false ) {
@@ -777,7 +847,7 @@ void character_attack( void )
     int nDeltaX = 0;
     switch( e_pchara->state ) {
     case ECS_ATK:
-        e_pchara->nDeltaX = ( e_pchara->dir ? 1 : -1 ) * e_pchara->nAtkCursor * 5;
+        e_pchara->nDeltaX = ( e_pchara->dir ? 1 : -1 ) * e_pchara->nAtkCursor * e_pchara->nAtkRate;
 //        e_pchara->x = e_pchara->x0 + nDeltaX;
         break;
 
@@ -787,7 +857,7 @@ void character_attack( void )
         break;
 
     case ECS_SLIDE:
-        e_pchara->nDeltaX = ( e_pchara->dir ? 1 : -1 ) * e_pchara->nSlideCursor * 5;
+        e_pchara->nDeltaX = ( e_pchara->dir ? 1 : -1 ) * e_pchara->nSlideCursor * e_pchara->nSlideRate;
         break;
 
     case ECS_STOP:
@@ -802,7 +872,7 @@ void character_draw()
 {
 //    printf( "character_draw\n" );
 
-    int nGroundY = FindAndDrawClosestGroundY( e_pchara->x, e_pchara->x + e_pchara->width, e_pchara->y + e_pchara->height );
+    int nGroundY = FindAndDrawClosestGroundY( e_pchara->x, e_pchara->x + e_pchara->width, e_pchara->y + ( e_pchara->height + e_pchara->nMoveHeight ) / 2 );
 
     character_gravity( nGroundY );
 
@@ -817,9 +887,10 @@ void character_draw()
     character_StateChangeImage();
 
     character_BoundryCheck();
+    character_CheckBlocker();
 
 	if( camera_move == 1 ) {
-    	CameraUpdate( &g_CameraPosition, e_pchara->x, e_pchara->y, e_pchara->width, e_pchara->height, e_pchara->nTestWidth );
+    	CameraUpdate( &g_CameraPosition, e_pchara->x, e_pchara->y, e_pchara->width, e_pchara->height, e_pchara->nMoveWidth );
     	al_identity_transform( &camera );
     	al_translate_transform( &camera, -g_CameraPosition, 0 );
     	al_use_transform( &camera );\
@@ -1003,7 +1074,7 @@ void charater_update2()
 
 void monster_gravity( int nMonsterIdx, int nGroundY ) {
 //    printf( "monster_gravity\n" );
-    if( nGroundY == -1 ) {
+    if( nGroundY == -2 ) {
         nGroundY = HEIGHT;
     }
 
@@ -1030,6 +1101,34 @@ void monster_gravity( int nMonsterIdx, int nGroundY ) {
 //    printf( "monster_gravity\n" );
 }
 
+void monster_CheckBlocker( const int nMonsterIdx )
+{
+    if( e_monster[ nMonsterIdx ].state == EMS_DIE ) {
+        return;
+    }
+
+    Position pos;
+    if( e_monster[ nMonsterIdx ].dir == false ) {
+        pos.e = e_monster[ nMonsterIdx ].x + e_monster[ nMonsterIdx ].width;
+        pos.w = pos.e - e_monster[ nMonsterIdx ].width;
+    }
+    else {
+        pos.w = e_monster[ nMonsterIdx ].x;
+        pos.e = e_monster[ nMonsterIdx ].x + e_monster[ nMonsterIdx ].width;
+    }
+
+    pos.n = e_monster[ nMonsterIdx ].y;
+    pos.s = e_monster[ nMonsterIdx ].y + e_monster[ nMonsterIdx ].height;
+
+    bool bClamped = CheckBlocker( &pos, e_monster[ nMonsterIdx ].dir );
+
+    // update x, y
+    if( bClamped == true ) {
+        e_monster[ nMonsterIdx ].x = pos.w;
+        e_monster[ nMonsterIdx ].y = pos.n;
+    }
+}
+
 void character_draw2(){
 //    printf( "character_draw2\n" );
     for( int n = 0; n < MONSTER_NUMBERS; n++ ) {
@@ -1039,6 +1138,7 @@ void character_draw2(){
             int nGroundY = FindAndDrawClosestGroundY( e_monster[ n ].x, e_monster[ n ].x + e_monster[ n ].width, e_monster[ n ].y + e_monster[ n ].height );
 
             monster_gravity( n, nGroundY );
+            monster_CheckBlocker( n );
         //如果活著
             if( e_monster[ n ].dir ) {
                 if( e_monster[ n ].x >= WIDTH / 2 + 50 + n * 240 ) {
