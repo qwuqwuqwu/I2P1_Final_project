@@ -120,7 +120,7 @@ bool CheckBlocker( Position *pPos, const bool bDir )
 
         if( bOverlap == true ) {
             bClamped = true;
-            printf( "******** clamped dir = %d, value = %d\n", nOrientation, nClampValue );
+            //printf( "******** clamped dir = %d, value = %d\n", nOrientation, nClampValue );
             switch( nOrientation ) {
             case EOD_E:
                 pPos->e = nClampValue;

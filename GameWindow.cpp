@@ -203,6 +203,7 @@ void game_update( void )
     }
     if( g_nWindow == 2 ){
         charater_update();
+        charater_update2();
     }
 }
 
