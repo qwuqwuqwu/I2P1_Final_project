@@ -18,8 +18,7 @@ float g_CameraPosition = 0.0;
 ALLEGRO_TRANSFORM camera;
 int g_nTerrainWidth = 0;
 
-float g_Gravity = 9.8;
-float g_Tick = 0.2;
+
 
 ECharacterState g_LastState;
 int g_nLastSubState;
@@ -368,6 +367,8 @@ void charater_process(ALLEGRO_EVENT event){
         key_state[event.keyboard.keycode] = false;
     }
 
+    Object_process( event );
+
 
 //    printf( "charater_process\n" );
 }
@@ -458,7 +459,7 @@ void charater_update(){
 }
 
 void character_gravity( int nGroundY ) {
-    printf( "character_gravity\n" );
+//    printf( "character_gravity\n" );
     if( e_pchara->state == ECS_MOVE || e_pchara->state == ECS_STOP || e_pchara->state == ECS_ATK || e_pchara->state == ECS_SLIDE || e_pchara->state == ECS_INJURED ) {
         if( nGroundY == -2 ) {
             nGroundY = HEIGHT;
@@ -761,13 +762,13 @@ void character_StateChangeImage( void )
         }
         // change substate
         if( g_LastState == NewState && g_nLastSubState != e_pchara->nSubState ) {
-            printf( "height is %d\n", e_pchara->height );
+//            printf( "height is %d\n", e_pchara->height );
             e_pchara->nMoveHeight = e_pchara->height;
             int nHeight = al_get_bitmap_height( e_pchara->img_move[ e_pchara->nSubState ] );
             e_pchara->y -= ( nHeight - e_pchara->height ) / 2;
             e_pchara->height = nHeight;
             e_pchara->nMoveY = e_pchara->y;
-            printf( "New height is %d\n", e_pchara->height );
+//            printf( "New height is %d\n", e_pchara->height );
 
             if( e_pchara->dir == false ) {
                 int nWidth = al_get_bitmap_width( e_pchara->img_move[ e_pchara->nSubState ] );
@@ -847,6 +848,10 @@ void character_StateChangeImage( void )
             else {
                 int nWidth = al_get_bitmap_width( e_pchara->img_atk[ e_pchara->nSubState ] );
                 e_pchara->width = nWidth;
+            }
+
+            if( e_pchara->nSubState == 1 && e_pchara->NowSpecialAtk == ESA_BOMB ) {
+                BombThrow( e_pchara->x, e_pchara->y, e_pchara->dir );
             }
         }
 
@@ -1079,7 +1084,7 @@ void character_draw()
 
     al_draw_bitmap( e_pchara->img_atkWord, g_CameraPosition, HEIGHT - g_nWordHeight, 0 );
 
-    printf( "character_draw\n" );
+//    printf( "character_draw\n" );
 }
 void character_destory(){
 //    printf( "character_destory\n" );
