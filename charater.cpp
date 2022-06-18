@@ -15,7 +15,7 @@ ALLEGRO_SAMPLE_INSTANCE *BossSampleInstance = NULL;
 ALLEGRO_SAMPLE *BossSample = NULL;
 
 bool g_bMute = false;
-float g_CameraPosition = 0.0;
+//float e_pchara->CamPos = 0.0;
 ALLEGRO_TRANSFORM camera;
 int g_nTerrainWidth = 0;
 
@@ -32,6 +32,7 @@ bool g_bImmortal = false;
 int g_nImortalCursor = 0;
 int g_nImortalTime = 120;
 
+
 void CameraUpdate( float *CamPosition, int x, int y, int width, int height, int nMoveWidth )
 {
 //    printf( "CameraUpdate\n" );
@@ -46,19 +47,17 @@ void CameraUpdate( float *CamPosition, int x, int y, int width, int height, int 
     if( *CamPosition < 0 ) {
         *CamPosition = 0.0;
     }
-    else if( *CamPosition >= ( g_nTerrainWidth - 5 * WIDTH / 4 ) ) {
+    else if( *CamPosition >= ( g_nTerrainWidth - 9 * WIDTH / 8 ) ) {
         *CamPosition = ( float )( g_nTerrainWidth - WIDTH);
         camera_move = 0;
         al_stop_sample_instance( g_pMenuSampleInstance );
         al_destroy_sample_instance( g_pMenuSampleInstance );
 
         BossSample = al_load_sample( "./sound/boss.mp3" );
-        al_reserve_samples( 20 );
         BossSampleInstance = al_create_sample_instance( BossSample );
         al_set_sample_instance_playmode( BossSampleInstance, ALLEGRO_PLAYMODE_LOOP );
-        //al_restore_default_mixer();
         al_attach_sample_instance_to_mixer( BossSampleInstance, al_get_default_mixer() );
-        al_set_sample_instance_gain( BossSampleInstance, 0.8 );
+        al_set_sample_instance_gain( BossSampleInstance, 0.7 );
         al_play_sample_instance( BossSampleInstance );
     }
 //    printf( "CameraUpdate\n" );
@@ -267,6 +266,7 @@ void character_init( const int nTerrainWidth ){
     e_pchara->nMoveY = e_pchara->y;
     e_pchara->dir = false;
     e_pchara->hp = HP;
+    e_pchara->life = LIFE;
 
     // initial the animation component
     e_pchara->state = ECS_STOP;
@@ -447,7 +447,7 @@ void charater_update(){
 
     }
     // attack v
-    else if( key_state[ ALLEGRO_KEY_V ] ) {
+    else if( key_state[ ALLEGRO_KEY_J ] ) {
         if( g_bCDing == false && e_pchara->state != ECS_ATK ) {
             e_pchara->x0 = e_pchara->x;
             e_pchara->state = ECS_ATK;
@@ -455,7 +455,7 @@ void charater_update(){
         }
     }
     // slide c
-    else if( key_state[ ALLEGRO_KEY_C ] ) {
+    else if( key_state[ ALLEGRO_KEY_K ] ) {
         if( g_bCDing == false && e_pchara->state != ECS_SLIDE ) {
             e_pchara->x0 = e_pchara->x;
             e_pchara->state = ECS_SLIDE;
@@ -1014,13 +1014,13 @@ void character_attack( void )
 
 void character_drawhp( void )
 {
-    if(e_pchara->hp >=6){al_draw_bitmap(e_pchara->img_store_HP[ 6 ],g_CameraPosition+280, HEIGHT - g_nWordHeight-20, 0);}
-	else if(e_pchara->hp ==5){al_draw_bitmap(e_pchara->img_store_HP[ 5 ],g_CameraPosition+280, HEIGHT - g_nWordHeight-20, 0);}
-	else if(e_pchara->hp ==4){al_draw_bitmap(e_pchara->img_store_HP[ 4 ],g_CameraPosition+280, HEIGHT - g_nWordHeight-20, 0);}
-    else if(e_pchara->hp ==3){al_draw_bitmap(e_pchara->img_store_HP[ 3 ],g_CameraPosition+280, HEIGHT - g_nWordHeight-20, 0);}
-    else if(e_pchara->hp ==2){al_draw_bitmap(e_pchara->img_store_HP[ 2 ],g_CameraPosition+280, HEIGHT - g_nWordHeight-20, 0);}
-    else if(e_pchara->hp ==1){al_draw_bitmap(e_pchara->img_store_HP[ 1 ],g_CameraPosition+280, HEIGHT - g_nWordHeight-20, 0);}
-    else {al_draw_bitmap(e_pchara->img_store_HP[ 0 ],g_CameraPosition+280, HEIGHT - g_nWordHeight-20, 0);}
+    if(e_pchara->hp >=6){al_draw_bitmap(e_pchara->img_store_HP[ 6 ],e_pchara->CamPos+280, HEIGHT - g_nWordHeight-20, 0);}
+	else if(e_pchara->hp ==5){al_draw_bitmap(e_pchara->img_store_HP[ 5 ],e_pchara->CamPos+280, HEIGHT - g_nWordHeight-20, 0);}
+	else if(e_pchara->hp ==4){al_draw_bitmap(e_pchara->img_store_HP[ 4 ],e_pchara->CamPos+280, HEIGHT - g_nWordHeight-20, 0);}
+    else if(e_pchara->hp ==3){al_draw_bitmap(e_pchara->img_store_HP[ 3 ],e_pchara->CamPos+280, HEIGHT - g_nWordHeight-20, 0);}
+    else if(e_pchara->hp ==2){al_draw_bitmap(e_pchara->img_store_HP[ 2 ],e_pchara->CamPos+280, HEIGHT - g_nWordHeight-20, 0);}
+    else if(e_pchara->hp ==1){al_draw_bitmap(e_pchara->img_store_HP[ 1 ],e_pchara->CamPos+280, HEIGHT - g_nWordHeight-20, 0);}
+    else {al_draw_bitmap(e_pchara->img_store_HP[ 0 ],e_pchara->CamPos+280, HEIGHT - g_nWordHeight-20, 0);}
 }
 
 void character_draw()
@@ -1056,9 +1056,9 @@ void character_draw()
     character_CheckBlocker();
 
 	if( camera_move == 1 ) {
-    	CameraUpdate( &g_CameraPosition, e_pchara->x, e_pchara->y, e_pchara->width, e_pchara->height, e_pchara->nMoveWidth );
+    	CameraUpdate( &e_pchara->CamPos, e_pchara->x, e_pchara->y, e_pchara->width, e_pchara->height, e_pchara->nMoveWidth );
     	al_identity_transform( &camera );
-    	al_translate_transform( &camera, -g_CameraPosition, 0 );
+    	al_translate_transform( &camera, -e_pchara->CamPos, 0 );
     	al_use_transform( &camera );
 	}
 
@@ -1078,7 +1078,7 @@ void character_draw()
     }
 
 
-    al_draw_bitmap( e_pchara->img_atkWord, g_CameraPosition, HEIGHT - g_nWordHeight, 0 );
+    al_draw_bitmap( e_pchara->img_atkWord, e_pchara->CamPos, HEIGHT - g_nWordHeight, 0 );
 
 //    printf( "character_draw\n" );
 }

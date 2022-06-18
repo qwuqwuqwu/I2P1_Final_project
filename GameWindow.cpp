@@ -6,11 +6,12 @@ int g_nWindow = 1;
 const char *title = "Final Project Team-4";
 
 // ALLEGRO Variables
-ALLEGRO_SAMPLE_INSTANCE *g_pMenuSampleInstance = NULL;
+ALLEGRO_SAMPLE_INSTANCE *g_pMenuSampleInstance = NULL, *DeathSampleInstance = NULL, *OverSampleInstance = NULL;
 ALLEGRO_DISPLAY *g_pDisplay = NULL;
-ALLEGRO_SAMPLE *g_pMenuSample = NULL;
+ALLEGRO_SAMPLE *g_pMenuSample = NULL, *DeathSample = NULL, *OverSample = NULL;
 ALLEGRO_VIDEO *g_pVideo = NULL;
 ALLEGRO_EVENT_QUEUE *g_pVideoQueue = NULL;
+ALLEGRO_BITMAP *img_over;
 
 // TODO
 // 1. release g_pMenuSample?
@@ -181,8 +182,18 @@ void game_begin( void )
     al_restore_default_mixer();
     al_attach_sample_instance_to_mixer( g_pMenuSampleInstance, al_get_default_mixer() );
     // set the volume of instance
-    al_set_sample_instance_gain( g_pMenuSampleInstance, 1 );
+    al_set_sample_instance_gain( g_pMenuSampleInstance, 0.8 );
     al_play_sample_instance( g_pMenuSampleInstance );
+
+    DeathSample = al_load_sample( "./sound/death.wav" );
+    DeathSampleInstance = al_create_sample_instance( DeathSample );
+    al_set_sample_instance_playmode( DeathSampleInstance, ALLEGRO_PLAYMODE_ONCE );
+    al_attach_sample_instance_to_mixer( DeathSampleInstance, al_get_default_mixer() );
+
+    OverSample = al_load_sample( "./sound/game_over.mp3" );
+    OverSampleInstance = al_create_sample_instance( OverSample );
+    al_set_sample_instance_playmode( OverSampleInstance, ALLEGRO_PLAYMODE_ONCE );
+    al_attach_sample_instance_to_mixer( OverSampleInstance, al_get_default_mixer() );
     //al_start_timer(fps);
 
     // initialize the menu before entering the loop
@@ -201,9 +212,34 @@ void game_update( void )
             g_nWindow = 2;
         }
     }
-    if( g_nWindow == 2 ){
+    if( g_nWindow == 2 && e_pchara->hp >= 1 ){
         charater_update();
         charater_update2();
+    }
+    else if( g_nWindow == 2 && e_pchara->hp < 1 ) {
+        al_stop_sample_instance( g_pMenuSampleInstance );
+        al_set_sample_instance_gain( DeathSampleInstance, 1 );
+        al_play_sample_instance( DeathSampleInstance );
+        al_rest(4);
+
+        if( e_pchara->life >= 1){
+
+            //to be fetched
+
+        }
+        else{
+            g_nWindow = 3;
+        }
+    }
+    else if( g_nWindow == 3 ){
+        al_set_sample_instance_gain( OverSampleInstance, 1 );
+        al_play_sample_instance( OverSampleInstance );
+        img_over = al_load_bitmap("./image/over.png");
+        al_draw_bitmap(img_over, e_pchara->CamPos, 0, 0);
+        al_flip_display();
+        assert( img_over != NULL );
+        al_rest(4);
+        game_destroy();
     }
 }
 
@@ -221,6 +257,7 @@ int process_event( void )
         charater_process( event );
         charater_process2( event );
     }
+
 
     // Shutdown our program
     if( event.type == ALLEGRO_EVENT_DISPLAY_CLOSE ) {

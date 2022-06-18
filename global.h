@@ -13,6 +13,7 @@
 #define GAME_TERMINATE ( -1 )
 #define NUMOF_TRANSFORM_IMG ( 3 )
 #define HP          ( 6 )
+#define LIFE ( 0 )
 
 
 // note that you can't assign initial value here!
@@ -25,7 +26,6 @@ extern bool key_state[ ALLEGRO_KEY_MAX ];
 extern bool judge_next_window;
 extern ALLEGRO_EVENT_QUEUE *event_queue;
 extern ALLEGRO_TIMER *fps;
-
 // the type of special attack
 enum ESpecialAtk {
     ESA_NORMAL = 0,
@@ -99,6 +99,7 @@ typedef struct _Character {
     ECharacterState state; // the state of character
     int nSubState;
 	int hp;
+	int life;
     ESpecialAtk NowSpecialAtk;
     ESpecialAtk NextSpecailAtk;
 
@@ -126,6 +127,7 @@ typedef struct _Character {
 
     int nSlideRate;
     int nAtkRate;
+    float CamPos;
 
     // bit map
     ALLEGRO_BITMAP *img_inhale[ 2 ];

@@ -23,7 +23,7 @@ void menu_process(ALLEGRO_EVENT event){
 void menu_draw(){
     img = al_load_bitmap("intro.png"); // ANS: load image
     assert( img != NULL );
-    al_draw_bitmap(img, 0, 0, 0); // ANS: draw image
+    al_draw_bitmap(img, e_pchara->CamPos, 0, 0); // ANS: draw image
 
 }
 void menu_destroy(){
@@ -33,7 +33,7 @@ void menu_destroy(){
 // function of game_scene
 void game_scene_init(){
     for( int i = 0; i < COUNOF_BACKGROUND; i++ ) {
-        g_background[ i ] = al_load_bitmap("./image/background1.png");
+        g_background[ i ] = al_load_bitmap("./image/background3.png");
         assert( g_background[ i ] != NULL );
     }
     g_nBackgroundWidth = al_get_bitmap_width( g_background[ 0 ] );
