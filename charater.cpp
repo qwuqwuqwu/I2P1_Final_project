@@ -7,6 +7,8 @@
 
 #define SLIDE_RATE  ( 3 )
 #define ATK_RATE    ( 3 )
+#define HP          ( 5 )
+
 //note
 
 ALLEGRO_SAMPLE *sample = NULL;
@@ -27,7 +29,9 @@ int g_nCDTime = 20;
 int camera_move = 1;
 
 int g_nWordHeight = 0;
-
+bool g_Injure = false;
+int g_InjureCursor = 0;
+int g_InjureTime = 100;
 void CameraUpdate( float *CamPosition, int x, int y, int width, int height, int nMoveWidth )
 {
 //    printf( "CameraUpdate\n" );
@@ -215,7 +219,7 @@ void character_init( const int nTerrainWidth ){
             assert( false );
             break;
         }
-        printf( "i = %d\n", i );
+        //printf( "i = %d\n", i );
 
 //        g_nImgMoveWidth[ i ] = al_get_bitmap_width( e_pchara->img_SpecialAtk[ 4 * i ] );
 //        g_nImgMoveHeight[ i ] = al_get_bitmap_height( e_pchara->img_SpecialAtk[ 4 * i ] );
@@ -236,7 +240,7 @@ void character_init( const int nTerrainWidth ){
     e_pchara->y = HEIGHT/2;
     e_pchara->nMoveY = e_pchara->y;
     e_pchara->dir = false;
-    e_pchara->hp = 3;
+    e_pchara->hp = HP;
 
     // initial the animation component
     e_pchara->state = ECS_STOP;
@@ -272,7 +276,7 @@ void character_init( const int nTerrainWidth ){
 //    printf( "test\n" );
 
 //    printf( "Character init success\n" );
-    printf( "character_init\n" );
+//    printf( "character_init\n" );
 }
 
 void charater_process(ALLEGRO_EVENT event){
@@ -285,6 +289,13 @@ void charater_process(ALLEGRO_EVENT event){
                 g_nCDCursor = ( g_nCDCursor + 1 ) % g_nCDTime;
                 if( g_nCDCursor == 0 ) {
                     g_bCDing = false;
+                }
+            }
+
+            if( g_Injure == true ) {
+                g_InjureCursor = ( g_InjureCursor + 1 ) % g_InjureTime;
+                if( g_InjureCursor == 0 ) {
+                    g_Injure = false;
                 }
             }
 
@@ -335,6 +346,14 @@ void charater_process(ALLEGRO_EVENT event){
                     e_pchara->state = ECS_STOP;
                     e_pchara->NowSpecialAtk = e_pchara->NextSpecailAtk;
                     e_pchara->NextSpecailAtk = ESA_NORMAL;
+                }
+            }
+            if( e_pchara->state == ECS_INJURED ) {
+                e_pchara->anime++;
+                e_pchara->anime %= e_pchara->anime_time;
+
+                if( e_pchara->anime == 0 ) {
+                    e_pchara->state = ECS_STOP;
                 }
             }
         }
@@ -441,7 +460,7 @@ void charater_update(){
 
 void character_gravity( int nGroundY ) {
 //    printf( "character_gravity\n" );
-    if( e_pchara->state == ECS_MOVE || e_pchara->state == ECS_STOP || e_pchara->state == ECS_ATK || e_pchara->state == ECS_SLIDE ) {
+    if( e_pchara->state == ECS_MOVE || e_pchara->state == ECS_STOP || e_pchara->state == ECS_ATK || e_pchara->state == ECS_SLIDE || e_pchara->state == ECS_INJURED ) {
         if( nGroundY == -2 ) {
             nGroundY = HEIGHT;
         }
@@ -682,6 +701,12 @@ void character_StateChangeImage( void )
         }
         break;
 
+    case ECS_INJURED:
+        if( NewState != g_LastState ) {
+            e_pchara->nSubState = 0;
+        }
+        break;
+
     default:
         assert( false );
         break;
@@ -863,6 +888,29 @@ void character_StateChangeImage( void )
         e_pchara->x = e_pchara->x0 + e_pchara->nDeltaX;
         break;
 
+    case ECS_INJURED:
+        // change state
+        if( g_LastState != NewState ) {
+            int nHeight = al_get_bitmap_height( e_pchara->img_move[ 0 ] );
+            e_pchara->y -= ( nHeight - e_pchara->height ) / 2;
+            e_pchara->height = nHeight;
+            e_pchara->nMoveHeight = e_pchara->height;
+            e_pchara->nMoveY = e_pchara->y;
+
+            if( e_pchara->dir == false ) {
+                int nWidth = al_get_bitmap_width( e_pchara->img_move[ 0 ] );
+                e_pchara->x -= nWidth - e_pchara->width;
+                e_pchara->width = nWidth;
+                e_pchara->nMoveWidth = e_pchara->width;
+            }
+            else {
+                int nWidth = al_get_bitmap_width( e_pchara->img_move[ 0 ] );
+                e_pchara->width = nWidth;
+                e_pchara->nMoveWidth = e_pchara->width;
+            }
+        }
+        break;
+
     default:
         assert( false );
         break;
@@ -901,6 +949,8 @@ void character_attack( void )
         break;
 
     case ECS_STOP:
+    case ECS_INJURED:
+
     default:
         // do nothing
         break;
@@ -1010,8 +1060,25 @@ void character_draw()
         }
         break;
 
+    case ECS_INJURED:
+        //printf("%d\n",e_pchara->anime);
+        g_Injure = true;
+        if(e_pchara->anime<5){
+            if( e_pchara->dir ) {
+                al_draw_bitmap( e_pchara->img_move[ e_pchara->nSubState ], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL);
+            }
+            else {
+                al_draw_bitmap( e_pchara->img_move[ e_pchara->nSubState ], e_pchara->x, e_pchara->y, 0);
+            }
+        }
+        if(g_InjureCursor==2){e_pchara->hp -=1;printf("%d\n",e_pchara->hp);}
+
+        break;
+
+
+
     default:
-        assert( false );
+        //assert( false );
         break;
     } // end of switch
 
@@ -1106,21 +1173,33 @@ void character_destory2()
 
 void charater_update2()
 {
-//    printf( "charater_update2\n" );
-    for( int n = 0; n < MONSTER_NUMBERS; n++ ) {
-        if( e_monster[ n ].state == EMS_ALIVE )
+    for( int i = 0; i < MONSTER_NUMBERS; i++ ) {
+        if( e_monster[ i ].state == EMS_ALIVE )
         {
-            if( ( e_pchara->x - 60 <= e_monster[ n ].x ) && ( e_monster[ n ].x <= e_pchara->x + 60 ) &&
-                ( e_pchara->y - 60 <= e_monster[ n ].y ) && ( e_monster[ n ].y <= e_pchara->y + 60 ) ) {
-                e_monster[ n ].hp--;
-            }
+            Position CharacterPosNoAtk,MonsterPosNoAtk;
+            CharacterPosNoAtk.w = e_pchara->x;
+            CharacterPosNoAtk.e = e_pchara->x + e_pchara->width;
+            CharacterPosNoAtk.n = e_pchara->y;
+            CharacterPosNoAtk.s = e_pchara->y + e_pchara->height;
+            MonsterPosNoAtk.e = e_monster[ i ].x + e_monster[ i ].width-8;
+            MonsterPosNoAtk.w = e_monster[ i ].x+8;
+            MonsterPosNoAtk.n = e_monster[ i ].y+8;
+            MonsterPosNoAtk.s = e_monster[ i ].y + e_monster[ i ].height-8;
 
-            if( e_monster[ n ].hp <= 0 ) {
+            if( CheckOverlap( &CharacterPosNoAtk, &MonsterPosNoAtk ) == true )
+               {
+                   if( e_pchara->state != ECS_ATK || e_pchara->state != ECS_INHALE ||e_pchara->state != ECS_SLIDE){
+                    e_pchara->state = ECS_INJURED;
+                    }
+               }
+
+            if( e_monster[ i ].hp <= 0 ) {
                 //如果死掉
-                al_destroy_bitmap( e_monster[ n ].img_move[ 0 ]);
-                e_monster[ n ].state = EMS_DIE;
+                al_destroy_bitmap( e_monster[ i ].img_move[ 0 ]);
+                e_monster[ i ].state = EMS_DIE;
             }
         }
+
     }
 //    printf( "charater_update2\n" );
 }
@@ -1192,7 +1271,7 @@ void character_draw2(){
 
             monster_gravity( n, nGroundY );
             monster_CheckBlocker( n );
-        //如果活著
+
             if( e_monster[ n ].dir ) {
                 if( e_monster[ n ].x >= WIDTH / 2 + 50 + n * 240 ) {
                     e_monster[ n ].dir = false;
@@ -1210,6 +1289,7 @@ void character_draw2(){
                 e_monster[ n ].x -= 1;
             }
         }
+
     }
 //    printf( "character_draw2\n" );
 }
