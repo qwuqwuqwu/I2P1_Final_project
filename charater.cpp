@@ -67,7 +67,7 @@ void character_init( const int nTerrainWidth ){
 
     for(int i = 0; i < 7; i++){
         char temp[ 50 ];
-        sprintf( temp, "./image/hp_full.png", i );
+        sprintf( temp, "./image/hp%d.png", i );
         e_pchara->img_store_HP[ i ] = al_load_bitmap( temp );
         assert( e_pchara->img_store_HP[ i ] != NULL );
         }
@@ -194,6 +194,11 @@ void character_init( const int nTerrainWidth ){
                 sprintf( temp, "./image/char_firespit%d.png", j + 1 );
                 e_pchara->img_store_SpecialAtk[ 2 * i + j ] = al_load_bitmap( temp );
                 assert( e_pchara->img_store_SpecialAtk[ 2 * i + j ] != NULL );
+
+                sprintf( temp, "./image/fire%d.png", j + 1 );
+                e_pchara->img_fire[ j ] = al_load_bitmap( temp );
+                assert( e_pchara->img_fire[ j ] != NULL );
+
             }
 
             // move
@@ -377,8 +382,6 @@ void charater_process(ALLEGRO_EVENT event){
     }
 
     Object_process( event );
-
-
 //    printf( "charater_process\n" );
 }
 
@@ -462,7 +465,6 @@ void charater_update(){
             al_set_sample_instance_gain( g_pMenuSampleInstance, 1 );
             g_bMute = false;
         }
-
     }
 //    printf( "charater_update\n" );
 }
@@ -1061,6 +1063,22 @@ void character_draw()
         break;
 
     case ECS_ATK:
+        // plot fire
+        if( e_pchara->NowSpecialAtk == ESA_FIRE ) {
+            if( e_pchara->dir == true ) {
+                al_draw_bitmap( e_pchara->img_fire[ e_pchara->nSubState ],
+                                e_pchara->x + e_pchara->width,
+                                e_pchara->y + ( e_pchara->height- al_get_bitmap_height( e_pchara->img_fire[ e_pchara->nSubState ] ) ) / 2,
+                                ALLEGRO_FLIP_HORIZONTAL );
+            }
+            else {
+                al_draw_bitmap( e_pchara->img_fire[ e_pchara->nSubState ],
+                                e_pchara->x - al_get_bitmap_width( e_pchara->img_fire[ e_pchara->nSubState ] ),
+                                e_pchara->y + ( e_pchara->height- al_get_bitmap_height( e_pchara->img_fire[ e_pchara->nSubState ] ) ) / 2,
+                                0 );
+            }
+        }
+        // plot character
         if( e_pchara->dir ) {
             al_draw_bitmap( e_pchara->img_atk[ e_pchara->nSubState ], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL );
         }
@@ -1202,17 +1220,16 @@ void charater_update2()
             CharacterPosNoAtk.e = e_pchara->x + e_pchara->width;
             CharacterPosNoAtk.n = e_pchara->y;
             CharacterPosNoAtk.s = e_pchara->y + e_pchara->height;
-            MonsterPosNoAtk.e = e_monster[ i ].x + e_monster[ i ].width-8;
-            MonsterPosNoAtk.w = e_monster[ i ].x+8;
-            MonsterPosNoAtk.n = e_monster[ i ].y+8;
-            MonsterPosNoAtk.s = e_monster[ i ].y + e_monster[ i ].height-8;
+            MonsterPosNoAtk.e = e_monster[ i ].x + e_monster[ i ].width - 8;
+            MonsterPosNoAtk.w = e_monster[ i ].x + 8;
+            MonsterPosNoAtk.n = e_monster[ i ].y + 8;
+            MonsterPosNoAtk.s = e_monster[ i ].y + e_monster[ i ].height - 8;
 
-            if( CheckOverlap( &CharacterPosNoAtk, &MonsterPosNoAtk ) == true )
-               {
-                   if( e_pchara->state != ECS_ATK || e_pchara->state != ECS_INHALE ||e_pchara->state != ECS_SLIDE){
+            if( CheckOverlap( &CharacterPosNoAtk, &MonsterPosNoAtk ) == true ) {
+                if( e_pchara->state != ECS_ATK || e_pchara->state != ECS_INHALE ||e_pchara->state != ECS_SLIDE){
                     e_pchara->state = ECS_INJURED;
-                    }
-               }
+                }
+            }
 
             if( e_monster[ i ].hp <= 0 ) {
                 //如果死掉

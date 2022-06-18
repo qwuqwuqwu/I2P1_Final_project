@@ -14,12 +14,13 @@ Bom g_Bomb;
 Pos g_Food[ MAX_COUNTOF_FOOD ];
 
 int g_nGroundCount = 0;
+int g_nFoodCount = 0;
 
 ALLEGRO_BITMAP *Ground[ MAX_COUNTOF_GROUND ] = { NULL };
 ALLEGRO_BITMAP *g_BombMap = NULL;
 ALLEGRO_BITMAP *g_ExplodeMap[ 3 ] = { NULL };
 
-ALLEGRO_BITMAP *g_FoodMap[ MAX_COUNTOF_FOOD ] = NULL;
+ALLEGRO_BITMAP *g_FoodMap[ MAX_COUNTOF_FOOD ] = { NULL };
 
 bool CheckOverlap( const Position *plhs, const Position *prhs ) {
 //    printf( "character_checkOverlap\n" );
@@ -115,6 +116,7 @@ bool CheckBlocker( Position *pPos, const bool bDir )
     int nHeight = pPos->s - pPos->n;
 
     for( int i = 0; i < g_nGroundCount; i++ ) {
+        //
         Position Ground;
         Ground.w = g_Ground[ i ].x;
         Ground.e = g_Ground[ i ].x + g_Ground[ i ].nWidth;
@@ -330,71 +332,51 @@ void BombSetup( void )
 void FoodSetup( void )
 {
     FILE* fp = fopen( "./res/food.txt", "r" );
-    int nType = 0;
     int nPosX = 0;
     int nPosY = 0;
-    while( fscanf( fp, "%d%d%d", &nType, &nPosX, &nPosY ) != EOF && g_nGroundCount <= MAX_COUNTOF_GROUND ) {
-        g_Ground[ g_nGroundCount ].type = NORMAL;
-        g_Ground[ g_nGroundCount ].type = nType;
-        g_Ground[ g_nGroundCount ].x = nPosX;
-        g_Ground[ g_nGroundCount ].y = nPosY;
-        g_nGroundCount++;
+    while( fscanf( fp, "%d%d", &nPosX, &nPosY ) != EOF && g_nFoodCount <= MAX_COUNTOF_FOOD ) {
+        g_Food[ g_nFoodCount ].state = EFS_IDLE;
+        g_Food[ g_nFoodCount ].x = nPosX;
+        g_Food[ g_nFoodCount ].y = nPosY;
+        g_nFoodCount++;
     }
 
-    g_FoodMap = al_load_bitmap("./image/food.png");
-    assert( g_BombMap != NULL );
+    for( int i = 0; i < g_nGroundCount; i++ ) {
+        g_FoodMap[ i ] = al_load_bitmap( "./image/food.png" );
+        assert( g_FoodMap[ i ] != NULL );
 
-    g_Bomb.img = g_BombMap;
-    g_Bomb.nSubState = 0;
-    g_Bomb.x = 0;
-    g_Bomb.y = 0;
-    g_Bomb.y0 = 0;
-    g_Bomb.dir = true;
-    g_Bomb.FallingTick = 0;
-    g_Bomb.state = EBS_IDLE;
-    g_Bomb.vy = 0.0;
-    g_Bomb.width = al_get_bitmap_width( g_BombMap );
-    g_Bomb.height = al_get_bitmap_height( g_BombMap );
-    g_Bomb.nExplodeCursor = 0;
-    g_Bomb.nExplodeTime = 30;
-
-    for( int i = 0; i < 3; i++ ) {
-        char temp[ 50 ];
-        sprintf( temp, "./image/explode%d.png", i + 1 );
-        g_ExplodeMap[ i ] = al_load_bitmap( temp );
-
-        assert( g_ExplodeMap[ i ] != NULL );
-        g_Bomb.img_explode[ i ] = g_ExplodeMap[ i ];
+        g_Food[ i ].nWidth = al_get_bitmap_width( g_FoodMap[ i ] );
+        g_Food[ i ].nHeight = al_get_bitmap_height( g_FoodMap[ i ] );
     }
 }
 
 void CandySetup( void )
 {
-    g_BombMap = al_load_bitmap("./image/bomb.png");
-    assert( g_BombMap != NULL );
-
-    g_Bomb.img = g_BombMap;
-    g_Bomb.nSubState = 0;
-    g_Bomb.x = 0;
-    g_Bomb.y = 0;
-    g_Bomb.y0 = 0;
-    g_Bomb.dir = true;
-    g_Bomb.FallingTick = 0;
-    g_Bomb.state = EBS_IDLE;
-    g_Bomb.vy = 0.0;
-    g_Bomb.width = al_get_bitmap_width( g_BombMap );
-    g_Bomb.height = al_get_bitmap_height( g_BombMap );
-    g_Bomb.nExplodeCursor = 0;
-    g_Bomb.nExplodeTime = 30;
-
-    for( int i = 0; i < 3; i++ ) {
-        char temp[ 50 ];
-        sprintf( temp, "./image/explode%d.png", i + 1 );
-        g_ExplodeMap[ i ] = al_load_bitmap( temp );
-
-        assert( g_ExplodeMap[ i ] != NULL );
-        g_Bomb.img_explode[ i ] = g_ExplodeMap[ i ];
-    }
+//    g_BombMap = al_load_bitmap("./image/bomb.png");
+//    assert( g_BombMap != NULL );
+//
+//    g_Bomb.img = g_BombMap;
+//    g_Bomb.nSubState = 0;
+//    g_Bomb.x = 0;
+//    g_Bomb.y = 0;
+//    g_Bomb.y0 = 0;
+//    g_Bomb.dir = true;
+//    g_Bomb.FallingTick = 0;
+//    g_Bomb.state = EBS_IDLE;
+//    g_Bomb.vy = 0.0;
+//    g_Bomb.width = al_get_bitmap_width( g_BombMap );
+//    g_Bomb.height = al_get_bitmap_height( g_BombMap );
+//    g_Bomb.nExplodeCursor = 0;
+//    g_Bomb.nExplodeTime = 30;
+//
+//    for( int i = 0; i < 3; i++ ) {
+//        char temp[ 50 ];
+//        sprintf( temp, "./image/explode%d.png", i + 1 );
+//        g_ExplodeMap[ i ] = al_load_bitmap( temp );
+//
+//        assert( g_ExplodeMap[ i ] != NULL );
+//        g_Bomb.img_explode[ i ] = g_ExplodeMap[ i ];
+//    }
 }
 
 void BombThrow( const int x, const int y, const bool bDir )
@@ -409,6 +391,31 @@ void BombThrow( const int x, const int y, const bool bDir )
     g_Bomb.FallingTick = 0;
     g_Bomb.nExplodeCursor = 0;
     g_Bomb.state = EBS_FLY;
+}
+
+bool EatFood( const Position *plhs, int *pFoodCount, int *pCandyCount )
+{
+    // eat food
+    *pFoodCount = 0;
+    *pCandyCount = 0;
+
+    for( int i = 0; i < g_nFoodCount; i++ ) {
+        if( g_Food[ i ].state == EFS_IDLE ) {
+            Position FoodPos;
+            FoodPos.e = g_Food[ i ].x + g_Food[ i ].nWidth;
+            FoodPos.s = g_Food[ i ].y + g_Food[ i ].nHeight;
+            FoodPos.w = g_Food[ i ].x;
+            FoodPos.n = g_Food[ i ].y;
+
+            bool bOverlaped = CheckOverlap( plhs, &FoodPos );
+            if( bOverlaped == true ) {
+                g_Food[ i ].state = EFS_EATEN;
+                *pFoodCount++;
+            }
+        }
+    }
+
+    // eat candy
 }
 
 bool BombUpdate( void )
@@ -459,8 +466,8 @@ bool BombUpdate( void )
 void object_init( void ){
     GroundSetup();
     BombSetup();
-    FoodSetup();
-    CandySetup();
+//    FoodSetup();
+//    CandySetup();
 }
 
 void object_draw( void ){

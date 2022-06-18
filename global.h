@@ -82,6 +82,11 @@ enum EBombState {
     EBS_EXPLODE = 3,
 };
 
+enum EFoodState {
+    EFS_IDLE = 1,
+    EFS_EATEN = 2,
+};
+
 typedef struct _Character {
 	bool dir; // left: false, right: true
     int x, y; // the position of image
@@ -126,6 +131,7 @@ typedef struct _Character {
     ALLEGRO_BITMAP *img_slide[ 2 ];
     ALLEGRO_BITMAP *img_transform[ 3 ];
     ALLEGRO_BITMAP *img_atkWord;
+    ALLEGRO_BITMAP *img_fire[ 2 ];
 
     // bit map store
     ALLEGRO_BITMAP *img_store_SpecialAtk[ 2 * ESA_NUM ];
@@ -139,6 +145,7 @@ typedef struct _Character {
 } Character;
 
 typedef struct _Mon {
+    ESpecialAtk NowSpecialAtk;
     int x, y; // the position of image
     int width, height; // the width and height of image
     bool dir; // left: false, right: true
