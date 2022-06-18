@@ -6,9 +6,9 @@ int g_nWindow = 1;
 const char *title = "Final Project Team-4";
 
 // ALLEGRO Variables
+ALLEGRO_SAMPLE_INSTANCE *g_pMenuSampleInstance = NULL;
 ALLEGRO_DISPLAY *g_pDisplay = NULL;
 ALLEGRO_SAMPLE *g_pMenuSample = NULL;
-ALLEGRO_SAMPLE_INSTANCE *g_pMenuSampleInstance = NULL;
 ALLEGRO_VIDEO *g_pVideo = NULL;
 ALLEGRO_EVENT_QUEUE *g_pVideoQueue = NULL;
 

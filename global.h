@@ -146,4 +146,5 @@ typedef struct _Position {
 
 extern Character *e_pchara;
 extern Mon e_monster[ 100 ];
+extern ALLEGRO_SAMPLE_INSTANCE *g_pMenuSampleInstance;
 #endif

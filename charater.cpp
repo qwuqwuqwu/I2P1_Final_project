@@ -9,9 +9,9 @@
 #define ATK_RATE    ( 3 )
 //note
 
-
 ALLEGRO_SAMPLE *sample = NULL;
 
+bool g_bMute = false;
 float g_CameraPosition = 0.0;
 ALLEGRO_TRANSFORM camera;
 int g_nTerrainWidth = 0;
@@ -334,6 +334,7 @@ void charater_process(ALLEGRO_EVENT event){
         key_state[event.keyboard.keycode] = false;
     }
 
+
 //    printf( "charater_process\n" );
 }
 
@@ -402,6 +403,18 @@ void charater_update(){
             e_pchara->state = ECS_INHALE;
             e_pchara->x0 = e_pchara->x;
         }
+    }
+    // mute
+    else if( key_state[ ALLEGRO_KEY_M ] ) {
+        if( g_bMute == false ) {
+            al_set_sample_instance_gain( g_pMenuSampleInstance, 0 );
+            g_bMute = true;
+        }
+        else {
+            al_set_sample_instance_gain( g_pMenuSampleInstance, 1 );
+            g_bMute = false;
+        }
+
     }
 //    printf( "charater_update\n" );
 }
