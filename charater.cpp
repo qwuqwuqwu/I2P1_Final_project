@@ -12,6 +12,8 @@
 //note
 
 ALLEGRO_SAMPLE *sample = NULL;
+ALLEGRO_SAMPLE_INSTANCE *BossSampleInstance = NULL;
+ALLEGRO_SAMPLE *BossSample = NULL;
 
 bool g_bMute = false;
 float g_CameraPosition = 0.0;
@@ -49,6 +51,17 @@ void CameraUpdate( float *CamPosition, int x, int y, int width, int height, int 
     else if( *CamPosition >= ( g_nTerrainWidth - 5 * WIDTH / 4 ) ) {
         *CamPosition = ( float )( g_nTerrainWidth - WIDTH);
         camera_move = 0;
+        al_stop_sample_instance( g_pMenuSampleInstance );
+        al_destroy_sample_instance( g_pMenuSampleInstance );
+
+        BossSample = al_load_sample( "./sound/boss.mp3" );
+        al_reserve_samples( 20 );
+        BossSampleInstance = al_create_sample_instance( BossSample );
+        al_set_sample_instance_playmode( BossSampleInstance, ALLEGRO_PLAYMODE_LOOP );
+        //al_restore_default_mixer();
+        al_attach_sample_instance_to_mixer( BossSampleInstance, al_get_default_mixer() );
+        al_set_sample_instance_gain( BossSampleInstance, 0.8 );
+        al_play_sample_instance( BossSampleInstance );
     }
 //    printf( "CameraUpdate\n" );
 }
