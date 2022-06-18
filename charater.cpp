@@ -34,6 +34,7 @@ int g_nWordHeight = 0;
 bool g_Injure = false;
 int g_InjureCursor = 0;
 int g_InjureTime = 100;
+
 void CameraUpdate( float *CamPosition, int x, int y, int width, int height, int nMoveWidth )
 {
 //    printf( "CameraUpdate\n" );
@@ -321,8 +322,13 @@ void charater_process(ALLEGRO_EVENT event){
 
             if( g_Injure == true ) {
                 g_InjureCursor = ( g_InjureCursor + 1 ) % g_InjureTime;
+
                 if( g_InjureCursor == 0 ) {
                     g_Injure = false;
+                }
+                else if( g_InjureCursor == 2 ) {
+                    e_pchara->hp -=1;
+                    printf("%d\n",e_pchara->hp);
                 }
             }
 
@@ -568,6 +574,32 @@ void character_CheckBlocker( void )
         e_pchara->nAtkRate = 0;
     }
 
+}
+
+void character_eat( void )
+{
+    if( e_pchara->state != ECS_INHALE ) {
+        return;
+    }
+
+    Position CharacterPos;
+    CharacterPos.w = e_pchara->x;
+    CharacterPos.e = e_pchara->x + e_pchara->width;
+    CharacterPos.n = e_pchara->y;
+    CharacterPos.s = e_pchara->y + e_pchara->height;
+
+    int nFoodCount = 0;
+    int nCandyCount = 0;
+    Eat( &CharacterPos, &nFoodCount, &nCandyCount );
+    if( nFoodCount != 0 ) {
+        // should return to full blood
+        e_pchara->hp = HP;
+        printf( "Full blood!\n" );
+    }
+
+    if( nCandyCount != 0 ) {
+        // immortal status
+    }
 }
 
 void character_checkTransform( void ) {
@@ -915,10 +947,10 @@ void character_StateChangeImage( void )
     case ECS_INJURED:
         // change state
         if( g_LastState != NewState ) {
+            e_pchara->nMoveHeight = e_pchara->height;
             int nHeight = al_get_bitmap_height( e_pchara->img_move[ 0 ] );
             e_pchara->y -= ( nHeight - e_pchara->height ) / 2;
             e_pchara->height = nHeight;
-            e_pchara->nMoveHeight = e_pchara->height;
             e_pchara->nMoveY = e_pchara->y;
 
             if( e_pchara->dir == false ) {
@@ -1000,6 +1032,7 @@ void character_draw()
     character_gravity( nGroundY );
 
     // check transform
+    character_eat();
     character_checkTransform();
 
     character_attack();
@@ -1120,8 +1153,6 @@ void character_draw()
                 al_draw_bitmap( e_pchara->img_move[ e_pchara->nSubState ], e_pchara->x, e_pchara->y, 0);
             }
         }
-        if(g_InjureCursor==2){e_pchara->hp -=1;printf("%d\n",e_pchara->hp);}
-
         break;
 
 

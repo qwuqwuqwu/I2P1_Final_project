@@ -399,10 +399,10 @@ void BombThrow( const int x, const int y, const bool bDir )
     g_Bomb.state = EBS_FLY;
 }
 
-bool Eat( const Position *plhs, int *pFoodCount, int *pCandyCount )
+void Eat( const Position *plhs, int *pFoodCount, int *pCandyCount )
 {
-    *pFoodCount = 0;
-    *pCandyCount = 0;
+    int nFoodCount = 0;
+    int nCandyCount = 0;
 
     // eat food
     for( int i = 0; i < g_nFoodCount; i++ ) {
@@ -416,7 +416,7 @@ bool Eat( const Position *plhs, int *pFoodCount, int *pCandyCount )
             bool bOverlaped = CheckOverlap( plhs, &FoodPos );
             if( bOverlaped == true ) {
                 g_Food[ i ].state = EFS_EATEN;
-                *pFoodCount++;
+                nFoodCount++;
             }
         }
     }
@@ -433,10 +433,13 @@ bool Eat( const Position *plhs, int *pFoodCount, int *pCandyCount )
             bool bOverlaped = CheckOverlap( plhs, &CandyPos );
             if( bOverlaped == true ) {
                 g_Candy[ i ].state = EFS_EATEN;
-                *pCandyCount++;
+                nCandyCount++;
             }
         }
     }
+
+    *pFoodCount = nFoodCount;
+    *pCandyCount = nCandyCount;
 }
 
 bool BombUpdate( void )
