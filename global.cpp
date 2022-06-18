@@ -4,6 +4,8 @@
 const float FPS = 60.0;
 const int WIDTH = 640;
 const int HEIGHT = 480;
+float g_Gravity = 9.8;
+float g_Tick = 0.2;
 bool key_state[ ALLEGRO_KEY_MAX ] = { false };
 bool judge_next_window = false;
 ALLEGRO_EVENT_QUEUE *event_queue = NULL;
