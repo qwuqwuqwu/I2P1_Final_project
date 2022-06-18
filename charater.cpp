@@ -29,10 +29,10 @@ int g_nCDCursor = 0;
 int g_nCDTime = 20;
 int camera_move = 1;
 
+int g_nWordHeight = 0;
 bool g_Injure = false;
 int g_InjureCursor = 0;
 int g_InjureTime = 100;
-
 void CameraUpdate( float *CamPosition, int x, int y, int width, int height, int nMoveWidth )
 {
 //    printf( "CameraUpdate\n" );
@@ -98,6 +98,10 @@ void character_init( const int nTerrainWidth ){
             }
 
             // transform
+            e_pchara->img_store_AtkWord[ i ] = al_load_bitmap( "./image/sign_normal.png" );
+            e_pchara->img_atkWord = e_pchara->img_store_AtkWord[ i ];
+            assert( e_pchara->img_store_AtkWord[ i ] != NULL );
+            g_nWordHeight = al_get_bitmap_height( e_pchara->img_store_AtkWord[ i ] );
             // do nothing
             break;
 
@@ -133,6 +137,9 @@ void character_init( const int nTerrainWidth ){
                 e_pchara->img_store_transform[ 3 * i + j ] = al_load_bitmap( temp );
                 assert( e_pchara->img_store_transform[ 3 * i + j ] != NULL );
             }
+
+            e_pchara->img_store_AtkWord[ i ] = al_load_bitmap( "./image/sign_sword.png" );
+            assert( e_pchara->img_store_AtkWord[ i ] != NULL );
             break;
 
         case ESA_BOMB:
@@ -167,6 +174,9 @@ void character_init( const int nTerrainWidth ){
                 e_pchara->img_store_transform[ 3 * i + j ] = al_load_bitmap( temp );
                 assert( e_pchara->img_store_transform[ 3 * i + j ] != NULL );
             }
+
+            e_pchara->img_store_AtkWord[ i ] = al_load_bitmap( "./image/sign_bomb.png" );
+            assert( e_pchara->img_store_AtkWord[ i ] != NULL );
             break;
 
         case ESA_FIRE:
@@ -201,6 +211,9 @@ void character_init( const int nTerrainWidth ){
                 e_pchara->img_store_transform[ 3 * i + j ] = al_load_bitmap( temp );
                 assert( e_pchara->img_store_transform[ 3 * i + j ] != NULL );
             }
+
+            e_pchara->img_store_AtkWord[ i ] = al_load_bitmap( "./image/sign_fire.png" );
+            assert( e_pchara->img_store_AtkWord[ i ] != NULL );
             break;
 
         default:
@@ -362,6 +375,10 @@ void charater_process(ALLEGRO_EVENT event){
 void charater_update(){
 //    printf( "charater_update\n" );
     // use the idea of finite state machine to deal with different state
+
+    if( e_pchara->state == ECS_INHALE ) {
+        return;
+    }
     if( key_state[ALLEGRO_KEY_W] ) {
         if( e_pchara->nJumpCount < MAX_COUNTOF_CONTINUOUS_JUMP ) {
             // 1. prevent second jump before certain time of the first jump
@@ -441,7 +458,7 @@ void charater_update(){
 }
 
 void character_gravity( int nGroundY ) {
-//    printf( "character_gravity\n" );
+    printf( "character_gravity\n" );
     if( e_pchara->state == ECS_MOVE || e_pchara->state == ECS_STOP || e_pchara->state == ECS_ATK || e_pchara->state == ECS_SLIDE || e_pchara->state == ECS_INJURED ) {
         if( nGroundY == -2 ) {
             nGroundY = HEIGHT;
@@ -558,7 +575,7 @@ void character_checkTransform( void ) {
                 e_pchara->state = ECS_TRANSFORMING;
                 e_pchara->nTransformCursor = 0;
                 e_pchara->NextSpecailAtk = ( ESpecialAtk )( i + 1 );
-
+                e_pchara->img_atkWord = e_pchara->img_store_AtkWord[ e_pchara->NextSpecailAtk ];
                 e_pchara->nInhaleCursor = 0;
 
                 e_monster[ i ].state = EMS_DIE;
@@ -700,10 +717,11 @@ void character_StateChangeImage( void )
     case ECS_STOP:
         // change state
         if( g_LastState != NewState ) {
+            e_pchara->nMoveHeight = e_pchara->height;
+
             int nHeight = al_get_bitmap_height( e_pchara->img_move[ 0 ] );
             e_pchara->y -= ( nHeight - e_pchara->height ) / 2;
             e_pchara->height = nHeight;
-            e_pchara->nMoveHeight = e_pchara->height;
             e_pchara->nMoveY = e_pchara->y;
 
             if( e_pchara->dir == false ) {
@@ -723,10 +741,10 @@ void character_StateChangeImage( void )
     case ECS_MOVE:
         // change state
         if( g_LastState != NewState ) {
+            e_pchara->nMoveHeight = e_pchara->height;
             int nHeight = al_get_bitmap_height( e_pchara->img_move[ 0 ] );
             e_pchara->y -= ( nHeight - e_pchara->height ) / 2;
             e_pchara->height = nHeight;
-            e_pchara->nMoveHeight = e_pchara->height;
             e_pchara->nMoveY = e_pchara->y;
 
             if( e_pchara->dir == false ) {
@@ -743,11 +761,13 @@ void character_StateChangeImage( void )
         }
         // change substate
         if( g_LastState == NewState && g_nLastSubState != e_pchara->nSubState ) {
+            printf( "height is %d\n", e_pchara->height );
+            e_pchara->nMoveHeight = e_pchara->height;
             int nHeight = al_get_bitmap_height( e_pchara->img_move[ e_pchara->nSubState ] );
             e_pchara->y -= ( nHeight - e_pchara->height ) / 2;
             e_pchara->height = nHeight;
-            e_pchara->nMoveHeight = e_pchara->height;
             e_pchara->nMoveY = e_pchara->y;
+            printf( "New height is %d\n", e_pchara->height );
 
             if( e_pchara->dir == false ) {
                 int nWidth = al_get_bitmap_width( e_pchara->img_move[ e_pchara->nSubState ] );
@@ -936,8 +956,17 @@ void character_attack( void )
 void character_draw()
 {
 //    printf( "character_draw\n" );
+//    printf( "e_pchara->substate = %d, e_pchara->y = %d, e_pchara->s = %d, e_pchara->height = %d, e_pchara->nMoveHeight = %d\n",
+//           e_pchara->nSubState, e_pchara->y, e_pchara->y + ( e_pchara->height + e_pchara->nMoveHeight ) / 2, e_pchara->height, e_pchara->nMoveHeight );
 
-    int nGroundY = FindAndDrawClosestGroundY( e_pchara->x, e_pchara->x + e_pchara->width, e_pchara->y + ( e_pchara->height + e_pchara->nMoveHeight ) / 2 );
+    int nTemp = 0;
+    if( e_pchara->height > e_pchara->nMoveHeight ) {
+        nTemp = e_pchara->y + ( e_pchara->height + e_pchara->nMoveHeight ) / 2;
+    }
+    else {
+        nTemp = e_pchara->y + e_pchara->height;
+    }
+    int nGroundY = FindAndDrawClosestGroundY( e_pchara->x, e_pchara->x + e_pchara->width, nTemp );
 
     character_gravity( nGroundY );
 
@@ -947,9 +976,10 @@ void character_draw()
     character_attack();
 
     // check monster alive?
-    //charater_update2();
+//    charater_update2();
 
     character_StateChangeImage();
+
 
     character_BoundryCheck();
     character_CheckBlocker();
@@ -958,7 +988,7 @@ void character_draw()
     	CameraUpdate( &g_CameraPosition, e_pchara->x, e_pchara->y, e_pchara->width, e_pchara->height, e_pchara->nMoveWidth );
     	al_identity_transform( &camera );
     	al_translate_transform( &camera, -g_CameraPosition, 0 );
-    	al_use_transform( &camera );\
+    	al_use_transform( &camera );
 	}
 
 //    printf( "character_draw\n" );
@@ -1046,7 +1076,10 @@ void character_draw()
         //assert( false );
         break;
     } // end of switch
-//    printf( "character_draw\n" );
+
+    al_draw_bitmap( e_pchara->img_atkWord, g_CameraPosition, HEIGHT - g_nWordHeight, 0 );
+
+    printf( "character_draw\n" );
 }
 void character_destory(){
 //    printf( "character_destory\n" );

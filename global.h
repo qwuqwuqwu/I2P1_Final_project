@@ -57,6 +57,16 @@ enum EMonsterState {
     EMS_DIE = 1,
 };
 
+enum EBlockType {
+    EBT_GRASS = 1,
+    EBT_CLOUD = 2,
+    EBT_LONGCLOUD = 3,
+    EBT_BRIDGE = 4,
+    EBT_LONGBRIDGE = 5,
+    EBT_STONE1 = 6,
+    EBT_STONE2 = 7,
+};
+
 typedef struct _Character {
 	bool dir; // left: false, right: true
     int x, y; // the position of image
@@ -100,12 +110,14 @@ typedef struct _Character {
     ALLEGRO_BITMAP *img_move[ 4 ];
     ALLEGRO_BITMAP *img_slide[ 2 ];
     ALLEGRO_BITMAP *img_transform[ 3 ];
+    ALLEGRO_BITMAP *img_atkWord;
 
     // bit map store
     ALLEGRO_BITMAP *img_store_SpecialAtk[ 2 * ESA_NUM ];
     ALLEGRO_BITMAP *img_store_move[ 4 * ESA_NUM ];
     ALLEGRO_BITMAP *img_store_slide[ 2 * ESA_NUM ];
     ALLEGRO_BITMAP *img_store_transform[ NUMOF_TRANSFORM_IMG * ESA_NUM ];
+    ALLEGRO_BITMAP *img_store_AtkWord[ ESA_NUM ];
 
     ALLEGRO_SAMPLE_INSTANCE *atk_Sound;
 } Character;

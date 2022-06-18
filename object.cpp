@@ -118,7 +118,7 @@ bool CheckBlocker( Position *pPos, const bool bDir )
 
         bool bOverlap = AdvCheckOverlap( pPos, &Ground, &nOrientation, &nClampValue );
 
-        if( bOverlap == true ) {
+        if( bOverlap == true && ( g_Ground[ i ].type == EBT_GRASS || g_Ground[ i ].type == EBT_STONE1 || g_Ground[ i ].type == EBT_STONE2 ) ) {
             bClamped = true;
             //printf( "******** clamped dir = %d, value = %d\n", nOrientation, nClampValue );
             switch( nOrientation ) {
@@ -164,14 +164,18 @@ int FindAndDrawClosestGroundY( const int w, const int e, const int s ){
         nGroundY = g_Ground[ nClosestGroundIdx ].y;
     }
 
-//    if( DEBUGPRINT_SCENE ) {
-//        printf( "obj x = %d, y = %d\n", e_pchara->x, e_pchara->y );
+    if( DEBUGPRINT_SCENE ) {
+        printf( "obj s = %d\n", s );
+        printf( "*************************************Ground %d: x = %d, y = %d, width = %d, height = %d\n",
+               nClosestGroundIdx,
+               g_Ground[ nClosestGroundIdx ].x, g_Ground[ nClosestGroundIdx ].y,
+                g_Ground[ nClosestGroundIdx ].nWidth, g_Ground[ nClosestGroundIdx ].nHeight );
 //        for( int i = 0; i < nFoundGroundCount; i++ ) {
 //            printf( "*************************************Ground %d: x = %d, y = %d, width = %d, height = %d\n",
 //                    i, g_Ground[ nFoundGroundIdx[ i ] ].x, g_Ground[ nFoundGroundIdx[ i ] ].y,
 //                    g_Ground[ nFoundGroundIdx[ i ] ].nWidth, g_Ground[ nFoundGroundIdx[ i ] ].nHeight );
 //        }
-//    }
+    }
     return nGroundY - 1;
 }
 
@@ -180,7 +184,7 @@ int FindClosestGround( int *pGroundIdx, int nGroundCount, const int s ) {
     int nClosestGroundIdx = -1;
 
     for( int i = 0; i < nGroundCount; i++ ) {
-        if( g_Ground[ pGroundIdx[ i ] ].y >= s && g_Ground[ pGroundIdx[ i ] ].y < nMinY ) {
+        if( g_Ground[ pGroundIdx[ i ] ].y > s && g_Ground[ pGroundIdx[ i ] ].y < nMinY ) {
             nMinY = g_Ground[ pGroundIdx[ i ] ].y;
             nClosestGroundIdx = pGroundIdx[ i ];
         }
@@ -279,6 +283,7 @@ void GroundSetup( void )
 
         g_Ground[ i ].nWidth = al_get_bitmap_width( Ground[ i ] );
         g_Ground[ i ].nHeight = al_get_bitmap_height( Ground[ i ] );
+        printf( "i, height = %d, %d\n", i, g_Ground[ i ].nHeight );
     }
 
     // release the file handler
