@@ -1,5 +1,6 @@
 *.depend
 *.layout
+*.log
 *.exe
 obj
 bin
