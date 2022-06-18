@@ -27,6 +27,8 @@ int g_nCDCursor = 0;
 int g_nCDTime = 20;
 int camera_move = 1;
 
+int g_nWordHeight = 0;
+
 void CameraUpdate( float *CamPosition, int x, int y, int width, int height, int nMoveWidth )
 {
 //    printf( "CameraUpdate\n" );
@@ -92,6 +94,10 @@ void character_init( const int nTerrainWidth ){
             }
 
             // transform
+            e_pchara->img_store_AtkWord[ i ] = al_load_bitmap( "./image/sign_normal.png" );
+            e_pchara->img_atkWord = e_pchara->img_store_AtkWord[ i ];
+            assert( e_pchara->img_store_AtkWord[ i ] != NULL );
+            g_nWordHeight = al_get_bitmap_height( e_pchara->img_store_AtkWord[ i ] );
             // do nothing
             break;
 
@@ -127,6 +133,9 @@ void character_init( const int nTerrainWidth ){
                 e_pchara->img_store_transform[ 3 * i + j ] = al_load_bitmap( temp );
                 assert( e_pchara->img_store_transform[ 3 * i + j ] != NULL );
             }
+
+            e_pchara->img_store_AtkWord[ i ] = al_load_bitmap( "./image/sign_sword.png" );
+            assert( e_pchara->img_store_AtkWord[ i ] != NULL );
             break;
 
         case ESA_BOMB:
@@ -161,6 +170,9 @@ void character_init( const int nTerrainWidth ){
                 e_pchara->img_store_transform[ 3 * i + j ] = al_load_bitmap( temp );
                 assert( e_pchara->img_store_transform[ 3 * i + j ] != NULL );
             }
+
+            e_pchara->img_store_AtkWord[ i ] = al_load_bitmap( "./image/sign_bomb.png" );
+            assert( e_pchara->img_store_AtkWord[ i ] != NULL );
             break;
 
         case ESA_FIRE:
@@ -195,6 +207,9 @@ void character_init( const int nTerrainWidth ){
                 e_pchara->img_store_transform[ 3 * i + j ] = al_load_bitmap( temp );
                 assert( e_pchara->img_store_transform[ 3 * i + j ] != NULL );
             }
+
+            e_pchara->img_store_AtkWord[ i ] = al_load_bitmap( "./image/sign_fire.png" );
+            assert( e_pchara->img_store_AtkWord[ i ] != NULL );
             break;
 
         default:
@@ -537,7 +552,7 @@ void character_checkTransform( void ) {
                 e_pchara->state = ECS_TRANSFORMING;
                 e_pchara->nTransformCursor = 0;
                 e_pchara->NextSpecailAtk = ( ESpecialAtk )( i + 1 );
-
+                e_pchara->img_atkWord = e_pchara->img_store_AtkWord[ e_pchara->NextSpecailAtk ];
                 e_pchara->nInhaleCursor = 0;
 
                 e_monster[ i ].state = EMS_DIE;
@@ -907,7 +922,7 @@ void character_draw()
     	CameraUpdate( &g_CameraPosition, e_pchara->x, e_pchara->y, e_pchara->width, e_pchara->height, e_pchara->nMoveWidth );
     	al_identity_transform( &camera );
     	al_translate_transform( &camera, -g_CameraPosition, 0 );
-    	al_use_transform( &camera );\
+    	al_use_transform( &camera );
 	}
 
 //    printf( "character_draw\n" );
@@ -978,7 +993,10 @@ void character_draw()
         assert( false );
         break;
     } // end of switch
-//    printf( "character_draw\n" );
+
+    al_draw_bitmap( e_pchara->img_atkWord, g_CameraPosition, HEIGHT - g_nWordHeight, 0 );
+
+    printf( "character_draw\n" );
 }
 void character_destory(){
 //    printf( "character_destory\n" );
