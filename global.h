@@ -13,6 +13,7 @@
 #define GAME_TERMINATE ( -1 )
 #define NUMOF_TRANSFORM_IMG ( 3 )
 
+
 // note that you can't assign initial value here!
 extern const float FPS;
 extern const int WIDTH;
@@ -57,6 +58,12 @@ enum EOrientationDirection {
 enum EMonsterState {
     EMS_ALIVE = 0,
     EMS_DIE = 1,
+};
+
+enum EMonsterType {
+    EMT_NORMAL = 0,
+    EMS_FRIE = 1,
+    EMS_BOMB = 2,
 };
 
 enum EBlockType {
@@ -127,6 +134,7 @@ typedef struct _Character {
     ALLEGRO_BITMAP *img_store_slide[ 2 * ESA_NUM ];
     ALLEGRO_BITMAP *img_store_transform[ NUMOF_TRANSFORM_IMG * ESA_NUM ];
     ALLEGRO_BITMAP *img_store_AtkWord[ ESA_NUM ];
+    ALLEGRO_BITMAP *img_store_HP[ 10 ];
 
     ALLEGRO_SAMPLE_INSTANCE *atk_Sound;
 } Character;
@@ -136,11 +144,12 @@ typedef struct _Mon {
     int width, height; // the width and height of image
     bool dir; // left: false, right: true
     int state; // the state of character
-    ALLEGRO_BITMAP *img_move[ 1 ];
+    int type;
+    ALLEGRO_BITMAP *img_move[ 3 ];
+    ALLEGRO_BITMAP *img_atk[ 3 ];
     int anime; // counting the time of animation
     int anime_time; // indicate how long the animation
     int hp;
-    int amidie;
 
     int y0;
     float vy;
