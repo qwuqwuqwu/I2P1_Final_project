@@ -105,8 +105,8 @@ typedef struct _Character {
     ESpecialAtk NextSpecailAtk;
 
 	// cursor and time
-    int anime; 				// counting the time of animation
-    int anime_time; 		// indicate how long the animation
+    int nMoveCursor; 	    // counting the time of animation
+    int nMoveTime; 		    // indicate how long the animation
     int nAtkCursor; 		// attack cursor
     int nAtkTime; 			// attack duration
     int nSlideCursor;		// slide cursor

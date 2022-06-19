@@ -271,8 +271,8 @@ void character_init( const int nTerrainWidth ){
     // initial the animation component
     e_pchara->state = ECS_STOP;
     e_pchara->nSubState = 0;
-    e_pchara->anime = 0;
-    e_pchara->anime_time = 20;
+    e_pchara->nMoveCursor = 0;
+    e_pchara->nMoveTime = 20;
     e_pchara->nAtkCursor = 0;
     e_pchara->nAtkTime = 20;
     e_pchara->nSlideCursor = 0;
@@ -328,10 +328,10 @@ void charater_process(ALLEGRO_EVENT event){
             }
 
             if( e_pchara->state == ECS_MOVE ) {
-                e_pchara->anime++;
-                e_pchara->anime %= e_pchara->anime_time;
+                e_pchara->nMoveCursor++;
+                e_pchara->nMoveCursor %= e_pchara->nMoveTime;
 
-                if( e_pchara->anime == 0 ) {
+                if( e_pchara->nMoveCursor == 0 ) {
                     e_pchara->state = ECS_STOP;
                 }
             }
@@ -389,8 +389,8 @@ void charater_process(ALLEGRO_EVENT event){
     // process the keyboard event
     }
     else if( event.type == ALLEGRO_EVENT_KEY_DOWN ) {
-        key_state[event.keyboard.keycode] = true;
-        e_pchara->anime = 0;
+        key_state[ event.keyboard.keycode ] = true;
+        e_pchara->nMoveCursor = 0;
     }
     else if( event.type == ALLEGRO_EVENT_KEY_UP ) {
         key_state[event.keyboard.keycode] = false;
@@ -697,13 +697,13 @@ void character_StateChangeImage( void )
             e_pchara->nSubState = 0;
         }
 
-        if( e_pchara->anime < e_pchara->anime_time / 4 ) {
+        if( e_pchara->nMoveCursor < e_pchara->nMoveTime / 4 ) {
             e_pchara->nSubState = 0;
         }
-        else if( e_pchara->anime_time / 4 <= e_pchara->anime && e_pchara->anime < e_pchara->anime_time / 2) {
+        else if( e_pchara->nMoveCursor < e_pchara->nMoveTime / 2 ) {
             e_pchara->nSubState = 1;
         }
-        else if( e_pchara->anime_time / 2 <= e_pchara->anime && e_pchara->anime < e_pchara->anime_time * 3 / 4 ) {
+        else if( e_pchara->nMoveCursor < e_pchara->nMoveTime * 3 / 4 ) {
             e_pchara->nSubState = 2;
         }
         else{
