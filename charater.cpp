@@ -996,7 +996,35 @@ void character_StateChangeImage( void )
 //    printf( "character_StateChangeImage\n" );
 }
 
-void character_attack( void )
+void character_attackMonster( void )
+{
+    if( e_pchara->state != ECS_ATK ) {
+        return;
+    }
+
+    // check monster
+    for( int i = 0; i < MONSTER_NUMBERS; i++ ) {
+        if( e_monster[ i ].state != EMS_DIE ) {
+            Position CharacterPos, MonsterPos;
+            CharacterPos.w = e_pchara->x;
+            CharacterPos.e = e_pchara->x + e_pchara->width;
+            CharacterPos.n = e_pchara->y;
+            CharacterPos.s = e_pchara->y + e_pchara->height;
+            MonsterPos.e = e_monster[ i ].x + e_monster[ i ].width - 8;
+            MonsterPos.w = e_monster[ i ].x + 8;
+            MonsterPos.n = e_monster[ i ].y + 8;
+            MonsterPos.s = e_monster[ i ].y + e_monster[ i ].height - 8;
+
+            if( CheckOverlap( &CharacterPos, &MonsterPos ) == true ) {
+                e_monster[ i ].hp -= ( ( int )e_pchara->NowSpecialAtk + 1 );
+            }
+        }
+    }
+
+    // check monster bomb
+}
+
+void character_attack_move( void )
 {
 //    printf( "character_attack\n" );
     if( g_bCDing == true ) {
@@ -1062,7 +1090,7 @@ void character_draw()
     character_eat();
     character_checkTransform();
 
-    character_attack();
+    character_attack_move();
 
     // check monster alive?
 //    charater_update2();
@@ -1072,6 +1100,7 @@ void character_draw()
 
     character_BoundryCheck();
     character_CheckBlocker();
+    character_attackMonster();
 
 	if( camera_move == 1 ) {
     	CameraUpdate( &e_pchara->CamPos, e_pchara->x, e_pchara->y, e_pchara->width, e_pchara->height, e_pchara->nMoveWidth );
@@ -1079,7 +1108,6 @@ void character_draw()
     	al_translate_transform( &camera, -e_pchara->CamPos, 0 );
     	al_use_transform( &camera );
 	}
-
 
     character_drawhp();
     //    printf( "character_draw\n" );
