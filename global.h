@@ -32,8 +32,7 @@ enum ESpecialAtk {
     ESA_SWORD = 1,
     ESA_BOMB = 2,
     ESA_FIRE = 3,
-    ESA_NUM = 4,
-    ESA_BOSS = 5,
+    ESA_NUM = 4,ESA_BOSS = 5,
 };
 
 // the state of character
