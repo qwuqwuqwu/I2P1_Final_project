@@ -3,7 +3,7 @@
 
 #define MAX_COUNTOF_CONTINUOUS_JUMP ( 2 )
 #define JUMP_VY ( -90 )
-#define MONSTER_NUMBERS ( 3 )
+#define MONSTER_NUMBERS ( 4 )
 
 #define SLIDE_RATE  ( 3 )
 #define ATK_RATE    ( 3 )
@@ -1002,14 +1002,63 @@ void character_attackMonster( void )
         return;
     }
 
+    // while in bomb state, only bomb can attack
+    if( e_pchara->NowSpecialAtk == ESA_BOMB ) {
+        return;
+    }
+
+    // plot fire
+    if( e_pchara->NowSpecialAtk == ESA_FIRE ) {
+        if( e_pchara->dir == true ) {
+            al_draw_bitmap( e_pchara->img_fire[ e_pchara->nSubState ],
+                            e_pchara->x + e_pchara->width,
+                            e_pchara->y + ( e_pchara->height- al_get_bitmap_height( e_pchara->img_fire[ e_pchara->nSubState ] ) ) / 2,
+                            ALLEGRO_FLIP_HORIZONTAL );
+        }
+        else {
+            al_draw_bitmap( e_pchara->img_fire[ e_pchara->nSubState ],
+                            e_pchara->x - al_get_bitmap_width( e_pchara->img_fire[ e_pchara->nSubState ] ),
+                            e_pchara->y + ( e_pchara->height- al_get_bitmap_height( e_pchara->img_fire[ e_pchara->nSubState ] ) ) / 2,
+                            0 );
+        }
+    }
+
     // check monster
     for( int i = 0; i < MONSTER_NUMBERS; i++ ) {
         if( e_monster[ i ].state != EMS_DIE ) {
             Position CharacterPos, MonsterPos;
-            CharacterPos.w = e_pchara->x;
-            CharacterPos.e = e_pchara->x + e_pchara->width;
-            CharacterPos.n = e_pchara->y;
-            CharacterPos.s = e_pchara->y + e_pchara->height;
+            if( e_pchara->NowSpecialAtk == ESA_FIRE ) {
+                if( e_pchara->dir == true ) {
+                    CharacterPos.w = e_pchara->x + e_pchara->width;
+                    CharacterPos.e = e_pchara->x + e_pchara->width
+                                     + al_get_bitmap_width( e_pchara->img_fire[ e_pchara->nSubState ] );
+
+                    CharacterPos.n = e_pchara->y
+                                    + ( e_pchara->height- al_get_bitmap_height( e_pchara->img_fire[ e_pchara->nSubState ] ) ) / 2;
+
+                    CharacterPos.s = e_pchara->y
+                                    + ( e_pchara->height+ al_get_bitmap_height( e_pchara->img_fire[ e_pchara->nSubState ] ) ) / 2;
+                }
+                else {
+                    CharacterPos.e = e_pchara->x;
+                    CharacterPos.w = e_pchara->x
+                                     - al_get_bitmap_width( e_pchara->img_fire[ e_pchara->nSubState ] );
+
+                    CharacterPos.n = e_pchara->y
+                                    + ( e_pchara->height- al_get_bitmap_height( e_pchara->img_fire[ e_pchara->nSubState ] ) ) / 2;
+
+                    CharacterPos.s = e_pchara->y
+                                    + ( e_pchara->height+ al_get_bitmap_height( e_pchara->img_fire[ e_pchara->nSubState ] ) ) / 2;
+                }
+            }
+            // normal, sword
+            else {
+                CharacterPos.w = e_pchara->x;
+                CharacterPos.e = e_pchara->x + e_pchara->width;
+                CharacterPos.n = e_pchara->y;
+                CharacterPos.s = e_pchara->y + e_pchara->height;
+            }
+
             MonsterPos.e = e_monster[ i ].x + e_monster[ i ].width - 8;
             MonsterPos.w = e_monster[ i ].x + 8;
             MonsterPos.n = e_monster[ i ].y + 8;
@@ -1115,7 +1164,7 @@ void character_draw()
     // with the state, draw corresponding image
 
     if( g_bImmortal == true ) {
-        if( g_nImortalCursor % 5 > 2 ) {
+        if( g_nImortalCursor % 5 > 1 ) {
             charactor_show();
         }
     }
