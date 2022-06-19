@@ -1148,7 +1148,7 @@ void character_attackMonster( void )
                             g_nBossImmortalCursor = 0;
                             e_monster[ i ].state = EMS_INJURED;
                             e_monster[ i ].nInjuredCursor = 0;
-e_							monster[ i ].hp -= ( ( int )e_pchara->NowSpecialAtk + 1 );
+                            e_monster[ i ].hp -= ( ( int )e_pchara->NowSpecialAtk + 1 );
                             //printf( "Injured by others, now hp is %d\n", e_pchara->hp );
                             //printf( "yo\n" );
                         }

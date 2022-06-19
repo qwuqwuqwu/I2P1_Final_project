@@ -31,7 +31,7 @@ int g_nBossBombRow = 0;
 
 bool g_bStartFalling = false;
 int g_nFallingCursor = 0;
-int g_nFallingTime = 300;
+int g_nFallingTime = 120;
 int g_nFallingRow = 0;
 
 ALLEGRO_BITMAP *Ground[ MAX_COUNTOF_GROUND ] = { NULL };
