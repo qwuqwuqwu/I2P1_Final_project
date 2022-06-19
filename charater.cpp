@@ -3,7 +3,7 @@
 
 #define MAX_COUNTOF_CONTINUOUS_JUMP ( 2 )
 #define JUMP_VY ( -90 )
-#define MONSTER_NUMBERS ( 4 )
+#define MAX_COUNTOF_MONSTER ( 100 )
 
 #define SLIDE_RATE  ( 3 )
 #define ATK_RATE    ( 3 )
@@ -32,6 +32,7 @@ bool g_bImmortal = false;
 int g_nImortalCursor = 0;
 int g_nImortalTime = 120;
 
+int g_nMonsterCount = 0;
 
 void CameraUpdate( float *CamPosition, int x, int y, int width, int height, int nMoveWidth )
 {
@@ -625,7 +626,7 @@ void character_checkTransform( void ) {
     CharacterPos.n = e_pchara->y;
     CharacterPos.s = e_pchara->y + e_pchara->height;
 
-    for( int i = 0; i < MONSTER_NUMBERS; i++ ) {
+    for( int i = 0; i < g_nMonsterCount; i++ ) {
         if( e_monster[ i ].state == EMS_ALIVE ) {
             // given monster position
             Position MonsterPos;
@@ -1024,7 +1025,7 @@ void character_attackMonster( void )
     }
 
     // check monster
-    for( int i = 0; i < MONSTER_NUMBERS; i++ ) {
+    for( int i = 0; i < g_nMonsterCount; i++ ) {
         if( e_monster[ i ].state != EMS_DIE ) {
             Position CharacterPos, MonsterPos;
             if( e_pchara->NowSpecialAtk == ESA_FIRE ) {
@@ -1315,22 +1316,22 @@ void monster_init( void )
     int nLM = 0;
     int nRM = 0;
     int nType = 0;
-    int nMonsterNumber = 0;
+    g_nMonsterCount = 0;
     while( fscanf( fp, "%d%d%d%d%d", &nPosX, &nPosY, &nLM, &nRM, &nType ) != EOF ) {
-        e_monster[ nMonsterNumber ].x = nPosX;
-        e_monster[ nMonsterNumber ].y = nPosY;
-        e_monster[ nMonsterNumber ].lm = nLM;
-        e_monster[ nMonsterNumber ].rm = nRM;
-        e_monster[ nMonsterNumber ].type = nType;
-        nMonsterNumber++;
+        e_monster[ g_nMonsterCount ].x = nPosX;
+        e_monster[ g_nMonsterCount ].y = nPosY;
+        e_monster[ g_nMonsterCount ].lm = nLM;
+        e_monster[ g_nMonsterCount ].rm = nRM;
+        e_monster[ g_nMonsterCount ].type = nType;
+        g_nMonsterCount++;
 
-        if( nMonsterNumber == MONSTER_NUMBERS ) {
+        if( g_nMonsterCount == MAX_COUNTOF_MONSTER ) {
             break;
         }
     }
     fclose( fp ); //記得關檔
 
-    for( int n = 0; n < MONSTER_NUMBERS; n++ ) {
+    for( int n = 0; n < g_nMonsterCount; n++ ) {
         if( e_monster[ n ].type == ESA_NORMAL ) {
             for( int i = 0; i < 2; i++ ) {
                 char temp[ 50 ];
@@ -1417,7 +1418,7 @@ void monster_process( ALLEGRO_EVENT event )
     // process the animation                //1.處理動畫
     if( event.type == ALLEGRO_EVENT_TIMER ){ //根據fps+anime
         if( event.timer.source == fps ){
-            for( int n = 0; n < MONSTER_NUMBERS; n++ ) {
+            for( int n = 0; n < g_nMonsterCount; n++ ) {
                 e_monster[ n ].anime++;
                 e_monster[ n ].anime %= e_monster[ n ].anime_time; //讓我們知道現在跑道time的哪一步
 
@@ -1461,7 +1462,7 @@ void monster_process( ALLEGRO_EVENT event )
 
 void monster_update( void )
 {
-    for( int i = 0; i < MONSTER_NUMBERS; i++ ) {
+    for( int i = 0; i < g_nMonsterCount; i++ ) {
         if( e_monster[ i ].state == EMS_ALIVE || e_monster[ i ].state == EMS_ATK ) {
             Position CharacterPosNoAtk,MonsterPosNoAtk;
             CharacterPosNoAtk.w = e_pchara->x;
@@ -1564,7 +1565,7 @@ void monster_CheckBlocker( const int nMonsterIdx )
 void monster_draw( void )
 {
     //printf( "character_draw2\n" );
-    for( int n = 0; n < MONSTER_NUMBERS; n++ ) {
+    for( int n = 0; n < g_nMonsterCount; n++ ) {
     // with the state, draw corresponding image
         if( e_monster[ n ].state == EMS_ALIVE || e_monster[ n ].state == EMS_ATK ) {
 
@@ -1628,7 +1629,7 @@ void monster_draw( void )
 void monster_destroy( void )
 {
 //    printf( "character_destory2\n" );
-    for( int n = 0; n < MONSTER_NUMBERS; n++ ) {
+    for( int n = 0; n < g_nMonsterCount; n++ ) {
         al_destroy_bitmap( e_monster[ n ].img_move[ 0 ] );
     }
 //    printf( "character_destory2\n" );
