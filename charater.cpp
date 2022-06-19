@@ -122,8 +122,6 @@ void character_init( const int nTerrainWidth ){
             // do nothing
             break;
 
-
-
         case ESA_SWORD:
             // special attack
             for(int j = 0; j < 2; j++){
@@ -635,14 +633,19 @@ void character_checkTransform( void ) {
             MonsterPos.s = e_monster[ i ].y + e_monster[ i ].height;
 
             if( CheckOverlap( &CharacterPos, &MonsterPos ) == true ) {
-                e_pchara->state = ECS_TRANSFORMING;
-                e_pchara->nTransformCursor = 0;
-                e_pchara->NextSpecailAtk = ( ESpecialAtk )( i + 1 );
-                e_pchara->img_atkWord = e_pchara->img_store_AtkWord[ e_pchara->NextSpecailAtk ];
-                e_pchara->nInhaleCursor = 0;
-
                 e_monster[ i ].state = EMS_DIE;
                 e_monster[ i ].hp = 0;
+                e_pchara->nInhaleCursor = 0;
+
+                if( ( ESpecialAtk )e_monster[ i ].type == ESA_NORMAL ) {
+                    e_pchara->state = ECS_STOP;
+                }
+                else {
+                    e_pchara->state = ECS_TRANSFORMING;
+                    e_pchara->nTransformCursor = 0;
+                    e_pchara->NextSpecailAtk = ( ESpecialAtk )e_monster[ i ].type;
+                    e_pchara->img_atkWord = e_pchara->img_store_AtkWord[ e_pchara->NextSpecailAtk ];
+                }
                 printf( "Next Special Attack is %d\n", e_pchara->NextSpecailAtk );
                 break;
             }
