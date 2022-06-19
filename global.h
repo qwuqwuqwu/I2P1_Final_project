@@ -182,6 +182,8 @@ typedef struct _Mon {
     ALLEGRO_BITMAP *img_move[ 2 ];
     ALLEGRO_BITMAP *img_atk[ 2 ];
     ALLEGRO_BITMAP *img_fire[ 2 ];
+    ALLEGRO_BITMAP *img_hurt[ 1 ];
+    ALLEGRO_BITMAP *img_die[ 1 ];
 
     int hp;
     int nBombIdx;
