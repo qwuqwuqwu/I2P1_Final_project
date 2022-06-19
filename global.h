@@ -32,8 +32,7 @@ enum ESpecialAtk {
     ESA_SWORD = 1,
     ESA_BOMB = 2,
     ESA_FIRE = 3,
-    ESA_NUM = 4,
-    ESA_BOSS = 5,
+    ESA_NUM = 4,ESA_BOSS = 5,
 };
 
 // the state of character
@@ -183,6 +182,8 @@ typedef struct _Mon {
     ALLEGRO_BITMAP *img_move[ 2 ];
     ALLEGRO_BITMAP *img_atk[ 2 ];
     ALLEGRO_BITMAP *img_fire[ 2 ];
+    ALLEGRO_BITMAP *img_hurt[ 1 ];
+    ALLEGRO_BITMAP *img_die[ 1 ];
 
     int hp;
     int nBombIdx;
