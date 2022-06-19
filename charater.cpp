@@ -24,8 +24,8 @@ int g_nTerrainWidth = 0;
 ECharacterState g_LastState;
 int g_nLastSubState;
 
-EMonsterState g_MonLastState;
-int g_nMonLastSubState;
+EMonsterState g_MonLastState[ MAX_COUNTOF_MONSTER ];
+int g_nMonLastSubState[ MAX_COUNTOF_MONSTER ];
 
 bool g_bCDing = false;
 int g_nCDCursor = 0;
@@ -34,6 +34,7 @@ int camera_move = 1;
 
 int g_nWordHeight = 0;
 bool g_bImmortal = false;
+bool g_bForceImmortal = false;
 int g_nImortalCursor = 0;
 int g_nImortalTime = 10 * FPS; // 10 sec
 
@@ -74,6 +75,15 @@ void character_init( const int nTerrainWidth, const int nLife ){
 
     // new e_pchara
     e_pchara = ( Character * )malloc( sizeof( Character ) );
+    g_bImmortal = false;
+    g_bForceImmortal = false;
+    g_LastState = ECS_STOP;
+    g_nLastSubState = 0;
+    g_nCDCursor = 0;
+    camera_move = 1;
+    g_nWordHeight = 0;
+    g_nImortalCursor = 0;
+    g_nImortalTime = 10 * FPS; // 10 sec
 
     // load character images
     // inhale
@@ -346,7 +356,7 @@ void charater_process( ALLEGRO_EVENT event )
 
             if( g_bImmortal == true ) {
                 g_nImortalCursor = ( g_nImortalCursor + 1 ) % g_nImortalTime;
-                if( g_nImortalCursor == 0 ) {
+                if( g_bForceImmortal == false && g_nImortalCursor == 0 ) {
                     g_bImmortal = false;
                 }
             }
@@ -414,7 +424,7 @@ void charater_process( ALLEGRO_EVENT event )
     }
     else if( event.type == ALLEGRO_EVENT_KEY_DOWN ) {
         key_state[ event.keyboard.keycode ] = true;
-        e_pchara->nMoveCursor = 0;
+        //e_pchara->nMoveCursor = 0;
     }
     else if( event.type == ALLEGRO_EVENT_KEY_UP ) {
         key_state[event.keyboard.keycode] = false;
@@ -505,6 +515,20 @@ void charater_update( void )
             al_set_sample_instance_gain( g_pMenuSampleInstance, 1 );
             g_bMute = false;
         }
+    }
+    // force immortal
+    else if( key_state[ ALLEGRO_KEY_I ] ) {
+        if( g_bForceImmortal == false ) {
+            g_bImmortal = true;
+            g_bForceImmortal = true;
+            g_nImortalCursor = 0;
+        }
+        else {
+            g_bImmortal = false;
+            g_bForceImmortal = false;
+            g_nImortalCursor = 0;
+        }
+
     }
 //    printf( "charater_update\n" );
 }
@@ -1422,6 +1446,11 @@ void monster_init( void )
     int nRM = 0;
     int nType = 0;
     g_nMonsterCount = 0;
+    for( int i = 0; i < MAX_COUNTOF_MONSTER; i++ ) {
+        g_MonLastState[ i ] = EMS_ALIVE;
+        g_nMonLastSubState[ i ] = 0;
+    }
+
     while( fscanf( fp, "%d%d%d%d%d", &nPosX, &nPosY, &nLM, &nRM, &nType ) != EOF ) {
         e_monster[ g_nMonsterCount ].x = nPosX;
         e_monster[ g_nMonsterCount ].y = nPosY;
@@ -1669,7 +1698,7 @@ void monster_StateChangeImage( const int i )
 //    printf( "update substate\n" );
     switch( NewState ) {
     case EMS_ALIVE:
-        if( NewState != g_MonLastState ) {
+        if( NewState != g_MonLastState[ i ] ) {
             e_monster[ i ].nSubState = 0;
         }
 
@@ -1682,7 +1711,7 @@ void monster_StateChangeImage( const int i )
         break;
 
     case EMS_ATK:
-        if( NewState != g_MonLastState ) {
+        if( NewState != g_MonLastState[ i ] ) {
             e_monster[ i ].nSubState = 0;
         }
 
@@ -1708,8 +1737,8 @@ void monster_StateChangeImage( const int i )
     switch( NewState ) {
     case EMS_ALIVE:
         // change state
-        if( g_MonLastState != NewState ||
-            ( g_MonLastState == NewState && ( g_nMonLastSubState != e_monster[ i ].nSubState ) ) ) {
+        if( g_MonLastState[ i ] != NewState ||
+            ( g_MonLastState[ i ] == NewState && ( g_nMonLastSubState[ i ] != e_monster[ i ].nSubState ) ) ) {
             if( e_monster[ i ].dir == false ) {
                 int nWidth = al_get_bitmap_width( e_monster[ i ].img_move[ e_monster[ i ].nSubState ] );
                 e_monster[ i ].x -= nWidth - e_monster[ i ].width;
@@ -1724,8 +1753,8 @@ void monster_StateChangeImage( const int i )
 
     case EMS_ATK:
         // change state
-        if( g_MonLastState != NewState ||
-            ( g_MonLastState == NewState && ( g_nMonLastSubState != e_monster[ i ].nSubState ) ) ) {
+        if( g_MonLastState[ i ] != NewState ||
+            ( g_MonLastState[ i ] == NewState && ( g_nMonLastSubState[ i ] != e_monster[ i ].nSubState ) ) ) {
             if( e_monster[ i ].dir == false ) {
                 int nWidth = al_get_bitmap_width( e_monster[ i ].img_atk[ e_monster[ i ].nSubState ] );
                 e_monster[ i ].x -= nWidth - e_monster[ i ].width;
@@ -1748,8 +1777,8 @@ void monster_StateChangeImage( const int i )
     }
 
 
-    g_MonLastState = NewState;
-    g_nMonLastSubState = e_pchara->nSubState;
+    g_MonLastState[ i ] = NewState;
+    g_nMonLastSubState[ i ] = e_pchara->nSubState;
 //    printf( "%d %d | ", g_LastState, g_nLastSubState );
 //    printf( "Character at x = %d, y = %d\n", e_pchara->x, e_pchara->y );
 //    printf( "character_StateChangeImage\n" );
