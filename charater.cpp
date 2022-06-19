@@ -1637,7 +1637,7 @@ void monster_init( void )
 
         if( e_monster[ n ].type == ESA_BOSS ) {
             g_nBossIdx = n;
-            e_monster[ n ].hp = 5;
+            e_monster[ n ].hp = 12;
             e_monster[ n ].dir = false;
             e_monster[ n ].nInjuredCursor = 0;
             e_monster[ n ].nInjuredTime = 120;
@@ -2196,22 +2196,22 @@ bool isCharacterAlive( void )
 
 void Boss_drawhp( void )
 {
-    if( e_monster[ g_nBossIdx ].hp >= 6 ) {
+    if( e_monster[ g_nBossIdx ].hp >= 11 ) {
         al_draw_bitmap( img_store_Boss_HP[ 6 ], e_pchara->CamPos + 480, HEIGHT - g_nWordHeight - 20, 0 );
     }
-	else if( e_monster[ g_nBossIdx ].hp ==5) {
+	else if( e_monster[ g_nBossIdx ].hp >= 9 ) {
         al_draw_bitmap( img_store_Boss_HP[ 5 ], e_pchara->CamPos + 480, HEIGHT - g_nWordHeight - 20, 0 );
     }
-	else if( e_monster[ g_nBossIdx ].hp == 4 ) {
+	else if( e_monster[ g_nBossIdx ].hp >= 7 ) {
         al_draw_bitmap( img_store_Boss_HP[ 4 ], e_pchara->CamPos + 480, HEIGHT - g_nWordHeight - 20, 0 );
     }
-    else if( e_monster[ g_nBossIdx ].hp == 3 ) {
+    else if( e_monster[ g_nBossIdx ].hp >= 5 ) {
         al_draw_bitmap( img_store_Boss_HP[ 3 ], e_pchara->CamPos + 480, HEIGHT - g_nWordHeight - 20, 0 );
     }
-    else if( e_monster[ g_nBossIdx ].hp == 2 ) {
+    else if( e_monster[ g_nBossIdx ].hp >= 3 ) {
         al_draw_bitmap( img_store_Boss_HP[ 2 ], e_pchara->CamPos + 480, HEIGHT - g_nWordHeight - 20, 0 );
     }
-    else if( e_monster[ g_nBossIdx ].hp == 1 ) {
+    else if( e_monster[ g_nBossIdx ].hp >= 1 ) {
         al_draw_bitmap( img_store_Boss_HP[ 1 ], e_pchara->CamPos + 480, HEIGHT - g_nWordHeight - 20, 0 );
     }
     else {

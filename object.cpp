@@ -10,6 +10,8 @@
 #define MAX_COUNTOF_BOSSBOMB_ROW    ( 10 )
 #define MAX_COUNTOF_BOSSBOMB_COL    ( 10 )
 
+#define BOMB_GRAVITY_RATE           ( 0.5 )
+
 // the state of object
 enum {NORMAL = 0, HIGHLIGHT};
 
@@ -570,16 +572,18 @@ void BombUpdate( void )
             if( nGroundY == -2 ) {
                 nGroundY = HEIGHT;
             }
+            float localTick = BOMB_GRAVITY_RATE * g_Tick;
 
             // ticktock
-            g_Bomb[ i ].FallingTick += g_Tick;
+            g_Bomb[ i ].FallingTick += localTick;
 
             // velocity;
-            g_Bomb[ i ].vy += g_Gravity * g_Tick;
+            g_Bomb[ i ].vy += g_Gravity * localTick;
             // position
             g_Bomb[ i ].y = g_Bomb[ i ].y0
                             + ( int )( g_Bomb[ i ].vy * g_Bomb[ i ].FallingTick
                                       + ( 0.5 * g_Gravity * ( g_Bomb[ i ].FallingTick * g_Bomb[ i ].FallingTick ) ) );
+
             g_Bomb[ i ].x = g_Bomb[ i ].x0 + g_Bomb[ i ].vx * g_Bomb[ i ].FallingTick;
 
 
@@ -648,11 +652,13 @@ void BossBomb_update( void )
                     nGroundY = HEIGHT;
                 }
 
+                float LocalTick = BOMB_GRAVITY_RATE * g_Tick;
+
                 // ticktock
-                g_BossBomb[ i ][ j ].FallingTick += g_Tick;
+                g_BossBomb[ i ][ j ].FallingTick += LocalTick;
 
                 // velocity;
-                g_BossBomb[ i ][ j ].vy += g_Gravity * g_Tick;
+                g_BossBomb[ i ][ j ].vy += g_Gravity * BOMB_GRAVITY_RATE * LocalTick;
                 // position
                 g_BossBomb[ i ][ j ].y = g_BossBomb[ i ][ j ].y0
                                 + ( int )( g_BossBomb[ i ][ j ].vy * g_BossBomb[ i ][ j ].FallingTick
