@@ -1376,14 +1376,14 @@ void charactor_show( void )
 
     case ECS_INJURED:
         //printf("%d\n",e_pchara->anime);
-        if( e_pchara->nInjuredCursor < 5 ) {
+//        if( e_pchara->nInjuredCursor < 5 ) {
             if( e_pchara->dir ) {
                 al_draw_bitmap( e_pchara->img_move[ e_pchara->nSubState ], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL );
             }
             else {
                 al_draw_bitmap( e_pchara->img_move[ e_pchara->nSubState ], e_pchara->x, e_pchara->y, 0);
             }
-        }
+//        }
         break;
 
 
@@ -1703,6 +1703,9 @@ void monsrt_attackCharacter( void )
                     e_pchara->state = ECS_INJURED;
                     e_pchara->nInjuredCursor = 0;
                     e_pchara->hp = e_pchara->hp - ( e_monster[ i ].type + 1 );
+
+                    e_pchara->NowSpecialAtk = ESA_NORMAL;
+                    e_pchara->img_atkWord = e_pchara->img_store_AtkWord[ e_pchara->NowSpecialAtk ];
                     printf( "Injured by others, now hp is %d\n", e_pchara->hp );
                     printf( "yo\n" );
                 }
@@ -1728,7 +1731,15 @@ void monsrt_attackCharacter( void )
             MonsterPos.n += 0;
 
             if( CheckOverlap( &CharacterPos, &MonsterPos ) == true ) {
+                g_bImmortal = true;
+                g_nImortalCursor = 0;
+                e_pchara->state = ECS_INJURED;
+                e_pchara->nInjuredCursor = 0;
                 e_pchara->hp -= 3;
+
+                e_pchara->NowSpecialAtk = ESA_NORMAL;
+                e_pchara->img_atkWord = e_pchara->img_store_AtkWord[ e_pchara->NowSpecialAtk ];
+
                 printf( "Injured by bomb %d, now hp is %d\n", i, e_pchara->hp );
                 ExplodeBomb( e_monster[ i ].nBombIdx );
             }
