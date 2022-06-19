@@ -41,7 +41,7 @@ bool g_bForceImmortal = false;
 int g_nImortalCursor = 0;
 int g_nImortalTime = 10 * FPS; // 10 sec
 
-int g_nBossIdx = 0;
+int g_nBossIdx = -1;
 bool g_bBossImmortal = false;
 int g_nBossImmortalCursor = 0;
 int g_nBossImmortalTime = 2 * FPS;
@@ -2187,6 +2187,8 @@ void monster_destroy( void )
         al_destroy_bitmap( img_store_Boss_HP[ i ] );
     }
 
+    g_nBossIdx = -1;
+
     printf( "monster destroy success!\n" );
 //    printf( "character_destory2\n" );
 }
@@ -2197,6 +2199,14 @@ bool isCharacterAlive( void )
         return false;
     }
     return e_pchara->hp > 0;
+}
+
+bool isBossAlive( void )
+{
+    if( g_nBossIdx < 0 || g_nBossIdx >= g_nMonsterCount ) {
+        return true;
+    }
+    return e_monster[ g_nBossIdx ].hp > 0;
 }
 
 void Boss_drawhp( void )

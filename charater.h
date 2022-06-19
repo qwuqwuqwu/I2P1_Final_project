@@ -16,4 +16,5 @@ void monster_draw( void );
 void monster_destroy( void );
 
 bool isCharacterAlive( void );
+bool isBossAlive( void );
 void Boss_drawhp( void );

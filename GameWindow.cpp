@@ -288,6 +288,10 @@ void game_update( void )
         charater_update();
         monster_update();
         bool bAlive = isCharacterAlive();
+        bool bBossAlive = isBossAlive();
+        if( bBossAlive == false ) {
+            printf( "DO SOMETHING!!!!!!\n" );
+        }
         if( bAlive == false ) {
             g_nLife--;
 
