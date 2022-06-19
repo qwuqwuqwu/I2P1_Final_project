@@ -79,7 +79,7 @@ void game_scene_destroy( void )
     for( int i = 0; i < COUNOF_BACKGROUND; i++ ) {
         al_destroy_bitmap( g_background[ i ] );
     }
-    printf( "destroy backgroun success\n" );
+    printf( "destroy background success\n" );
     object_destroy();
     character_destroy();
     monster_destroy();

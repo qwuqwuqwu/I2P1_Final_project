@@ -60,14 +60,12 @@ void CameraUpdate( float *CamPosition, int x, int y, int width, int height, int 
         al_stop_sample_instance( g_pMenuSampleInstance );
         al_destroy_sample_instance( g_pMenuSampleInstance );
 
-        if( BossSampleInstance == NULL ) {
-            BossSample = al_load_sample( "./sound/boss.mp3" );
-            BossSampleInstance = al_create_sample_instance( BossSample );
-            al_set_sample_instance_playmode( BossSampleInstance, ALLEGRO_PLAYMODE_LOOP );
-            al_attach_sample_instance_to_mixer( BossSampleInstance, al_get_default_mixer() );
-            al_set_sample_instance_gain( BossSampleInstance, 0.7 );
-            al_play_sample_instance( BossSampleInstance );
-        }
+        BossSample = al_load_sample( "./sound/boss.mp3" );
+        BossSampleInstance = al_create_sample_instance( BossSample );
+        al_set_sample_instance_playmode( BossSampleInstance, ALLEGRO_PLAYMODE_LOOP );
+        al_attach_sample_instance_to_mixer( BossSampleInstance, al_get_default_mixer() );
+        al_set_sample_instance_gain( BossSampleInstance, 0.7 );
+        al_play_sample_instance( BossSampleInstance );
         BossBomb_Trigger();
     }
 //    printf( "CameraUpdate\n" );
@@ -544,8 +542,6 @@ void charater_update( void )
     else if( key_state[ ALLEGRO_KEY_U ] ) {
         e_pchara->hp = HP;
     }
-
-    BossBomb_update();
 //    printf( "charater_update\n" );
 }
 
@@ -1401,21 +1397,30 @@ void charactor_show( void )
         //assert( false );
         break;
     } // end of switch
-    printf( "x = %d, y = %d\n", e_pchara->x, e_pchara->y );
+//    printf( "x = %d, y = %d\n", e_pchara->x, e_pchara->y );
 }
 
 void character_destroy( void )
 {
 //    printf( "character_destory\n" );
-    al_destroy_sample_instance( e_pchara->sound_inhale );
-    al_destroy_sample_instance( e_pchara->sound_transform );
-    al_destroy_sample_instance( e_pchara->sound_slash );
-    al_destroy_sample_instance( e_pchara->sound_fire );
-
+    printf( "1\n" );
+    if( camera_move == 0 ) {
+//        al_stop_sample_instance( BossSampleInstance );
+        al_destroy_sample( BossSample );
+        al_destroy_sample_instance( BossSampleInstance );
+    }
+    printf( "1.5\n" );
+    al_destroy_sample_instance( e_pchara->sound_inhale ); printf( "1.6\n" );
+    al_destroy_sample( sample_inhale );
+    al_destroy_sample_instance( e_pchara->sound_transform );printf( "1.7\n" );
+    al_destroy_sample( sample_transform );
+    al_destroy_sample_instance( e_pchara->sound_slash );printf( "1.8\n" );
+    al_destroy_sample_instance( e_pchara->sound_fire );printf( "1.9\n" );
+    printf( "2\n" );
     al_identity_transform( &camera );
     al_translate_transform( &camera, 0, 0 );
     al_use_transform( &camera );
-
+    printf( "3\n" );
     // bit map
     for( int i = 0; i < 2; i++ ) {
         al_destroy_bitmap( e_pchara->img_inhale[ i ] );
@@ -1423,6 +1428,7 @@ void character_destroy( void )
     for( int i = 0; i < 2; i++ ) {
         al_destroy_bitmap( e_pchara->img_fire[ i ] );
     }
+    printf( "4\n" );
     // bit map store
     for( int i = 0; i < ESA_NUM; i++ ) {
         for( int j = 0; j < 2; j++ ) {
@@ -1446,12 +1452,15 @@ void character_destroy( void )
 
         al_destroy_bitmap( e_pchara->img_store_AtkWord[ i ] );
     }
+    printf( "5\n" );
 
     for( int i = 0; i < HP + 1; i++ ) {
         al_destroy_bitmap( e_pchara->img_store_HP[ i ] );
     }
-
+    printf( "6\n" );
     al_destroy_bitmap( e_pchara->img_LIFE );
+
+    printf( "7\n" );
 
     free( e_pchara );
     e_pchara = NULL;
@@ -1758,7 +1767,10 @@ void monsrt_attackCharacter( void )
             }
         }
     }
+}
 
+void BossBomb_attackCharacter( void )
+{
     // check boss bomb
     Position CharacterPos;
     CharacterPos.e = e_pchara->x + e_pchara->width;
@@ -1771,7 +1783,7 @@ void monsrt_attackCharacter( void )
         g_nImortalCursor = 0;
         e_pchara->state = ECS_INJURED;
         e_pchara->nInjuredCursor = 0;
-        e_pchara->hp -= ( nBossHarm );
+        e_pchara->hp -= ( nBossHarm * 4 );
 
         e_pchara->NowSpecialAtk = ESA_NORMAL;
         e_pchara->img_atkWord = e_pchara->img_store_AtkWord[ e_pchara->NowSpecialAtk ];
@@ -2013,6 +2025,8 @@ void monster_draw( void )
             }
         }
     }
+
+    BossBomb_attackCharacter();
 //    printf( "character_draw2\n" );
 }
 

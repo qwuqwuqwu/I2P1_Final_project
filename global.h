@@ -13,7 +13,7 @@
 #define GAME_TERMINATE ( -1 )
 #define NUMOF_TRANSFORM_IMG ( 3 )
 #define HP          ( 6 )
-#define LIFE        ( 3 )
+#define LIFE        ( 2 )
 
 
 // note that you can't assign initial value here!

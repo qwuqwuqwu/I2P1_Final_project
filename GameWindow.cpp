@@ -236,10 +236,11 @@ void game_update( void )
             }
             // still have lives
             else {
+                al_rest(1);
                 al_stop_sample_instance( g_pMenuSampleInstance );
                 al_set_sample_instance_gain( DeathSampleInstance, 1 );
                 al_play_sample_instance( DeathSampleInstance );
-                al_rest(3);
+
 
                 //to be fetched
                 game_scene_destroy();
