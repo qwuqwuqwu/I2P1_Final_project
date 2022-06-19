@@ -383,7 +383,7 @@ void charater_process(ALLEGRO_EVENT event){
             if( e_pchara->state == ECS_INJURED ) {
                 e_pchara->nInjuredCursor++;
                 e_pchara->nInjuredCursor %= e_pchara->nInjuredTime;
-                printf( "e_pchara->nInjuredCursor = %d\n", e_pchara->nInjuredCursor );
+//                printf( "e_pchara->nInjuredCursor = %d\n", e_pchara->nInjuredCursor );
 
                 if( e_pchara->nInjuredCursor == 0 ) {
                     e_pchara->state = ECS_STOP;

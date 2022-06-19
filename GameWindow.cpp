@@ -15,6 +15,9 @@ ALLEGRO_BITMAP *img_over;
 
 int g_nLife = 2;
 
+int g_nWindow3Count = 0;
+#define MAX_COUNTOF_WINDOW3 ( 600 )
+
 // TODO
 // 1. release g_pMenuSample?
 // 2. release g_pMenuSampleInstance?
@@ -212,7 +215,6 @@ void game_update( void )
         }
     }
     if( g_nWindow == 2 ) {
-        printf( "window2\n" );
         charater_update();
         monster_update();
         bool bAlive = isCharacterAlive();
@@ -221,8 +223,6 @@ void game_update( void )
 
             if( g_nLife == 0 ) {
                 al_stop_sample_instance( g_pMenuSampleInstance );
-
-                printf( "1\n" );
                 game_scene_destroy();
 
                 g_nWindow = 3;
@@ -230,10 +230,6 @@ void game_update( void )
                 al_play_sample_instance( OverSampleInstance );
                 img_over = al_load_bitmap( "./image/over.png" );
                 assert( img_over != NULL );
-
-                window3();
-//                al_flip_display();
-                //al_rest(4);
             }
             // still have lives
             else {
@@ -249,7 +245,7 @@ void game_update( void )
             }
         }
     }
-    else if( g_nWindow == 3 ){
+    else if( g_nWindow == 3 ) {
         // do nothing
     }
 }
@@ -267,6 +263,12 @@ int process_event( void )
 	else if( g_nWindow == 2 ) {
         charater_process( event );
         monster_process( event );
+    }
+    else if( g_nWindow == 3 ) {
+        g_nWindow3Count++;
+        if( g_nWindow3Count > MAX_COUNTOF_WINDOW3 ) {
+            return GAME_TERMINATE;
+        }
     }
 
     // Shutdown our program
@@ -286,11 +288,6 @@ int process_event( void )
 
 void window3( void )
 {
-    printf( "window3\n" );
-
-    img_over = al_load_bitmap( "./image/over.png" );
-    assert( img_over != NULL );
-
     al_draw_bitmap( img_over, 0, 0, 0 );
 }
 
