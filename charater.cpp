@@ -70,7 +70,8 @@ void CameraUpdate( float *CamPosition, int x, int y, int width, int height, int 
 //    printf( "CameraUpdate\n" );
 }
 
-void character_init( const int nTerrainWidth, const int nLife ){
+void character_init( const int nTerrainWidth, const int nLife )
+{
 //    printf( "character_init\n" );
 
     // new e_pchara
@@ -102,13 +103,11 @@ void character_init( const int nTerrainWidth, const int nLife ){
         assert( e_pchara->img_store_HP[ i ] != NULL );
     }
 
-    //life
-    for(int i = 0; i < 1; i++){
-        char temp[ 50 ];
-        sprintf( temp, "./image/icon_life.png");
-        e_pchara->img_store_LIFE[ i+1] = al_load_bitmap( temp );
-        assert( e_pchara->img_store_LIFE[ i+1 ] != NULL );
-    }
+    // life
+    char temp[ 50 ];
+    sprintf( temp, "./image/icon_life.png" );
+    e_pchara->img_LIFE = al_load_bitmap( temp );
+    assert( e_pchara->img_LIFE != NULL );
 
     for( int i = 0; i < ESA_NUM; i++ ){
         //printf( "i = %d\n", i );
@@ -1214,15 +1213,15 @@ void character_drawhp( void )
     else {al_draw_bitmap(e_pchara->img_store_HP[ 0 ],e_pchara->CamPos+280, HEIGHT - g_nWordHeight-20, 0);}
 
     if(e_pchara->life >=3){
-    al_draw_bitmap(e_pchara->img_store_LIFE[ 1 ],e_pchara->CamPos+160, HEIGHT - g_nWordHeight-422, 0);
-    al_draw_bitmap(e_pchara->img_store_LIFE[ 1 ],e_pchara->CamPos+95, HEIGHT - g_nWordHeight-422, 0);
-    al_draw_bitmap(e_pchara->img_store_LIFE[ 1 ],e_pchara->CamPos+30, HEIGHT - g_nWordHeight-422, 0);
+    al_draw_bitmap(e_pchara->img_LIFE,e_pchara->CamPos+160, HEIGHT - g_nWordHeight-422, 0);
+    al_draw_bitmap(e_pchara->img_LIFE,e_pchara->CamPos+95, HEIGHT - g_nWordHeight-422, 0);
+    al_draw_bitmap(e_pchara->img_LIFE,e_pchara->CamPos+30, HEIGHT - g_nWordHeight-422, 0);
     }
 	else if(e_pchara->life ==2){
-    al_draw_bitmap(e_pchara->img_store_LIFE[ 1 ],e_pchara->CamPos+95, HEIGHT - g_nWordHeight-422, 0);
-    al_draw_bitmap(e_pchara->img_store_LIFE[ 1 ],e_pchara->CamPos+30, HEIGHT - g_nWordHeight-422, 0);
+    al_draw_bitmap(e_pchara->img_LIFE,e_pchara->CamPos+95, HEIGHT - g_nWordHeight-422, 0);
+    al_draw_bitmap(e_pchara->img_LIFE,e_pchara->CamPos+30, HEIGHT - g_nWordHeight-422, 0);
     }
-	else if(e_pchara->life ==1){al_draw_bitmap(e_pchara->img_store_LIFE[ 1 ],e_pchara->CamPos+30, HEIGHT - g_nWordHeight-422, 0);}
+	else if(e_pchara->life ==1){al_draw_bitmap(e_pchara->img_LIFE,e_pchara->CamPos+30, HEIGHT - g_nWordHeight-422, 0);}
 }
 
 void character_draw()
@@ -1443,6 +1442,8 @@ void character_destroy( void )
         al_destroy_bitmap( e_pchara->img_store_HP[ i ] );
     }
 
+    al_destroy_bitmap( e_pchara->img_LIFE );
+
     free( e_pchara );
     e_pchara = NULL;
     printf( "character destroy success!\n" );
@@ -1640,10 +1641,7 @@ void monster_update( void )
             }
 
             if( e_monster[ i ].hp <= 0 ) {
-                //如果死掉
-                al_destroy_bitmap( e_monster[ i ].img_move[ 0 ] );
                 e_monster[ i ].state = EMS_DIE;
-
             }
         }
 
@@ -1651,72 +1649,93 @@ void monster_update( void )
 //    printf( "charater_update2\n" );
 }
 
-void monsrt_attackCharacter( void ){
-        for( int i = 0; i < g_nMonsterCount; i++ ) {
-            if( e_monster[ i ].state == EMS_ATK ) {
-                Position CharacterPos, MonsterPos;
+void monsrt_attackCharacter( void )
+{
+    for( int i = 0; i < g_nMonsterCount; i++ ) {
+        if( e_monster[ i ].state == EMS_ATK ) {
+            Position CharacterPos, MonsterPos;
 
-                    if( e_monster[ i ].type == ESA_FIRE ) { // atk-fire
-                        if( e_monster[ i ].dir == true ) {
-                            MonsterPos.w = e_monster[ i ].x + e_monster[ i ].width;
-                            MonsterPos.e = e_monster[ i ].x + e_monster[ i ].width
-                                             + al_get_bitmap_width( e_monster[ i ].img_fire[ e_monster[ i ].nSubState ] );
+            if( e_monster[ i ].type == ESA_FIRE ) { // atk-fire
+                if( e_monster[ i ].dir == true ) {
+                    MonsterPos.w = e_monster[ i ].x + e_monster[ i ].width;
+                    MonsterPos.e = e_monster[ i ].x + e_monster[ i ].width
+                                 + al_get_bitmap_width( e_monster[ i ].img_fire[ e_monster[ i ].nSubState ] );
 
-                            MonsterPos.n = e_monster[ i ].y
-                                            + ( e_monster[ i ].height- al_get_bitmap_height( e_monster[ i ].img_fire[ e_monster[ i ].nSubState ] ) ) / 2;
+                    MonsterPos.n = e_monster[ i ].y
+                                + ( e_monster[ i ].height- al_get_bitmap_height( e_monster[ i ].img_fire[ e_monster[ i ].nSubState ] ) ) / 2;
 
-                            MonsterPos.s = e_monster[ i ].y
-                                            + ( e_monster[ i ].height+ al_get_bitmap_height( e_monster[ i ].img_fire[ e_monster[ i ].nSubState ] ) ) / 2;
-                        }
-                        else {
-                            MonsterPos.e = e_monster[ i ].x;
-                            MonsterPos.w = e_monster[ i ].x
-                                             - al_get_bitmap_width( e_monster[ i ].img_fire[ e_monster[ i ].nSubState ] );
-
-                            MonsterPos.n = e_monster[ i ].y
-                                            + ( e_monster[ i ].height- al_get_bitmap_height( e_monster[ i ].img_fire[ e_monster[ i ].nSubState ] ) ) / 2;
-
-                            MonsterPos.s = e_monster[ i ].y
-                                            + ( e_monster[ i ].height+ al_get_bitmap_height( e_monster[ i ].img_fire[ e_monster[ i ].nSubState ] ) ) / 2;
-                        }
-                    }
-                    // normal / sword
-                    else {
-                        MonsterPos.w = e_monster[ i ].x;
-                        MonsterPos.e = e_monster[ i ].x + e_monster[ i ].width;
-                        MonsterPos.n = e_monster[ i ].y;
-                        MonsterPos.s = e_monster[ i ].y + e_monster[ i ].height;
-                    }
-
-
-                CharacterPos.e = e_pchara->x + e_pchara->width - 8;
-                CharacterPos.w = e_pchara->x + 8;
-                CharacterPos.n = e_pchara->y + 8;
-                CharacterPos.s = e_pchara->y + e_pchara->height - 8;
-
-                if( CheckOverlap( &CharacterPos, &MonsterPos ) == true ) {
-                     if( g_bImmortal == true || e_pchara->state == ECS_ATK || e_pchara->state == ECS_INHALE || e_pchara->state == ECS_SLIDE ) {
-                    // do nothing
-                    }
-                    else {
-                        printf( "%d ", e_pchara->state );
-                        g_bImmortal = true;
-                        g_nImortalCursor = 0;
-                        e_pchara->state = ECS_INJURED;
-                        e_pchara->nInjuredCursor = 0;
-                        e_pchara->hp--;
-                        printf( "yo\n" );
-                    }
+                    MonsterPos.s = e_monster[ i ].y
+                                + ( e_monster[ i ].height+ al_get_bitmap_height( e_monster[ i ].img_fire[ e_monster[ i ].nSubState ] ) ) / 2;
                 }
+                else {
+                    MonsterPos.e = e_monster[ i ].x;
+                    MonsterPos.w = e_monster[ i ].x
+                                 - al_get_bitmap_width( e_monster[ i ].img_fire[ e_monster[ i ].nSubState ] );
+
+                    MonsterPos.n = e_monster[ i ].y
+                                + ( e_monster[ i ].height- al_get_bitmap_height( e_monster[ i ].img_fire[ e_monster[ i ].nSubState ] ) ) / 2;
+
+                    MonsterPos.s = e_monster[ i ].y
+                                + ( e_monster[ i ].height+ al_get_bitmap_height( e_monster[ i ].img_fire[ e_monster[ i ].nSubState ] ) ) / 2;
+                }
+            }
+            // normal / sword
+            else {
+                MonsterPos.w = e_monster[ i ].x;
+                MonsterPos.e = e_monster[ i ].x + e_monster[ i ].width;
+                MonsterPos.n = e_monster[ i ].y;
+                MonsterPos.s = e_monster[ i ].y + e_monster[ i ].height;
+            }
+
+            CharacterPos.e = e_pchara->x + e_pchara->width - 8;
+            CharacterPos.w = e_pchara->x + 8;
+            CharacterPos.n = e_pchara->y + 8;
+            CharacterPos.s = e_pchara->y + e_pchara->height - 8;
+
+            if( CheckOverlap( &CharacterPos, &MonsterPos ) == true ) {
+                if( g_bImmortal == true || e_pchara->state == ECS_ATK || e_pchara->state == ECS_INHALE || e_pchara->state == ECS_SLIDE ) {
+                    // do nothing
+                }
+                else {
+                    printf( "%d ", e_pchara->state );
+                    g_bImmortal = true;
+                    g_nImortalCursor = 0;
+                    e_pchara->state = ECS_INJURED;
+                    e_pchara->nInjuredCursor = 0;
+                    e_pchara->hp--;
+                    printf( "Injured by others, now hp is %d\n", e_pchara->hp );
+                    printf( "yo\n" );
+                }
+            }
         }
+
+        // check bomb
+        if( e_monster[ i ].state != EMS_DIE && e_monster[ i ].nBombIdx != -1 ) {
+            Position CharacterPos, MonsterPos;
+            CharacterPos.e = e_pchara->x + e_pchara->width;
+            CharacterPos.w = e_pchara->x;
+            CharacterPos.n = e_pchara->y;
+            CharacterPos.s = e_pchara->y + e_pchara->height;
+
+            bool bEffectiveBomb = GetBombPosition( e_monster[ i ].nBombIdx, &MonsterPos );
+            if( bEffectiveBomb == false ) {
+                return;
+            }
+
+            MonsterPos.e -= 0; // shrink boarder
+            MonsterPos.s -= 0;
+            MonsterPos.w += 0;
+            MonsterPos.n += 0;
+
+            if( CheckOverlap( &CharacterPos, &MonsterPos ) == true ) {
+                e_pchara->hp -= 3;
+                printf( "Injured by bomb %d, now hp is %d\n", i, e_pchara->hp );
+                ExplodeBomb( e_monster[ i ].nBombIdx );
+            }
+        }
+
     }
 }
-
-
-
-
-
-
 
 void monster_gravity( int nMonsterIdx, int nGroundY ) {
 //    printf( "monster_gravity\n" );

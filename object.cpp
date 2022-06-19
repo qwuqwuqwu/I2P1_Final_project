@@ -434,11 +434,13 @@ bool GetBombPosition( const int idx, Position *pBombPos )
         return false;
     }
 
-    if( g_Bomb[ idx ].state != EBS_IDLE ) {
+    // bomb is effective only when it is flying
+    // after bomb explode, no harm will be cause
+    if( g_Bomb[ idx ].state == EBS_FLY ) {
         pBombPos->e = g_Bomb[ idx ].x + g_Bomb[ idx ].width;
         pBombPos->s = g_Bomb[ idx ].y + g_Bomb[ idx ].height;
         pBombPos->w = g_Bomb[ idx ].x;
-        pBombPos->n = g_Bomb[ idx ].x;
+        pBombPos->n = g_Bomb[ idx ].y;
         return true;
     }
 }

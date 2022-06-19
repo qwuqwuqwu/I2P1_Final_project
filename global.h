@@ -141,6 +141,7 @@ typedef struct _Character {
     ALLEGRO_BITMAP *img_transform[ 3 ];
     ALLEGRO_BITMAP *img_atkWord;
     ALLEGRO_BITMAP *img_fire[ 2 ];
+    ALLEGRO_BITMAP *img_LIFE;
 
     // bit map store
     ALLEGRO_BITMAP *img_store_SpecialAtk[ 2 * ESA_NUM ];
@@ -149,7 +150,6 @@ typedef struct _Character {
     ALLEGRO_BITMAP *img_store_transform[ NUMOF_TRANSFORM_IMG * ESA_NUM ];
     ALLEGRO_BITMAP *img_store_AtkWord[ ESA_NUM ];
     ALLEGRO_BITMAP *img_store_HP[ HP + 1 ];
-    ALLEGRO_BITMAP *img_store_LIFE[ LIFE + 1 ];
 
     ALLEGRO_SAMPLE_INSTANCE *sound_inhale;
     ALLEGRO_SAMPLE_INSTANCE *sound_slash;
