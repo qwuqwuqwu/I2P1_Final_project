@@ -1225,11 +1225,15 @@ void monster_init( void )
     FILE* fp = fopen( "./res/monster.txt", "r" );
     int nPosX = 0;
     int nPosY = 0;
+    int nLM = 0;
+    int nRM = 0;
     int nType = 0;
     int nMonsterNumber = 0;
-    while( fscanf( fp, "%d%d%d", &nPosX, &nPosY, &nType ) != EOF ) {
+    while( fscanf( fp, "%d%d%d%d%d", &nPosX, &nPosY, &nLM, &nRM, &nType ) != EOF ) {
         e_monster[ nMonsterNumber ].x = nPosX;
         e_monster[ nMonsterNumber ].y = nPosY;
+        e_monster[ nMonsterNumber ].lm = nLM;
+        e_monster[ nMonsterNumber ].rm = nRM;
         e_monster[ nMonsterNumber ].type = nType;
         nMonsterNumber++;
 
@@ -1470,7 +1474,7 @@ void monster_draw( void )
 //                if( e_monster[ n ].anime < e_monster[ n ].anime_time / 2 ) {
                     int nSubState = e_monster[ n ].nSubState;
                     if( e_monster[ n ].dir == true ) { //如果面右
-                        if( e_monster[ n ].x >= WIDTH / 2 + 50 + n * 240 ) {
+                        if( e_monster[ n ].x >= e_monster[ n ].rm ) {
                             e_monster[ n ].dir = false;
                             al_draw_bitmap( e_monster[ n ].img_move[ nSubState ], e_monster[ n ].x, e_monster[ n ].y, 0 );
                         }
@@ -1478,7 +1482,7 @@ void monster_draw( void )
                         e_monster[ n ].x += 1;
                     }
                     else {//如果面左
-                        if( e_monster[ n ].x <= WIDTH / 2 + n * 240 ) {
+                        if( e_monster[ n ].x <= e_monster[ n ].lm ) {
                             e_monster[ n ].dir = true;
                             al_draw_bitmap( e_monster[ n ].img_move[ nSubState ], e_monster[ n ].x, e_monster[ n ].y, ALLEGRO_FLIP_HORIZONTAL );
                         }

@@ -153,6 +153,7 @@ typedef struct _Character {
 
 typedef struct _Mon {
     int x, y; // the position of image
+    int lm, rm; // left most and right most of monster position
     int width, height; // the width and height of image
     bool dir; // left: false, right: true
     int state; // the state of character
