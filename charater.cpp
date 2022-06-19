@@ -60,12 +60,14 @@ void CameraUpdate( float *CamPosition, int x, int y, int width, int height, int 
         al_stop_sample_instance( g_pMenuSampleInstance );
         al_destroy_sample_instance( g_pMenuSampleInstance );
 
-        BossSample = al_load_sample( "./sound/boss.mp3" );
-        BossSampleInstance = al_create_sample_instance( BossSample );
-        al_set_sample_instance_playmode( BossSampleInstance, ALLEGRO_PLAYMODE_LOOP );
-        al_attach_sample_instance_to_mixer( BossSampleInstance, al_get_default_mixer() );
-        al_set_sample_instance_gain( BossSampleInstance, 0.7 );
-        al_play_sample_instance( BossSampleInstance );
+        if( BossSampleInstance == NULL ) {
+            BossSample = al_load_sample( "./sound/boss.mp3" );
+            BossSampleInstance = al_create_sample_instance( BossSample );
+            al_set_sample_instance_playmode( BossSampleInstance, ALLEGRO_PLAYMODE_LOOP );
+            al_attach_sample_instance_to_mixer( BossSampleInstance, al_get_default_mixer() );
+            al_set_sample_instance_gain( BossSampleInstance, 0.7 );
+            al_play_sample_instance( BossSampleInstance );
+        }
         BossBomb_Trigger();
     }
 //    printf( "CameraUpdate\n" );
@@ -1453,6 +1455,7 @@ void character_destroy( void )
 
     free( e_pchara );
     e_pchara = NULL;
+
     printf( "character destroy success!\n" );
 //    printf( "character_destory\n" );
 }
@@ -1658,6 +1661,9 @@ void monster_update( void )
 
 void monsrt_attackCharacter( void )
 {
+    if( g_bImmortal == true ) {
+        return;
+    }
     for( int i = 0; i < g_nMonsterCount; i++ ) {
         if( e_monster[ i ].state == EMS_ATK ) {
             Position CharacterPos, MonsterPos;
@@ -1700,7 +1706,7 @@ void monsrt_attackCharacter( void )
             CharacterPos.s = e_pchara->y + e_pchara->height - 8;
 
             if( CheckOverlap( &CharacterPos, &MonsterPos ) == true ) {
-                if( g_bImmortal == true || e_pchara->state == ECS_ATK || e_pchara->state == ECS_INHALE || e_pchara->state == ECS_SLIDE ) {
+                if( e_pchara->state == ECS_ATK || e_pchara->state == ECS_INHALE || e_pchara->state == ECS_SLIDE ) {
                     // do nothing
                 }
                 else {
