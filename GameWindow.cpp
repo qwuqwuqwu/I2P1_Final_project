@@ -224,9 +224,12 @@ void Vic_video_display(ALLEGRO_VIDEO *video) {
 }
 
 void Vicinit_video(){
+    al_init_video_addon();
     al_set_new_bitmap_flags(ALLEGRO_MIN_LINEAR | ALLEGRO_MAG_LINEAR);
+    const char *vfilename = "dance.ogv";
+
     printf("reading video.....\n");
-    VicVideo = al_open_video("dance.ogv");
+    VicVideo = al_open_video( vfilename );
     if( VicVideo )
         printf("read video succeed\n");
     else
