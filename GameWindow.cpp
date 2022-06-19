@@ -13,7 +13,7 @@ ALLEGRO_VIDEO *g_pVideo = NULL;
 ALLEGRO_EVENT_QUEUE *g_pVideoQueue = NULL;
 ALLEGRO_BITMAP *img_over;
 
-int g_nLife = 2;
+int g_nLife = 6;
 
 int g_nWindow3Count = 0;
 #define MAX_COUNTOF_WINDOW3 ( 600 )

@@ -35,7 +35,7 @@ int camera_move = 1;
 int g_nWordHeight = 0;
 bool g_bImmortal = false;
 int g_nImortalCursor = 0;
-int g_nImortalTime = 120;
+int g_nImortalTime = 10 * FPS; // 10 sec
 
 int g_nMonsterCount = 0;
 
