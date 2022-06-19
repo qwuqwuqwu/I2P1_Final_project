@@ -223,6 +223,9 @@ void game_update( void )
 
             if( g_nLife == 0 ) {
                 al_stop_sample_instance( g_pMenuSampleInstance );
+                al_set_sample_instance_gain( DeathSampleInstance, 1 );
+                al_play_sample_instance( DeathSampleInstance );
+                al_rest(3);
                 game_scene_destroy();
 
                 g_nWindow = 3;
@@ -236,6 +239,7 @@ void game_update( void )
                 al_stop_sample_instance( g_pMenuSampleInstance );
                 al_set_sample_instance_gain( DeathSampleInstance, 1 );
                 al_play_sample_instance( DeathSampleInstance );
+                al_rest(3);
 
                 //to be fetched
                 game_scene_destroy();
