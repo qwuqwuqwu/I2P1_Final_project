@@ -866,13 +866,13 @@ int CheckBossBomb( const Position CharPos )
     // check bomb
     for( int i = 0; i < g_nBossBombRow; i++ ) {
         for( int j = 0; j < g_nBossBombColCount[ i ]; j++ ) {
-            if( g_BossBomb[ i ][ j ].state == EBS_FLY || g_BossBomb[ i ][ j ].state == EBS_EXPLODE ) {
+            if( g_BossBomb[ i ][ j ].state == EBS_FLY ) {
                 Position MonsterPos;
 
-                MonsterPos.e = g_BossBomb[ i ][ j ].x + g_BossBomb[ i ][ j ].width + 8; // shrink boarder
-                MonsterPos.s = g_BossBomb[ i ][ j ].y + g_BossBomb[ i ][ j ].height + 8;
-                MonsterPos.w = g_BossBomb[ i ][ j ].x - 8;
-                MonsterPos.n = g_BossBomb[ i ][ j ].y - 8;
+                MonsterPos.e = g_BossBomb[ i ][ j ].x + g_BossBomb[ i ][ j ].width - 8; // shrink boarder
+                MonsterPos.s = g_BossBomb[ i ][ j ].y + g_BossBomb[ i ][ j ].height - 8;
+                MonsterPos.w = g_BossBomb[ i ][ j ].x + 8;
+                MonsterPos.n = g_BossBomb[ i ][ j ].y + 8;
 
                 if( CheckOverlap( &CharPos, &MonsterPos ) == true ) {
                     g_BossBomb[ i ][ j ].state = EBS_EXPLODE;

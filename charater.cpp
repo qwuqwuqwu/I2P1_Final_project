@@ -1884,7 +1884,7 @@ void BossBomb_attackCharacter( void )
         g_nImortalCursor = 0;
         e_pchara->state = ECS_INJURED;
         e_pchara->nInjuredCursor = 0;
-        e_pchara->hp -= ( nBossHarm * 4 );
+        e_pchara->hp -= ( nBossHarm );
 
         e_pchara->NowSpecialAtk = ESA_NORMAL;
         e_pchara->img_atkWord = e_pchara->img_store_AtkWord[ e_pchara->NowSpecialAtk ];
@@ -2072,6 +2072,9 @@ void monster_draw( void )
         monster_StateChangeImage( i );
     }
 
+    monsrt_attackCharacter();
+    BossBomb_attackCharacter();
+
     for( int n = 0; n < g_nMonsterCount; n++ ) {
     // with the state, draw corresponding image
         if( e_monster[ n ].state == EMS_ALIVE || e_monster[ n ].state == EMS_ATK || e_monster[ n ].state == EMS_INJURED ) {
@@ -2080,8 +2083,6 @@ void monster_draw( void )
 
             monster_gravity( n, nGroundY );
             monster_CheckBlocker( n );
-
-            monsrt_attackCharacter();
 
             if( e_monster[ n ].state == EMS_ALIVE && e_monster[ n ].type != ESA_BOSS ) {
 //                if( e_monster[ n ].anime < e_monster[ n ].anime_time / 2 ) {
