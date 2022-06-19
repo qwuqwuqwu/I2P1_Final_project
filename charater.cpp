@@ -57,8 +57,9 @@ void CameraUpdate( float *CamPosition, int x, int y, int width, int height, int 
     else if( *CamPosition >= ( g_nTerrainWidth - 4 * WIDTH / 3 ) ) {
         *CamPosition = ( float )( g_nTerrainWidth - WIDTH);
         camera_move = 0;
+
+        al_stop_samples();
         al_stop_sample_instance( g_pMenuSampleInstance );
-        al_destroy_sample_instance( g_pMenuSampleInstance );
 
         BossSample = al_load_sample( "./sound/boss.mp3" );
         BossSampleInstance = al_create_sample_instance( BossSample );
@@ -1405,15 +1406,16 @@ void character_destroy( void )
 //    printf( "character_destory\n" );
     printf( "1\n" );
     if( camera_move == 0 ) {
-//        al_stop_sample_instance( BossSampleInstance );
-        al_destroy_sample( BossSample );
+        al_stop_sample_instance( BossSampleInstance );
+        al_stop_samples();
+//        al_destroy_sample( BossSample );
         al_destroy_sample_instance( BossSampleInstance );
     }
     printf( "1.5\n" );
     al_destroy_sample_instance( e_pchara->sound_inhale ); printf( "1.6\n" );
-    al_destroy_sample( sample_inhale );
+//    al_destroy_sample( sample_inhale );
     al_destroy_sample_instance( e_pchara->sound_transform );printf( "1.7\n" );
-    al_destroy_sample( sample_transform );
+//    al_destroy_sample( sample_transform );
     al_destroy_sample_instance( e_pchara->sound_slash );printf( "1.8\n" );
     al_destroy_sample_instance( e_pchara->sound_fire );printf( "1.9\n" );
     printf( "2\n" );

@@ -13,7 +13,7 @@
 #define GAME_TERMINATE ( -1 )
 #define NUMOF_TRANSFORM_IMG ( 3 )
 #define HP          ( 6 )
-#define LIFE        ( 2 )
+#define LIFE        ( 3 )
 
 
 // note that you can't assign initial value here!
@@ -203,6 +203,7 @@ typedef struct _Bomb {
     float vy;
     float vx;
     float FallingTick;
+    ALLEGRO_SAMPLE *sound_sample;
     ALLEGRO_SAMPLE_INSTANCE *sound_explode;
 } Bom;
 
@@ -227,5 +228,6 @@ typedef struct _Position {
 extern Character *e_pchara;
 extern Mon e_monster[ 100 ];
 extern ALLEGRO_SAMPLE_INSTANCE *g_pMenuSampleInstance;
+extern ALLEGRO_SAMPLE *g_pMenuSample;
 
 #endif
