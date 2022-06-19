@@ -486,8 +486,16 @@ void charater_update(){
 
 void character_gravity( int nGroundY ) {
 //    printf( "character_gravity\n" );
-    if( e_pchara->state == ECS_MOVE || e_pchara->state == ECS_STOP || e_pchara->state == ECS_ATK || e_pchara->state == ECS_SLIDE || e_pchara->state == ECS_INJURED ) {
+    if( e_pchara->state == ECS_MOVE || e_pchara->state == ECS_STOP || e_pchara->state == ECS_ATK ||
+        e_pchara->state == ECS_SLIDE || e_pchara->state == ECS_INJURED ) {
         if( nGroundY == -2 ) {
+            if( g_bImmortal == false ) {
+                e_pchara->state = ECS_INJURED;
+                e_pchara->hp--;
+                g_bImmortal = true;
+                g_nImortalCursor = 0;
+                nGroundY = HEIGHT;
+            }
             nGroundY = HEIGHT;
         }
 
@@ -973,7 +981,7 @@ void character_StateChangeImage( void )
 
     g_LastState = NewState;
     g_nLastSubState = e_pchara->nSubState;
- //   printf( "%d %d | ", g_LastState, g_nLastSubState );
+//    printf( "%d %d | ", g_LastState, g_nLastSubState );
 //    printf( "Character at x = %d, y = %d\n", e_pchara->x, e_pchara->y );
 //    printf( "character_StateChangeImage\n" );
 }
