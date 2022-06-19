@@ -252,6 +252,7 @@ int CompareGround( const void *plhs, const void *prhs ) {
 
 void GroundSetup( void )
 {
+    g_nGroundCount = 0;
     FILE* fp = fopen( "./res/ground.txt", "r" );
     int nType = 0;
     int nPosX = 0;
@@ -312,6 +313,7 @@ void GroundSetup( void )
 
 void BombSetup( void )
 {
+    g_nBombCount = 0;
     for( int i = 0; i < 3; i++ ) {
         char temp[ 50 ];
         sprintf( temp, "./image/explode%d.png", i + 1 );
@@ -347,6 +349,7 @@ void BombSetup( void )
 void FoodSetup( void )
 {
     printf( "FoodSetup\n" );
+    g_nFoodCount = 0;
     FILE* fp = fopen( "./res/food.txt", "r" );
     int nPosX = 0;
     int nPosY = 0;
@@ -371,6 +374,7 @@ void FoodSetup( void )
 void CandySetup( void )
 {
     printf( "CandySetup\n" );
+    g_nCandyCount = 0;
     FILE* fp = fopen( "./res/candy.txt", "r" );
     int nPosX = 0;
     int nPosY = 0;
@@ -545,7 +549,8 @@ void object_init( void ){
     CandySetup();
 }
 
-void object_draw( void ){
+void object_draw( void )
+{
     // plot ground
     for( int i = 0; i < g_nGroundCount; i++ ) {
        al_draw_bitmap( Ground[ i ], g_Ground[ i ].x, g_Ground[ i ].y, 0 );

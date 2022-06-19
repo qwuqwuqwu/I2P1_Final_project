@@ -13,7 +13,7 @@ ALLEGRO_VIDEO *g_pVideo = NULL;
 ALLEGRO_EVENT_QUEUE *g_pVideoQueue = NULL;
 ALLEGRO_BITMAP *img_over;
 
-int g_nLife = 6;
+int g_nLife = 2;
 
 // TODO
 // 1. release g_pMenuSample?
@@ -212,30 +212,35 @@ void game_update( void )
         }
     }
     if( g_nWindow == 2 ) {
+        printf( "window2\n" );
         charater_update();
         monster_update();
         bool bAlive = isCharacterAlive();
         if( bAlive == false ) {
             g_nLife--;
+
             if( g_nLife == 0 ) {
+                al_stop_sample_instance( g_pMenuSampleInstance );
+
+                printf( "1\n" );
+                game_scene_destroy();
+
                 g_nWindow = 3;
                 al_set_sample_instance_gain( OverSampleInstance, 1 );
                 al_play_sample_instance( OverSampleInstance );
                 img_over = al_load_bitmap( "./image/over.png" );
-                al_draw_bitmap(img_over, 0, 0, 0);
-                al_flip_display();
                 assert( img_over != NULL );
-                al_rest(4);
 
-                printf( "YO\n" );
-                game_scene_destroy();
+                window3();
+//                al_flip_display();
+                //al_rest(4);
             }
             // still have lives
             else {
                 al_stop_sample_instance( g_pMenuSampleInstance );
                 al_set_sample_instance_gain( DeathSampleInstance, 1 );
                 al_play_sample_instance( DeathSampleInstance );
-                al_rest(4);
+
                 //to be fetched
                 game_scene_destroy();
                 game_scene_init( g_nLife );
@@ -245,7 +250,7 @@ void game_update( void )
         }
     }
     else if( g_nWindow == 3 ){
-        printf( "HELLO window 3\n" );
+        // do nothing
     }
 }
 
@@ -279,6 +284,16 @@ int process_event( void )
     return 0;
 }
 
+void window3( void )
+{
+    printf( "window3\n" );
+
+    img_over = al_load_bitmap( "./image/over.png" );
+    assert( img_over != NULL );
+
+    al_draw_bitmap( img_over, 0, 0, 0 );
+}
+
 void game_draw( void )
 {
     if( g_nWindow == 1 ) {
@@ -286,6 +301,9 @@ void game_draw( void )
     }
 	else if( g_nWindow == 2 ) {
         game_scene_draw();
+    }
+    else if( g_nWindow == 3 ) {
+        window3();
     }
     al_flip_display();
 }
