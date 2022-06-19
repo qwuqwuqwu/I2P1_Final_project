@@ -16,6 +16,8 @@ ALLEGRO_SAMPLE *sample_transform = NULL;
 ALLEGRO_SAMPLE_INSTANCE *BossSampleInstance = NULL;
 ALLEGRO_SAMPLE *BossSample = NULL;
 
+ALLEGRO_BITMAP *img_store_Boss_HP[ HP + 1 ];
+
 bool g_bMute = false;
 //float e_pchara->CamPos = 0.0;
 ALLEGRO_TRANSFORM camera;
@@ -1145,6 +1147,7 @@ void character_attackMonster( void )
                             g_nBossImmortalCursor = 0;
                             e_monster[ i ].state = EMS_INJURED;
                             e_monster[ i ].nInjuredCursor = 0;
+                            e_monster[ i ].hp -= ( ( int )e_pchara->NowSpecialAtk + 1 );
                             //printf( "Injured by others, now hp is %d\n", e_pchara->hp );
                             //printf( "yo\n" );
                         }
@@ -1182,22 +1185,29 @@ void character_attackMonster( void )
             MonsterPos.s = e_monster[ i ].y + e_monster[ i ].height - 16;
 
             if( CheckOverlap( &CharacterPos, &MonsterPos ) == true ) {
-                e_monster[ i ].hp -= 3;
-                if( e_pchara->NowSpecialAtk == ESA_BOMB ) {
-                    printf( "Trigger Explode\n" );
-                    ExplodeBomb( e_pchara->nBombIdx );
-                }
-
                 if( e_monster[ i ].type == ESA_BOSS ) {
                     if( g_bBossImmortal == true ) {
                         printf("nothing");
                     }
                     else {
                         printf( "%d ", e_monster[ i ].hp );
-                        g_bImmortal = true;
-                        g_nImortalCursor = 0;
+                        g_bBossImmortal = true;
+                        g_nBossImmortalCursor = 0;
                         e_monster[ i ].state = EMS_INJURED;
                         e_monster[ i ].nInjuredCursor = 0;
+                        e_monster[ i ].hp -= 3;
+                        if( e_pchara->NowSpecialAtk == ESA_BOMB ) {
+                            printf( "Trigger Explode\n" );
+                            ExplodeBomb( e_pchara->nBombIdx );
+                        }
+                    }
+                }
+                // other
+                else {
+                    e_monster[ i ].hp -= 3;
+                    if( e_pchara->NowSpecialAtk == ESA_BOMB ) {
+                        printf( "Trigger Explode\n" );
+                        ExplodeBomb( e_pchara->nBombIdx );
                     }
                 }
             }
