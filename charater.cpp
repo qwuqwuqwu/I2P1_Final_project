@@ -1322,6 +1322,10 @@ void character_destroy( void )
 //    printf( "character_destory\n" );
     al_destroy_sample_instance( e_pchara->atk_Sound );
 
+    al_identity_transform( &camera );
+    al_translate_transform( &camera, 0, 0 );
+    al_use_transform( &camera );
+
     // bit map
     for( int i = 0; i < 2; i++ ) {
         al_destroy_bitmap( e_pchara->img_inhale[ i ] );
