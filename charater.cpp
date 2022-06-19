@@ -64,8 +64,11 @@ void CameraUpdate( float *CamPosition, int x, int y, int width, int height, int 
 //    printf( "CameraUpdate\n" );
 }
 
-void character_init( const int nTerrainWidth ){
+void character_init( const int nTerrainWidth, const int nLife ){
 //    printf( "character_init\n" );
+
+    // new e_pchara
+    e_pchara = ( Character * )malloc( sizeof( Character ) );
 
     // load character images
     // inhale
@@ -265,7 +268,7 @@ void character_init( const int nTerrainWidth ){
     e_pchara->nMoveY = e_pchara->y;
     e_pchara->dir = false;
     e_pchara->hp = HP;
-    e_pchara->life = LIFE;
+    e_pchara->life = nLife;
 
     e_pchara->nBombIdx = -1;
 
@@ -1317,22 +1320,45 @@ void charactor_show( void )
 void character_destroy( void )
 {
 //    printf( "character_destory\n" );
-   // al_destroy_bitmap(e_pchara->img_atk[0]);
-   // al_destroy_bitmap(e_pchara->img_atk[1]);
-    al_destroy_sample_instance(e_pchara->atk_Sound);
+    al_destroy_sample_instance( e_pchara->atk_Sound );
 
-    // load character images
-    for( int i = 0; i < 4; i++ ) {
-        al_destroy_bitmap( e_pchara->img_move[ i ] );
-    }
-    // inhale
+    // bit map
     for( int i = 0; i < 2; i++ ) {
         al_destroy_bitmap( e_pchara->img_inhale[ i ] );
     }
-
     for( int i = 0; i < 2; i++ ) {
-        al_destroy_bitmap( e_pchara->img_transform[ i ] );
+        al_destroy_bitmap( e_pchara->img_fire[ i ] );
     }
+    // bit map store
+    for( int i = 0; i < ESA_NUM; i++ ) {
+        for( int j = 0; j < 2; j++ ) {
+            al_destroy_bitmap( e_pchara->img_store_SpecialAtk[ 2 * i + j ] );
+        }
+        for( int j = 0; j < 4; j++ ) {
+            al_destroy_bitmap( e_pchara->img_store_move[ 4 * i + j ] );
+        }
+        for( int j = 0; j < 2; j++ ) {
+            al_destroy_bitmap( e_pchara->img_store_slide[ 2 * i + j ] );
+        }
+
+        if( i == 0 ) {
+            // do nothing
+        }
+        else {
+            for( int j = 0; j < NUMOF_TRANSFORM_IMG; j++ ) {
+                al_destroy_bitmap( e_pchara->img_store_transform[ NUMOF_TRANSFORM_IMG * i + j ] );
+            }
+        }
+
+        al_destroy_bitmap( e_pchara->img_store_AtkWord[ i ] );
+    }
+
+    for( int i = 0; i < HP + 1; i++ ) {
+        al_destroy_bitmap( e_pchara->img_store_HP[ i ] );
+    }
+
+    free( e_pchara );
+    printf( "character destroy success!\n" );
 //    printf( "character_destory\n" );
 }
 
@@ -1375,7 +1401,8 @@ void monster_init( void )
                 assert( e_monster[ n ].img_move[ i ] != NULL );
                 e_monster[ n ].width = al_get_bitmap_width( e_monster[ n ].img_move[ 0 ] );
                 e_monster[ n ].height = al_get_bitmap_height( e_monster[ n ].img_move[ 0 ] );
-                e_monster[ n ].img_atk[ i ] = e_monster[ n ].img_move[ i ];
+                e_monster[ n ].img_atk[ i ] = al_load_bitmap( temp );
+                assert( e_monster[ n ].img_atk[ i ] != NULL );
             }
         }
         else if( e_monster[ n ].type == ESA_SWORD ) {
@@ -1664,8 +1691,20 @@ void monster_draw( void )
 void monster_destroy( void )
 {
 //    printf( "character_destory2\n" );
-    for( int n = 0; n < g_nMonsterCount; n++ ) {
-        al_destroy_bitmap( e_monster[ n ].img_move[ 0 ] );
+    // bit map
+    for( int i = 0; i < g_nMonsterCount; i++ ) {
+        for( int j = 0; j < 2; j++ ) {
+            al_destroy_bitmap( e_monster[ i ].img_move[ j ] );
+        }
+        for( int j = 0; j < 2; j++ ) {
+            al_destroy_bitmap( e_monster[ i ].img_atk[ j ] );
+        }
     }
+    printf( "monster destroy success!\n" );
 //    printf( "character_destory2\n" );
+}
+
+bool isCharacterAlive( void )
+{
+    return e_pchara->hp > 0;
 }

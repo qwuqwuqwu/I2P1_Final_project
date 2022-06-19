@@ -15,30 +15,39 @@ int g_nBackgroundWidth = 0;
 void menu_init(){
     font = al_load_ttf_font("./font/pirulen.ttf",12,0);
 }
-void menu_process(ALLEGRO_EVENT event){
-    if( event.type == ALLEGRO_EVENT_KEY_UP )
-        if( event.keyboard.keycode == ALLEGRO_KEY_ENTER )
-            judge_next_window = true;
-}
-void menu_draw(){
-    img = al_load_bitmap("intro.png"); // ANS: load image
-    assert( img != NULL );
-    al_draw_bitmap(img, e_pchara->CamPos, 0, 0); // ANS: draw image
 
+void menu_process( ALLEGRO_EVENT event )
+{
+    if( event.type == ALLEGRO_EVENT_KEY_UP ) {
+        if( event.keyboard.keycode == ALLEGRO_KEY_ENTER ) {
+            judge_next_window = true;
+        }
+    }
 }
-void menu_destroy(){
-    al_destroy_font(font);
+
+void menu_draw( void )
+{
+    img = al_load_bitmap( "intro.png" );
+    assert( img != NULL );
+
+    al_draw_bitmap( img, 0, 0, 0 );
+}
+
+void menu_destroy( void )
+{
+    al_destroy_font( font );
 }
 
 // function of game_scene
-void game_scene_init(){
+void game_scene_init( const int nLife )
+{
     for( int i = 0; i < COUNOF_BACKGROUND; i++ ) {
         g_background[ i ] = al_load_bitmap("./image/background3.png");
         assert( g_background[ i ] != NULL );
     }
     g_nBackgroundWidth = al_get_bitmap_width( g_background[ 0 ] );
 
-    character_init( COUNOF_BACKGROUND * g_nBackgroundWidth );
+    character_init( COUNOF_BACKGROUND * g_nBackgroundWidth, nLife );
     monster_init();
     object_init();
 }
@@ -70,9 +79,8 @@ void game_scene_destroy( void )
     for( int i = 0; i < COUNOF_BACKGROUND; i++ ) {
         al_destroy_bitmap( g_background[ i ] );
     }
-
     object_destroy();
-
     character_destroy();
     monster_destroy();
+    printf( "game scene destroy success!\n" );
 }

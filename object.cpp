@@ -264,6 +264,9 @@ void GroundSetup( void )
         g_nGroundCount++;
     }
 
+    // release the file handler
+    fclose( fp );
+
     // sort ground
     qsort( g_Ground, g_nGroundCount, sizeof( Pos ), CompareGround );
 
@@ -305,9 +308,6 @@ void GroundSetup( void )
         g_Ground[ i ].nHeight = al_get_bitmap_height( Ground[ i ] );
         printf( "i, height = %d, %d\n", i, g_Ground[ i ].nHeight );
     }
-
-    // release the file handler
-    fclose( fp );
 }
 
 void BombSetup( void )
@@ -357,6 +357,8 @@ void FoodSetup( void )
         g_nFoodCount++;
     }
 
+    fclose( fp );
+
     for( int i = 0; i < g_nFoodCount; i++ ) {
         g_FoodMap[ i ] = al_load_bitmap( "./image/food.png" );
         assert( g_FoodMap[ i ] != NULL );
@@ -364,8 +366,6 @@ void FoodSetup( void )
         g_Food[ i ].nWidth = al_get_bitmap_width( g_FoodMap[ i ] );
         g_Food[ i ].nHeight = al_get_bitmap_height( g_FoodMap[ i ] );
     }
-
-    fclose( fp );
 }
 
 void CandySetup( void )
@@ -380,6 +380,7 @@ void CandySetup( void )
         g_Candy[ g_nCandyCount ].y = nPosY;
         g_nCandyCount++;
     }
+    fclose( fp );
 
     for( int i = 0; i < g_nCandyCount; i++ ) {
         g_CandyMap[ i ] = al_load_bitmap( "./image/candy.png" );
@@ -388,8 +389,6 @@ void CandySetup( void )
         g_Candy[ i ].nWidth = al_get_bitmap_width( g_CandyMap[ i ] );
         g_Candy[ i ].nHeight = al_get_bitmap_height( g_CandyMap[ i ] );
     }
-
-    fclose( fp );
 }
 
 int RegisterBomb( void )
@@ -588,7 +587,8 @@ void object_draw( void ){
     }
 }
 
-void object_destroy( void ){
+void object_destroy( void )
+{
     // ground
     for( int i = 0; i < g_nGroundCount; i++ ) {
         al_destroy_bitmap( Ground[ i ] );
@@ -611,6 +611,8 @@ void object_destroy( void ){
     for( int i = 0; i < g_nCandyCount; i++ ) {
         al_destroy_bitmap( g_CandyMap[ i ] );
     }
+
+    printf( "object destroy success!\n" );
 }
 
 void Object_process( ALLEGRO_EVENT event )

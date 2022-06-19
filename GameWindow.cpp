@@ -13,6 +13,8 @@ ALLEGRO_VIDEO *g_pVideo = NULL;
 ALLEGRO_EVENT_QUEUE *g_pVideoQueue = NULL;
 ALLEGRO_BITMAP *img_over;
 
+int g_nLife = 6;
+
 // TODO
 // 1. release g_pMenuSample?
 // 2. release g_pMenuSampleInstance?
@@ -67,9 +69,6 @@ void game_init( void )
     ALLEGRO_BITMAP *pIcon = al_load_bitmap( "./image/icon.jpg" );
     assert( pIcon != NULL );
     al_set_display_icon( g_pDisplay, pIcon );
-
-	// new e_pchara
-    e_pchara = ( Character * )malloc( sizeof( Character ) );
 }
 
 void init_video( void )
@@ -207,39 +206,46 @@ void game_update( void )
             // not back menu anymore, therefore destroy it
             menu_destroy();
             // initialize next scene
-            game_scene_init();
+            game_scene_init( g_nLife );
             judge_next_window = false;
             g_nWindow = 2;
         }
     }
-    if( g_nWindow == 2 && e_pchara->hp >= 1 ){
+    if( g_nWindow == 2 ) {
         charater_update();
         monster_update();
-    }
-    else if( g_nWindow == 2 && e_pchara->hp < 1 ) {
-        al_stop_sample_instance( g_pMenuSampleInstance );
-        al_set_sample_instance_gain( DeathSampleInstance, 1 );
-        al_play_sample_instance( DeathSampleInstance );
-        al_rest(4);
+        bool bAlive = isCharacterAlive();
+        if( bAlive == false ) {
+            g_nLife--;
+            if( g_nLife == 0 ) {
+                g_nWindow = 3;
+                al_set_sample_instance_gain( OverSampleInstance, 1 );
+                al_play_sample_instance( OverSampleInstance );
+                img_over = al_load_bitmap( "./image/over.png" );
+                al_draw_bitmap(img_over, 0, 0, 0);
+                al_flip_display();
+                assert( img_over != NULL );
+                al_rest(4);
 
-        if( e_pchara->life >= 1){
-
-            //to be fetched
-
-        }
-        else{
-            g_nWindow = 3;
+                printf( "YO\n" );
+                game_scene_destroy();
+            }
+            // still have lives
+            else {
+                al_stop_sample_instance( g_pMenuSampleInstance );
+                al_set_sample_instance_gain( DeathSampleInstance, 1 );
+                al_play_sample_instance( DeathSampleInstance );
+                al_rest(4);
+                //to be fetched
+                game_scene_destroy();
+                game_scene_init( g_nLife );
+                al_play_sample_instance( g_pMenuSampleInstance );
+                al_set_sample_instance_gain( g_pMenuSampleInstance, 1 );
+            }
         }
     }
     else if( g_nWindow == 3 ){
-        al_set_sample_instance_gain( OverSampleInstance, 1 );
-        al_play_sample_instance( OverSampleInstance );
-        img_over = al_load_bitmap("./image/over.png");
-        al_draw_bitmap(img_over, e_pchara->CamPos, 0, 0);
-        al_flip_display();
-        assert( img_over != NULL );
-        al_rest(4);
-        game_destroy();
+        printf( "HELLO window 3\n" );
     }
 }
 
@@ -257,7 +263,6 @@ int process_event( void )
         charater_process( event );
         monster_process( event );
     }
-
 
     // Shutdown our program
     if( event.type == ALLEGRO_EVENT_DISPLAY_CLOSE ) {
@@ -303,8 +308,6 @@ int game_run( void )
 void game_destroy( void )
 {
     // Make sure you destroy all things
-    free( e_pchara );
-
     al_destroy_event_queue( event_queue );
     al_destroy_display( g_pDisplay );
     game_scene_destroy();
