@@ -1872,6 +1872,9 @@ void monsrt_attackCharacter( void )
 
 void BossBomb_attackCharacter( void )
 {
+    if( g_bImmortal == true ) {
+        return;
+    }
     // check boss bomb
     Position CharacterPos;
     CharacterPos.e = e_pchara->x + e_pchara->width;
@@ -2186,6 +2189,9 @@ void monster_destroy( void )
     for( int i = 0; i <= HP; i++) {
         al_destroy_bitmap( img_store_Boss_HP[ i ] );
     }
+
+    al_destroy_bitmap( e_monster[ g_nBossIdx ].img_hurt[ 0 ] );
+    al_destroy_bitmap( e_monster[ g_nBossIdx ].img_die[ 0 ] );
 
     g_nBossIdx = -1;
 
