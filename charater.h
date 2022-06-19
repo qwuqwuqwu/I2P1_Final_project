@@ -7,10 +7,10 @@ void charater_update();
 void character_predraw( int nGroundY );
 void charactor_show( void );
 void character_draw();
-void character_destory();
+void character_destroy();
 
-void character_init2();
-void charater_process2( ALLEGRO_EVENT event );
-void charater_update2();
-void character_draw2();
-void character_destory2();
+void monster_init( void );
+void monster_process( ALLEGRO_EVENT event );
+void monster_update( void );
+void monster_draw( void );
+void monster_destroy( void );

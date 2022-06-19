@@ -1191,8 +1191,8 @@ void charactor_show( void )
 
 }
 
-
-void character_destory(){
+void character_destroy( void )
+{
 //    printf( "character_destory\n" );
    // al_destroy_bitmap(e_pchara->img_atk[0]);
    // al_destroy_bitmap(e_pchara->img_atk[1]);
@@ -1219,7 +1219,8 @@ void character_destory(){
 //ESA_BOMB = 2,
 //ESA_FIRE = 3,
 
-void character_init2(){
+void monster_init( void )
+{
 //    printf( "character_init2\n" );
 
     FILE* fp = fopen( "./res/monster.txt", "r" );
@@ -1318,7 +1319,8 @@ void character_init2(){
 //    printf( "character_init2\n" );
 }
 
-void charater_process2(ALLEGRO_EVENT event){
+void monster_process( ALLEGRO_EVENT event )
+{
 //    printf( "charater_process2\n" );
     // process the animation                //1.處理動畫
     if( event.type == ALLEGRO_EVENT_TIMER ){ //根據fps+anime
@@ -1349,16 +1351,7 @@ void charater_process2(ALLEGRO_EVENT event){
 //    printf( "charater_process2\n" );
 }
 
-void character_destory2()
-{
-//    printf( "character_destory2\n" );
-    for( int n = 0; n < MONSTER_NUMBERS; n++ ) {
-        al_destroy_bitmap( e_monster[ n ].img_move[ 0 ] );
-    }
-//    printf( "character_destory2\n" );
-}
-
-void charater_update2()
+void monster_update( void )
 {
     for( int i = 0; i < MONSTER_NUMBERS; i++ ) {
         if( e_monster[ i ].state == EMS_ALIVE || e_monster[ i ].state == EMS_ATK) {
@@ -1464,7 +1457,8 @@ void monster_CheckBlocker( const int nMonsterIdx )
     }
 }
 
-void character_draw2(){
+void monster_draw( void )
+{
     //printf( "character_draw2\n" );
     for( int n = 0; n < MONSTER_NUMBERS; n++ ) {
     // with the state, draw corresponding image
@@ -1558,5 +1552,11 @@ void character_draw2(){
 //    printf( "character_draw2\n" );
 }
 
-
-
+void monster_destroy( void )
+{
+//    printf( "character_destory2\n" );
+    for( int n = 0; n < MONSTER_NUMBERS; n++ ) {
+        al_destroy_bitmap( e_monster[ n ].img_move[ 0 ] );
+    }
+//    printf( "character_destory2\n" );
+}

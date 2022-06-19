@@ -39,7 +39,7 @@ void game_scene_init(){
     g_nBackgroundWidth = al_get_bitmap_width( g_background[ 0 ] );
 
     character_init( COUNOF_BACKGROUND * g_nBackgroundWidth );
-    character_init2();
+    monster_init();
     object_init();
 }
 
@@ -53,7 +53,7 @@ void game_scene_draw( void ){
 
     // draw character
     character_draw();
-    character_draw2();
+    monster_draw();
 }
 
 /*
@@ -64,7 +64,8 @@ void game_scene_draw( void ){
          ++++++++++++++
  */
 
-void game_scene_destroy(){
+void game_scene_destroy( void )
+{
     // background
     for( int i = 0; i < COUNOF_BACKGROUND; i++ ) {
         al_destroy_bitmap( g_background[ i ] );
@@ -72,6 +73,6 @@ void game_scene_destroy(){
 
     object_destroy();
 
-    character_destory();
-    character_destory2();
+    character_destroy();
+    monster_destroy();
 }

@@ -214,7 +214,7 @@ void game_update( void )
     }
     if( g_nWindow == 2 && e_pchara->hp >= 1 ){
         charater_update();
-        charater_update2();
+        monster_update();
     }
     else if( g_nWindow == 2 && e_pchara->hp < 1 ) {
         al_stop_sample_instance( g_pMenuSampleInstance );
@@ -255,7 +255,7 @@ int process_event( void )
     }
 	else if( g_nWindow == 2 ) {
         charater_process( event );
-        charater_process2( event );
+        monster_process( event );
     }
 
 
