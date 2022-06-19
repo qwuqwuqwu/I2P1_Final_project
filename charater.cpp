@@ -1872,6 +1872,9 @@ void monsrt_attackCharacter( void )
 
 void BossBomb_attackCharacter( void )
 {
+    if( g_bImmortal == true ) {
+        return;
+    }
     // check boss bomb
     Position CharacterPos;
     CharacterPos.e = e_pchara->x + e_pchara->width;
