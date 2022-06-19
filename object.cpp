@@ -343,6 +343,12 @@ void BombSetup( void )
         for( int j = 0; j < 3; j++ ) {
             g_Bomb[ i ].img_explode[ j ] = g_ExplodeMap[ j ];
         }
+
+        ALLEGRO_SAMPLE *pTemp = al_load_sample( "./sound/explode.wav" );
+        g_Bomb[ i ].sound_explode = al_create_sample_instance( pTemp );
+        al_set_sample_instance_playmode( g_Bomb[ i ].sound_explode, ALLEGRO_PLAYMODE_ONCE );
+        al_set_sample_instance_gain( g_Bomb[ i ].sound_explode, 0.4 );
+        al_attach_sample_instance_to_mixer( g_Bomb[ i ].sound_explode, al_get_default_mixer() );
     }
 }
 
@@ -574,6 +580,9 @@ void object_draw( void )
             else {
                 al_draw_bitmap( g_Bomb[ i ].img_explode[ g_Bomb[ i ].nSubState ], g_Bomb[ i ].x, g_Bomb[ i ].y, ALLEGRO_FLIP_HORIZONTAL );
             }
+            if( e_pchara->nSubState == 0 ) {
+                al_play_sample_instance( g_Bomb[ i ].sound_explode );
+            }
         }
     }
 
@@ -602,6 +611,7 @@ void object_destroy( void )
     // bomb
     for( int i = 0; i < MAX_COUNTOF_BOMB; i++ ) {
         al_destroy_bitmap( g_BombMap[ i ] );
+        al_destroy_sample_instance( g_Bomb[ i ].sound_explode );
     }
     for( int i = 0; i < 3; i++ ) {
         al_destroy_bitmap( g_ExplodeMap[ i ] );

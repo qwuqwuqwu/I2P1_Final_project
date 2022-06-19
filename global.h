@@ -150,7 +150,10 @@ typedef struct _Character {
     ALLEGRO_BITMAP *img_store_AtkWord[ ESA_NUM ];
     ALLEGRO_BITMAP *img_store_HP[ HP + 1 ];
 
-    ALLEGRO_SAMPLE_INSTANCE *atk_Sound;
+    ALLEGRO_SAMPLE_INSTANCE *sound_inhale;
+    ALLEGRO_SAMPLE_INSTANCE *sound_slash;
+    ALLEGRO_SAMPLE_INSTANCE *sound_fire;
+    ALLEGRO_SAMPLE_INSTANCE *sound_transform;
 } Character;
 
 typedef struct _Mon {
@@ -199,6 +202,7 @@ typedef struct _Bomb {
     float vy;
     float vx;
     float FallingTick;
+    ALLEGRO_SAMPLE_INSTANCE *sound_explode;
 } Bom;
 
 // structure to represent ground
