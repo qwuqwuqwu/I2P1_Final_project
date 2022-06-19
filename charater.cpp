@@ -1702,7 +1702,7 @@ void monsrt_attackCharacter( void )
                     g_nImortalCursor = 0;
                     e_pchara->state = ECS_INJURED;
                     e_pchara->nInjuredCursor = 0;
-                    e_pchara->hp--;
+                    e_pchara->hp = e_pchara->hp - ( e_monster[ i ].type + 1 );
                     printf( "Injured by others, now hp is %d\n", e_pchara->hp );
                     printf( "yo\n" );
                 }
