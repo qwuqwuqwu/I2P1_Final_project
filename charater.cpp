@@ -1401,6 +1401,7 @@ void character_destroy( void )
     }
 
     free( e_pchara );
+    e_pchara = NULL;
     printf( "character destroy success!\n" );
 //    printf( "character_destory\n" );
 }
@@ -1848,8 +1849,10 @@ void monster_destroy( void )
         for( int j = 0; j < 2; j++ ) {
             al_destroy_bitmap( e_monster[ i ].img_atk[ j ] );
         }
-        for( int j = 0; j < 2; j++ ) {
-            al_destroy_bitmap( e_monster[ i ].img_fire[ j ] );
+        if( e_monster[ i ].type == ESA_FIRE ) {
+            for( int j = 0; j < 2; j++ ) {
+                al_destroy_bitmap( e_monster[ i ].img_fire[ j ] );
+            }
         }
     }
     printf( "monster destroy success!\n" );
@@ -1858,5 +1861,8 @@ void monster_destroy( void )
 
 bool isCharacterAlive( void )
 {
+    if( e_pchara == NULL ) {
+        return false;
+    }
     return e_pchara->hp > 0;
 }
