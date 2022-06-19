@@ -152,7 +152,6 @@ typedef struct _Character {
 } Character;
 
 typedef struct _Mon {
-    ESpecialAtk NowSpecialAtk;
     int x, y; // the position of image
     int width, height; // the width and height of image
     bool dir; // left: false, right: true
@@ -166,6 +165,7 @@ typedef struct _Mon {
     ALLEGRO_BITMAP *img_atk[ 3 ];
     int anime; // counting the time of animation
     int anime_time; // indicate how long the animation
+    int nSubState;
     int hp;
 
     int y0;

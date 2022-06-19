@@ -1299,6 +1299,7 @@ void monster_init( void )
         e_monster[ n ].dir = true;
         e_monster[ n ].hp = 1; // TODO different type should have different hp
         e_monster[ n ].state = EMS_ALIVE;
+        e_monster[ n ].nSubState = 0;
 
         e_monster[ n ].anime = 0;
         e_monster[ n ].anime_time = 30;
@@ -1326,6 +1327,13 @@ void monster_process( ALLEGRO_EVENT event )
             for( int n = 0; n < MONSTER_NUMBERS; n++ ) {
                 e_monster[ n ].anime++;
                 e_monster[ n ].anime %= e_monster[ n ].anime_time; //讓我們知道現在跑道time的哪一步
+
+                if( e_monster[ n ].anime < e_monster[ n ].anime_time / 2 ) {
+                    e_monster[ n ].nSubState = 1;
+                }
+                else {
+                    e_monster[ n ].nSubState = 0;
+                }
 
                 e_monster[ n ].nAtkCursor++;  //用以判斷說要進行攻擊了的週期
                 e_monster[ n ].nAtkCursor %= e_monster[ n ].nAtkTime;
@@ -1459,42 +1467,43 @@ void monster_draw( void )
             monster_CheckBlocker( n );
 
             if( e_monster[ n ].state == EMS_ALIVE ) {
-                if( e_monster[ n ].anime < e_monster[ n ].anime_time / 2 ) {
+//                if( e_monster[ n ].anime < e_monster[ n ].anime_time / 2 ) {
+                    int nSubState = e_monster[ n ].nSubState;
                     if( e_monster[ n ].dir == true ) { //如果面右
                         if( e_monster[ n ].x >= WIDTH / 2 + 50 + n * 240 ) {
                             e_monster[ n ].dir = false;
-                            al_draw_bitmap( e_monster[ n ].img_move[ 0 ], e_monster[ n ].x, e_monster[ n ].y, 0 );
+                            al_draw_bitmap( e_monster[ n ].img_move[ nSubState ], e_monster[ n ].x, e_monster[ n ].y, 0 );
                         }
-                        al_draw_bitmap( e_monster[ n ].img_move[ 0 ], e_monster[ n ].x, e_monster[ n ].y, ALLEGRO_FLIP_HORIZONTAL );
+                        al_draw_bitmap( e_monster[ n ].img_move[ nSubState ], e_monster[ n ].x, e_monster[ n ].y, ALLEGRO_FLIP_HORIZONTAL );
                         e_monster[ n ].x += 1;
                     }
                     else {//如果面左
                         if( e_monster[ n ].x <= WIDTH / 2 + n * 240 ) {
                             e_monster[ n ].dir = true;
-                            al_draw_bitmap( e_monster[ n ].img_move[ 0 ], e_monster[ n ].x, e_monster[ n ].y, ALLEGRO_FLIP_HORIZONTAL );
+                            al_draw_bitmap( e_monster[ n ].img_move[ nSubState ], e_monster[ n ].x, e_monster[ n ].y, ALLEGRO_FLIP_HORIZONTAL );
                         }
-                        al_draw_bitmap( e_monster[ n ].img_move[ 0 ], e_monster[ n ].x, e_monster[ n ].y, 0 );
+                        al_draw_bitmap( e_monster[ n ].img_move[ nSubState ], e_monster[ n ].x, e_monster[ n ].y, 0 );
                         e_monster[ n ].x -= 1;
                     }
-                }
-                else {
-                    if( e_monster[ n ].dir == true ) { //如果面右
-                        if( e_monster[ n ].x >= WIDTH / 2 + 50 + n * 240 ) {
-                            e_monster[ n ].dir = false;
-                            al_draw_bitmap( e_monster[ n ].img_move[ 1 ], e_monster[ n ].x, e_monster[ n ].y, 0 );
-                        }
-                        al_draw_bitmap( e_monster[ n ].img_move[ 1 ], e_monster[ n ].x, e_monster[ n ].y, ALLEGRO_FLIP_HORIZONTAL );
-                        e_monster[ n ].x += 1;
-                    }
-                    else{//如果面左
-                        if( e_monster[ n ].x <= WIDTH / 2 + n * 240 ) {
-                            e_monster[ n ].dir = true;
-                            al_draw_bitmap( e_monster[ n ].img_move[ 1 ], e_monster[ n ].x, e_monster[ n ].y, ALLEGRO_FLIP_HORIZONTAL );
-                        }
-                        al_draw_bitmap( e_monster[ n ].img_move[ 1 ], e_monster[ n ].x, e_monster[ n ].y, 0 );
-                        e_monster[ n ].x -= 1;
-                    }
-                }
+//                }
+//                else {
+//                    if( e_monster[ n ].dir == true ) { //如果面右
+//                        if( e_monster[ n ].x >= WIDTH / 2 + 50 + n * 240 ) {
+//                            e_monster[ n ].dir = false;
+//                            al_draw_bitmap( e_monster[ n ].img_move[ 1 ], e_monster[ n ].x, e_monster[ n ].y, 0 );
+//                        }
+//                        al_draw_bitmap( e_monster[ n ].img_move[ 1 ], e_monster[ n ].x, e_monster[ n ].y, ALLEGRO_FLIP_HORIZONTAL );
+//                        e_monster[ n ].x += 1;
+//                    }
+//                    else{//如果面左
+//                        if( e_monster[ n ].x <= WIDTH / 2 + n * 240 ) {
+//                            e_monster[ n ].dir = true;
+//                            al_draw_bitmap( e_monster[ n ].img_move[ 1 ], e_monster[ n ].x, e_monster[ n ].y, ALLEGRO_FLIP_HORIZONTAL );
+//                        }
+//                        al_draw_bitmap( e_monster[ n ].img_move[ 1 ], e_monster[ n ].x, e_monster[ n ].y, 0 );
+//                        e_monster[ n ].x -= 1;
+//                    }
+//                }
 
 
             }/*else if(e_monster[ n ].state == EMS_ATK){ //here is the bug
