@@ -166,6 +166,7 @@ typedef struct _Mon {
     int nAtkanime_time;
     ALLEGRO_BITMAP *img_move[ 2 ];
     ALLEGRO_BITMAP *img_atk[ 2 ];
+    ALLEGRO_BITMAP *img_fire[ 2 ];
     int anime; // counting the time of animation
     int anime_time; // indicate how long the animation
     int nSubState;

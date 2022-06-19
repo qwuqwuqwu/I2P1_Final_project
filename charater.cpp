@@ -211,7 +211,6 @@ void character_init( const int nTerrainWidth, const int nLife ){
                 sprintf( temp, "./image/fire%d.png", j + 1 );
                 e_pchara->img_fire[ j ] = al_load_bitmap( temp );
                 assert( e_pchara->img_fire[ j ] != NULL );
-
             }
 
             // move
@@ -1452,6 +1451,11 @@ void monster_init( void )
                 sprintf( tmpatk, "./image/enemy_fire_spit%d.png", i + 1 );
                 e_monster[ n ].img_atk[ i ] = al_load_bitmap( tmpatk );
                 assert( e_monster[ n ].img_atk[ i ] != NULL );
+
+                // fire
+                sprintf( temp, "./image/fire%d.png", i + 1 );
+                e_monster[ n ].img_fire[ i ] = al_load_bitmap( temp );
+                assert( e_monster[ n ].img_fire[ i ] != NULL );
             }
         }
 
@@ -1482,8 +1486,8 @@ void monster_process( ALLEGRO_EVENT event )
 {
 //    printf( "charater_process2\n" );
     // process the animation                //1.處理動畫
-    if( event.type == ALLEGRO_EVENT_TIMER ){ //根據fps+anime
-        if( event.timer.source == fps ){
+    if( event.type == ALLEGRO_EVENT_TIMER ) { //根據fps+anime
+        if( event.timer.source == fps ) {
             for( int n = 0; n < g_nMonsterCount; n++ ) {
                 e_monster[ n ].anime++;
                 e_monster[ n ].anime %= e_monster[ n ].anime_time; //讓我們知道現在跑道time的哪一步
@@ -1561,10 +1565,6 @@ void monster_update( void )
                 e_monster[ i ].state = EMS_DIE;
 
             }
-
-//            if( e_monster[ i ].nAtkCursor == e_monster[ i ].nAtkTime - 2 ) {
-//                e_monster[ i ].state = EMS_ATK;
-//            }
         }
 
     }
@@ -1660,7 +1660,7 @@ void monster_draw( void )
                         e_monster[ n ].x -= 1;
                     }
             }
-            else if( e_monster[ n ].state == EMS_ATK ) { //here is the bug
+            else if( e_monster[ n ].state == EMS_ATK ) {
 //                printf("nice");
                 int nSubState = e_monster[ n ].nSubState;
 
@@ -1674,17 +1674,32 @@ void monster_draw( void )
                     BombThrow( e_monster[ n ].nBombIdx, e_monster[ n ].x, e_monster[ n ].y, e_monster[ n ].dir );
                 }
 
+                // plot fire
+                if( e_monster[ n ].type == ESA_FIRE ) {
+                    if( e_monster[ n ].dir == true ) {
+                        al_draw_bitmap( e_monster[ n ].img_fire[ e_monster[ n ].nSubState ],
+                                        e_monster[ n ].x + e_monster[ n ].width,
+                                        e_monster[ n ].y + ( e_monster[ n ].height- al_get_bitmap_height( e_monster[ n ].img_fire[ e_monster[ n ].nSubState ] ) ) / 2,
+                                        ALLEGRO_FLIP_HORIZONTAL );
+                    }
+                    else {
+                        al_draw_bitmap( e_monster[ n ].img_fire[ e_monster[ n ].nSubState ],
+                                        e_monster[ n ].x - al_get_bitmap_width( e_monster[ n ].img_fire[ e_monster[ n ].nSubState ] ),
+                                        e_monster[ n ].y + ( e_monster[ n ].height- al_get_bitmap_height( e_monster[ n ].img_fire[ e_monster[ n ].nSubState ] ) ) / 2,
+                                        0 );
+                    }
+                }
+
                 if( e_monster[ n ].dir == true ) {
                     al_draw_bitmap( e_monster[ n ].img_atk[ nSubState ],
-                                    e_monster[ n ].x + e_monster[ n ].width,
-                                    e_monster[ n ].y
-                                    + ( e_monster[ n ].height- al_get_bitmap_height( e_monster[ n ].img_atk[ nSubState ] ) ) / 2,
+                                    e_monster[ n ].x,
+                                    e_monster[ n ].y,
                                     ALLEGRO_FLIP_HORIZONTAL );
                 }
                 else {
-                    al_draw_bitmap( e_monster[ n ].img_atk[ nSubState ] ,
-                                e_monster[ n ].x  - al_get_bitmap_width( e_monster[ n ].img_atk[ nSubState ] ),
-                                e_monster[ n ].y + ( e_monster[ n ].height- al_get_bitmap_height( e_monster[ n ].img_atk[ nSubState ] ) ) / 2,0 );
+                    al_draw_bitmap( e_monster[ n ].img_atk[ nSubState ],
+                                e_monster[ n ].x,
+                                e_monster[ n ].y, 0);
                 }
             }
         }
@@ -1702,6 +1717,9 @@ void monster_destroy( void )
         }
         for( int j = 0; j < 2; j++ ) {
             al_destroy_bitmap( e_monster[ i ].img_atk[ j ] );
+        }
+        for( int j = 0; j < 2; j++ ) {
+            al_destroy_bitmap( e_monster[ i ].img_fire[ j ] );
         }
     }
     printf( "monster destroy success!\n" );
