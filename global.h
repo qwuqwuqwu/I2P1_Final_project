@@ -33,6 +33,7 @@ enum ESpecialAtk {
     ESA_BOMB = 2,
     ESA_FIRE = 3,
     ESA_NUM = 4,
+    ESA_BOSS = 5,
 };
 
 // the state of character
@@ -60,6 +61,7 @@ enum EMonsterState {
     EMS_ALIVE = 0,
     EMS_DIE = 1,
     EMS_ATK = 2,
+    EMS_INJURED = 3,
 };
 
 //enum EMonsterType {
@@ -174,6 +176,10 @@ typedef struct _Mon {
 
     int nAtkCursor; 		    // attack cursor
     int nAtkTime;
+    int nInjuredCursor;     // injured cursor
+    int nInjuredTime;       // injured time
+
+
     ALLEGRO_BITMAP *img_move[ 2 ];
     ALLEGRO_BITMAP *img_atk[ 2 ];
     ALLEGRO_BITMAP *img_fire[ 2 ];

@@ -181,11 +181,11 @@ int FindAndDrawClosestGroundY( const int w, const int e, const int s ){
     }
 
     if( DEBUGPRINT_SCENE ) {
-        printf( "obj s = %d\n", s );
-        printf( "*************************************Ground %d: x = %d, y = %d, width = %d, height = %d\n",
-               nClosestGroundIdx,
-               g_Ground[ nClosestGroundIdx ].x, g_Ground[ nClosestGroundIdx ].y,
-                g_Ground[ nClosestGroundIdx ].nWidth, g_Ground[ nClosestGroundIdx ].nHeight );
+ //       printf( "obj s = %d\n", s );
+ //       printf( "*************************************Ground %d: x = %d, y = %d, width = %d, height = %d\n",
+ //              nClosestGroundIdx,
+ //              g_Ground[ nClosestGroundIdx ].x, g_Ground[ nClosestGroundIdx ].y,
+ //               g_Ground[ nClosestGroundIdx ].nWidth, g_Ground[ nClosestGroundIdx ].nHeight );
 //        for( int i = 0; i < nFoundGroundCount; i++ ) {
 //            printf( "*************************************Ground %d: x = %d, y = %d, width = %d, height = %d\n",
 //                    i, g_Ground[ nFoundGroundIdx[ i ] ].x, g_Ground[ nFoundGroundIdx[ i ] ].y,
@@ -307,7 +307,7 @@ void GroundSetup( void )
 
         g_Ground[ i ].nWidth = al_get_bitmap_width( Ground[ i ] );
         g_Ground[ i ].nHeight = al_get_bitmap_height( Ground[ i ] );
-        printf( "i, height = %d, %d\n", i, g_Ground[ i ].nHeight );
+  //      printf( "i, height = %d, %d\n", i, g_Ground[ i ].nHeight );
     }
 }
 

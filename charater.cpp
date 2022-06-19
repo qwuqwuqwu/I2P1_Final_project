@@ -30,6 +30,7 @@ int g_nMonLastSubState[ MAX_COUNTOF_MONSTER ];
 bool g_bCDing = false;
 int g_nCDCursor = 0;
 int g_nCDTime = 20;
+
 int camera_move = 1;
 
 int g_nWordHeight = 0;
@@ -660,7 +661,7 @@ void character_eat( void )
     if( nFoodCount != 0 ) {
         // should return to full blood
         e_pchara->hp = HP;
-        printf( "Full blood!\n" );
+    //    printf( "Full blood!\n" );
     }
 
     if( nCandyCount != 0 ) {
@@ -688,7 +689,7 @@ void character_checkTransform( void ) {
     CharacterPos.s = e_pchara->y + e_pchara->height;
 
     for( int i = 0; i < g_nMonsterCount; i++ ) {
-        if( e_monster[ i ].state == EMS_ALIVE ) {
+        if( e_monster[ i ].state == EMS_ALIVE && e_monster[ i ].type != ESA_BOSS ) {
             // given monster position
             Position MonsterPos;
             MonsterPos.e = e_monster[ i ].x + e_monster[ i ].width;
@@ -1128,9 +1129,28 @@ void character_attackMonster( void )
                 MonsterPos.s = e_monster[ i ].y + e_monster[ i ].height - 8;
 
                 if( CheckOverlap( &CharacterPos, &MonsterPos ) == true ) {
+                    if(e_monster[ i ].type != ESA_BOSS){
                     e_monster[ i ].hp -= ( ( int )e_pchara->NowSpecialAtk + 1 );
+
+                    }else{
+
+                        //printf( "%d ", e_monster[ i ].hp );
+                        if( g_bImmortal == true  ) {
+                            printf("nothing");
+                        }
+                        else {
+                        printf( "%d ", e_monster[ i ].hp );
+
+                        g_bImmortal = true;
+                        g_nImortalCursor = 0;
+                        e_monster[ i ].state = EMS_INJURED;
+                        e_monster[ i ].nInjuredCursor = 0;
+                        e_monster[ i ].hp = e_monster[ i ].hp - ( (int)e_pchara->NowSpecialAtk + 1 );
+                        //printf( "Injured by others, now hp is %d\n", e_pchara->hp );
+                        //printf( "yo\n" );
+                        }
+                    }
                 }
-            }
         }
     }
 
@@ -1158,17 +1178,33 @@ void character_attackMonster( void )
             MonsterPos.s = e_monster[ i ].y + e_monster[ i ].height - 16;
 
             if( CheckOverlap( &CharacterPos, &MonsterPos ) == true ) {
-                e_monster[ i ].hp -= 3;
+                if(e_monster[ i ].type != ESA_BOSS){
+                    e_monster[ i ].hp -= 3;
+                    if( e_pchara->NowSpecialAtk == ESA_BOMB ) {
+                        printf( "Trigger Explode\n" );
+                        ExplodeBomb( e_pchara->nBombIdx );
+                    }
+                }else{
 
-                // explode bomb
-                if( e_pchara->NowSpecialAtk == ESA_BOMB ) {
-                    printf( "Trigger Explode\n" );
-                    ExplodeBomb( e_pchara->nBombIdx );
+                    if( g_bImmortal == true  ) {
+                              printf("nothing");
+                    }
+                    else {
+                        printf( "%d ", e_monster[ i ].hp );
+                        g_bImmortal = true;
+                        g_nImortalCursor = 0;
+                        e_monster[ i ].state = EMS_INJURED;
+                        e_monster[ i ].nInjuredCursor = 0;
+                        e_monster[ i ].hp -= 3;
+                    }
+
                 }
-            }
+
         }
-        printf( "%d %d %d %d\n", CharacterPos.e, CharacterPos.s, CharacterPos.w, CharacterPos.n );
+        //printf( "%d %d %d %d\n", CharacterPos.e, CharacterPos.s, CharacterPos.w, CharacterPos.n );
+     }
     }
+ }
 }
 
 void character_attack_move( void )
@@ -1488,6 +1524,7 @@ void monster_init( void )
     }
     fclose( fp ); //記得關檔
 
+
     for( int n = 0; n < g_nMonsterCount; n++ ) {
         if( e_monster[ n ].type == ESA_NORMAL ) {
             for( int i = 0; i < 2; i++ ) {
@@ -1551,9 +1588,30 @@ void monster_init( void )
                 assert( e_monster[ n ].img_fire[ i ] != NULL );
             }
         }
+        else if( e_monster[ n ].type == ESA_BOSS ){
+            for( int i = 0; i < 2; i++ ) {
+                char temp[ 50 ];
+                sprintf( temp, "./image/boss_normal.png",i+1);
+                e_monster[ n ].img_move[ i ] = al_load_bitmap( temp );
+                assert( e_monster[ n ].img_move[ i ] != NULL );
+                e_monster[ n ].width = al_get_bitmap_width( e_monster[ n ].img_move[ 0 ] );
+                e_monster[ n ].height = al_get_bitmap_height( e_monster[ n ].img_move[ 0 ] );
+                e_monster[ n ].img_atk[ i ] = al_load_bitmap( temp );
+                assert( e_monster[ n ].img_atk[ i ] != NULL );
+            }
+        }
 
-        e_monster[ n ].dir = true;
-        e_monster[ n ].hp = 1; // TODO different type should have different hp
+        if(e_monster[ n ].type==ESA_BOSS){
+            e_monster[ n ].hp = 5;
+            e_monster[ n ].dir = false;
+            e_pchara->nInjuredCursor = 0;
+            e_pchara->nInjuredTime = 120;
+        }else{
+            e_monster[ n ].dir = true;
+            e_monster[ n ].hp = 1;
+        }
+
+
         e_monster[ n ].state = EMS_ALIVE;
         e_monster[ n ].nSubState = 0;
         e_monster[ n ].nBombIdx = -1;
@@ -1608,11 +1666,23 @@ void monster_process( ALLEGRO_EVENT event )
                         e_monster[ n ].nMoveCursor = 0;
                     }
                 }
-            }
+
+                if( e_monster[ n ].state == EMS_INJURED ) {
+                    e_monster[ n ].nInjuredCursor++;
+                    e_monster[ n ].nInjuredCursor %= e_monster[ n ].nInjuredTime;
+//                printf( "e_pchara->nInjuredCursor = %d\n", e_pchara->nInjuredCursor );
+
+                    if( e_monster[ n ].nInjuredCursor == 0 ) {
+                        e_monster[ n ].state = EMS_ALIVE;
+                    }
+                }
+
         }
     }
 //    printf( "charater_process2\n" );
+  }
 }
+
 
 void monster_update( void )
 {
@@ -1633,13 +1703,13 @@ void monster_update( void )
                     // do nothing
                 }
                 else {
-                    printf( "%d ", e_pchara->state );
+                   // printf( "%d ", e_pchara->state );
                     g_bImmortal = true;
                     g_nImortalCursor = 0;
                     e_pchara->state = ECS_INJURED;
                     e_pchara->nInjuredCursor = 0;
                     e_pchara->hp--;
-                    printf( "yo\n" );
+                   // printf( "yo\n" );
                 }
             }
 
@@ -1709,8 +1779,8 @@ void monsrt_attackCharacter( void )
 
                     e_pchara->NowSpecialAtk = ESA_NORMAL;
                     e_pchara->img_atkWord = e_pchara->img_store_AtkWord[ e_pchara->NowSpecialAtk ];
-                    printf( "Injured by others, now hp is %d\n", e_pchara->hp );
-                    printf( "yo\n" );
+               //     printf( "Injured by others, now hp is %d\n", e_pchara->hp );
+                //    printf( "yo\n" );
                 }
             }
         }
@@ -1743,7 +1813,7 @@ void monsrt_attackCharacter( void )
                 e_pchara->NowSpecialAtk = ESA_NORMAL;
                 e_pchara->img_atkWord = e_pchara->img_store_AtkWord[ e_pchara->NowSpecialAtk ];
 
-                printf( "Injured by bomb %d, now hp is %d\n", i, e_pchara->hp );
+              //  printf( "Injured by bomb %d, now hp is %d\n", i, e_pchara->hp );
                 ExplodeBomb( e_monster[ i ].nBombIdx );
             }
         }
@@ -1846,6 +1916,13 @@ void monster_StateChangeImage( const int i )
         // do nothing
         break;
 
+    case EMS_INJURED:
+        if( NewState != g_LastState ) {
+            e_monster[ i ].nSubState = 0;
+        }
+        break;
+
+
     default:
         assert( false );
         break;
@@ -1890,6 +1967,21 @@ void monster_StateChangeImage( const int i )
         // do nothing;
         break;
 
+    case EMS_INJURED:
+        // change state
+        if( g_LastState != NewState ) {
+            int nHeight = al_get_bitmap_height( e_monster[ i ].img_move[ 0 ] );
+            e_monster[ i ].y -= ( nHeight - e_monster[ i ].height ) / 2;
+            e_monster[ i ].height = nHeight;
+
+
+            int nWidth = al_get_bitmap_width( e_monster[ i ].img_move[ 0 ] );
+            e_monster[ i ].x -= nWidth - e_monster[ i ].width;
+            e_monster[ i ].width = nWidth;
+
+        }
+        break;
+
     default:
         assert( false );
         break;
@@ -1922,7 +2014,7 @@ void monster_draw( void )
 
             monsrt_attackCharacter();
 
-            if( e_monster[ n ].state == EMS_ALIVE ) {
+            if( e_monster[ n ].state == EMS_ALIVE && e_monster[ n ].type != ESA_BOSS) {
 //                if( e_monster[ n ].anime < e_monster[ n ].anime_time / 2 ) {
                     int nSubState = e_monster[ n ].nSubState;
                     if( e_monster[ n ].dir == true ) { //如果面右
@@ -1983,11 +2075,21 @@ void monster_draw( void )
                                 e_monster[ n ].x,
                                 e_monster[ n ].y, 0);
                 }
+            }else if(e_monster[ n ].type == ESA_BOSS && e_monster[ n ].state!=EMS_INJURED){
+                int nSubState = e_monster[ n ].nSubState;
+                al_draw_bitmap( e_monster[ n ].img_move[ nSubState ], e_monster[ n ].x, e_monster[ n ].y, 0 );
             }
+        }else if(e_monster[ n ].state==EMS_INJURED){
+                int nSubState = e_monster[ n ].nSubState;
+                al_draw_bitmap( e_pchara->img_move[ e_pchara->nSubState ], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL );
+        break;}
+
+
+
         }
-    }
-//    printf( "character_draw2\n" );
 }
+//    printf( "character_draw2\n" );
+
 
 void monster_destroy( void )
 {
