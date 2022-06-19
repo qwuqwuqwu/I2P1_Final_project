@@ -41,7 +41,7 @@ bool g_bForceImmortal = false;
 int g_nImortalCursor = 0;
 int g_nImortalTime = 10 * FPS; // 10 sec
 
-int g_nBossIdx = 0;
+int g_nBossIdx = -1;
 bool g_bBossImmortal = false;
 int g_nBossImmortalCursor = 0;
 int g_nBossImmortalTime = 2 * FPS;
@@ -1884,7 +1884,7 @@ void BossBomb_attackCharacter( void )
         g_nImortalCursor = 0;
         e_pchara->state = ECS_INJURED;
         e_pchara->nInjuredCursor = 0;
-        e_pchara->hp -= ( nBossHarm * 4 );
+        e_pchara->hp -= ( nBossHarm );
 
         e_pchara->NowSpecialAtk = ESA_NORMAL;
         e_pchara->img_atkWord = e_pchara->img_store_AtkWord[ e_pchara->NowSpecialAtk ];
@@ -2072,19 +2072,19 @@ void monster_draw( void )
         monster_StateChangeImage( i );
     }
 
+    monsrt_attackCharacter();
+    BossBomb_attackCharacter();
+
     for( int n = 0; n < g_nMonsterCount; n++ ) {
     // with the state, draw corresponding image
-        if( e_monster[ n ].state == EMS_ALIVE || e_monster[ n ].state == EMS_ATK ) {
+        if( e_monster[ n ].state == EMS_ALIVE || e_monster[ n ].state == EMS_ATK || e_monster[ n ].state == EMS_INJURED ) {
 
             int nGroundY = FindAndDrawClosestGroundY( e_monster[ n ].x, e_monster[ n ].x + e_monster[ n ].width, e_monster[ n ].y + e_monster[ n ].height );
 
             monster_gravity( n, nGroundY );
             monster_CheckBlocker( n );
 
-
-            monsrt_attackCharacter();
-
-            if( e_monster[ n ].state == EMS_ALIVE && e_monster[ n ].type != ESA_BOSS) {
+            if( e_monster[ n ].state == EMS_ALIVE && e_monster[ n ].type != ESA_BOSS ) {
 //                if( e_monster[ n ].anime < e_monster[ n ].anime_time / 2 ) {
                     int nSubState = e_monster[ n ].nSubState;
                     if( e_monster[ n ].dir == true ) { //如果面右
@@ -2149,12 +2149,13 @@ void monster_draw( void )
             else if ( e_monster[ n ].type == ESA_BOSS && e_monster[ n ].state != EMS_INJURED && e_monster[ n ].state!= EMS_DIE ) {
                 al_draw_bitmap( e_monster[ n ].img_move[ 0 ], e_monster[ n ].x, e_monster[ n ].y, 0 );
             }
-            else if ( e_monster[ n ].type == ESA_BOSS && e_monster[ n ].state != EMS_INJURED && e_monster[ n ].state!= EMS_DIE ) {
+            else if ( e_monster[ n ].type == ESA_BOSS && e_monster[ n ].state == EMS_INJURED ) {
                 al_draw_bitmap( e_monster[ n ].img_hurt[ 0 ], e_monster[ n ].x, e_monster[ n ].y, 0 );
-            } //add
-        }else if( e_monster[ n ].state==EMS_DIE && e_monster[ n ].type==ESA_BOSS){
-                al_draw_bitmap( e_monster[ n ].img_die[ 0 ], e_monster[ n ].x, e_monster[ n ].y, 0 );
-         }
+            }
+        }
+        else if( n == g_nBossIdx && e_monster[ n ].state == EMS_DIE ) {
+            al_draw_bitmap( e_monster[ n ].img_die[ 0 ], e_monster[ n ].x, e_monster[ n ].y, 0 );
+        }
     }
     Boss_drawhp();
 }
@@ -2186,6 +2187,8 @@ void monster_destroy( void )
         al_destroy_bitmap( img_store_Boss_HP[ i ] );
     }
 
+    g_nBossIdx = -1;
+
     printf( "monster destroy success!\n" );
 //    printf( "character_destory2\n" );
 }
@@ -2196,6 +2199,14 @@ bool isCharacterAlive( void )
         return false;
     }
     return e_pchara->hp > 0;
+}
+
+bool isBossAlive( void )
+{
+    if( g_nBossIdx < 0 || g_nBossIdx >= g_nMonsterCount ) {
+        return true;
+    }
+    return e_monster[ g_nBossIdx ].hp > 0;
 }
 
 void Boss_drawhp( void )
