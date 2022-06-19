@@ -10,7 +10,9 @@
 
 //note
 
-ALLEGRO_SAMPLE *sample = NULL;
+ALLEGRO_SAMPLE *sample_inhale = NULL;
+ALLEGRO_SAMPLE *sample_transform = NULL;
+
 ALLEGRO_SAMPLE_INSTANCE *BossSampleInstance = NULL;
 ALLEGRO_SAMPLE *BossSample = NULL;
 
@@ -22,6 +24,9 @@ int g_nTerrainWidth = 0;
 ECharacterState g_LastState;
 int g_nLastSubState;
 
+EMonsterState g_MonLastState;
+int g_nMonLastSubState;
+
 bool g_bCDing = false;
 int g_nCDCursor = 0;
 int g_nCDTime = 20;
@@ -30,7 +35,7 @@ int camera_move = 1;
 int g_nWordHeight = 0;
 bool g_bImmortal = false;
 int g_nImortalCursor = 0;
-int g_nImortalTime = 120;
+int g_nImortalTime = 10 * FPS; // 10 sec
 
 int g_nMonsterCount = 0;
 
@@ -260,10 +265,25 @@ void character_init( const int nTerrainWidth, const int nLife ){
     }
 
     // load effective sound
-    sample = al_load_sample("./sound/inhale.wav");
-    e_pchara->atk_Sound  = al_create_sample_instance(sample);
-    al_set_sample_instance_playmode(e_pchara->atk_Sound, ALLEGRO_PLAYMODE_ONCE);
-    al_attach_sample_instance_to_mixer(e_pchara->atk_Sound, al_get_default_mixer());
+    sample_inhale = al_load_sample( "./sound/inhale.wav" );
+    e_pchara->sound_inhale = al_create_sample_instance( sample_inhale );
+    al_set_sample_instance_playmode( e_pchara->sound_inhale, ALLEGRO_PLAYMODE_ONCE );
+    al_attach_sample_instance_to_mixer( e_pchara->sound_inhale, al_get_default_mixer() );
+
+    sample_transform = al_load_sample( "./sound/get_ability.wav" );
+    e_pchara->sound_transform = al_create_sample_instance( sample_transform );
+    al_set_sample_instance_playmode( e_pchara->sound_transform, ALLEGRO_PLAYMODE_ONCE );
+    al_attach_sample_instance_to_mixer( e_pchara->sound_transform, al_get_default_mixer() );
+
+    ALLEGRO_SAMPLE *pTemp = al_load_sample( "./sound/slash.wav" );
+    e_pchara->sound_slash = al_create_sample_instance( pTemp );
+    al_set_sample_instance_playmode( e_pchara->sound_slash, ALLEGRO_PLAYMODE_ONCE );
+    al_attach_sample_instance_to_mixer( e_pchara->sound_slash, al_get_default_mixer() );
+
+    pTemp = al_load_sample( "./sound/fireball.wav" );
+    e_pchara->sound_fire = al_create_sample_instance( pTemp );
+    al_set_sample_instance_playmode( e_pchara->sound_fire, ALLEGRO_PLAYMODE_ONCE );
+    al_attach_sample_instance_to_mixer( e_pchara->sound_fire, al_get_default_mixer() );
 
     // initial the geometric information of character
     e_pchara->width = al_get_bitmap_width(e_pchara->img_move[0]);
@@ -318,7 +338,8 @@ void character_init( const int nTerrainWidth, const int nLife ){
 //    printf( "character_init\n" );
 }
 
-void charater_process(ALLEGRO_EVENT event){
+void charater_process( ALLEGRO_EVENT event )
+{
 //    printf( "charater_process\n" );
     // process the animation
     if( event.type == ALLEGRO_EVENT_TIMER ) {
@@ -411,7 +432,8 @@ void charater_process(ALLEGRO_EVENT event){
 //    printf( "charater_process\n" );
 }
 
-void charater_update(){
+void charater_update( void )
+{
 //    printf( "charater_update\n" );
     // use the idea of finite state machine to deal with different state
 
@@ -500,13 +522,6 @@ void character_gravity( int nGroundY ) {
     if( e_pchara->state == ECS_MOVE || e_pchara->state == ECS_STOP || e_pchara->state == ECS_ATK ||
         e_pchara->state == ECS_SLIDE || e_pchara->state == ECS_INJURED ) {
         if( nGroundY == -2 ) {
-            if( g_bImmortal == false ) {
-                e_pchara->state = ECS_INJURED;
-                e_pchara->hp--;
-                g_bImmortal = true;
-                g_nImortalCursor = 0;
-                nGroundY = HEIGHT;
-            }
             nGroundY = HEIGHT;
         }
 
@@ -521,6 +536,16 @@ void character_gravity( int nGroundY ) {
 
 
         if( ( e_pchara->y + ( e_pchara->height + e_pchara->nMoveHeight ) / 2 ) >= nGroundY ) {
+
+            if( nGroundY == HEIGHT ) {
+                if( g_bImmortal == false ) {
+                    e_pchara->state = ECS_INJURED;
+                    e_pchara->hp--;
+                    g_bImmortal = true;
+                    g_nImortalCursor = 0;
+                }
+            }
+
             e_pchara->y = nGroundY - ( e_pchara->height + e_pchara->nMoveHeight ) / 2;
             e_pchara->y0 = e_pchara->y;
             e_pchara->vy = 0.0;
@@ -1091,10 +1116,11 @@ void character_attackMonster( void )
         if( bEffectiveBomb == false ) {
             return;
         }
-        CharacterPos.e += 0;
-        CharacterPos.s += 0;
-        CharacterPos.w -= 0;
-        CharacterPos.n -= 0;
+
+        CharacterPos.e -= 30; // shrink boarder
+        CharacterPos.s -= 30;
+        CharacterPos.w += 30;
+        CharacterPos.n += 30;
 
         for( int i = 0; i < g_nMonsterCount; i++ ) {
             if( e_monster[ i ].state == EMS_DIE ) {
@@ -1259,15 +1285,13 @@ void charactor_show( void )
     case ECS_INHALE:
         if( e_pchara->dir ) {
             al_draw_bitmap( e_pchara->img_inhale[ e_pchara->nSubState ], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL );
-            if( e_pchara->nSubState == 1 ) {
-                al_play_sample_instance(e_pchara->atk_Sound);
-            }
         }
         else {
             al_draw_bitmap( e_pchara->img_inhale[ e_pchara->nSubState ], e_pchara->x, e_pchara->y, 0 );
-            if( e_pchara->nSubState == 1 ) {
-                al_play_sample_instance(e_pchara->atk_Sound);
-            }
+
+        }
+        if( e_pchara->nSubState == 0 ) {
+            al_play_sample_instance( e_pchara->sound_inhale );
         }
         break;
 
@@ -1277,6 +1301,10 @@ void charactor_show( void )
         }
         else {
             al_draw_bitmap( e_pchara->img_transform[ e_pchara->nSubState ], e_pchara->x, e_pchara->y, 0 );
+        }
+
+        if( e_pchara->nSubState == 0 ) {
+            al_play_sample_instance( e_pchara->sound_transform );
         }
         break;
 
@@ -1302,6 +1330,15 @@ void charactor_show( void )
         }
         else {
             al_draw_bitmap( e_pchara->img_atk[ e_pchara->nSubState ], e_pchara->x, e_pchara->y, 0 );
+        }
+
+        if( e_pchara->nSubState == 0 ) {
+            if( e_pchara->NowSpecialAtk == ESA_SWORD ) {
+                al_play_sample_instance( e_pchara->sound_slash );
+            }
+            else if( e_pchara->NowSpecialAtk == ESA_FIRE ) {
+                al_play_sample_instance( e_pchara->sound_fire );
+            }
         }
         break;
 
@@ -1338,7 +1375,10 @@ void charactor_show( void )
 void character_destroy( void )
 {
 //    printf( "character_destory\n" );
-    al_destroy_sample_instance( e_pchara->atk_Sound );
+    al_destroy_sample_instance( e_pchara->sound_inhale );
+    al_destroy_sample_instance( e_pchara->sound_transform );
+    al_destroy_sample_instance( e_pchara->sound_slash );
+    al_destroy_sample_instance( e_pchara->sound_fire );
 
     al_identity_transform( &camera );
     al_translate_transform( &camera, 0, 0 );
@@ -1380,6 +1420,7 @@ void character_destroy( void )
     }
 
     free( e_pchara );
+    e_pchara = NULL;
     printf( "character destroy success!\n" );
 //    printf( "character_destory\n" );
 }
@@ -1484,14 +1525,14 @@ void monster_init( void )
         e_monster[ n ].nSubState = 0;
         e_monster[ n ].nBombIdx = -1;
 
-        e_monster[ n ].anime = 0;
-        e_monster[ n ].anime_time = 30;
+        e_monster[ n ].nMoveCursor = n % 30; // different attack phase
+        e_monster[ n ].nMoveTime = 30;
 
-        e_monster[ n ].nAtkCursor = 0;
-        e_monster[ n ].nAtkTime = 300;
+        e_monster[ n ].nAtkCursor = 0; 		// attack cursor
+        e_monster[ n ].nAtkTime = 30;
 
-        e_monster[ n ].nAtkanime = 0; 		// attack cursor
-        e_monster[ n ].nAtkanime_time = 30;
+        e_monster[ n ].nSwitchCursor = 0;
+        e_monster[ n ].nSwitchTime = 300;
 
         // gravity
         e_monster[ n ].y0 = e_monster[ n ].y;
@@ -1508,39 +1549,30 @@ void monster_process( ALLEGRO_EVENT event )
     if( event.type == ALLEGRO_EVENT_TIMER ) { //根據fps+anime
         if( event.timer.source == fps ) {
             for( int n = 0; n < g_nMonsterCount; n++ ) {
-                e_monster[ n ].anime++;
-                e_monster[ n ].anime %= e_monster[ n ].anime_time; //讓我們知道現在跑道time的哪一步
-
-                if( e_monster[ n ].anime < e_monster[ n ].anime_time / 2 ) {
-                    e_monster[ n ].nSubState = 1;
-                }
-                else {
-                    e_monster[ n ].nSubState = 0;
-                }
 
                 if( e_monster[ n ].state == EMS_ALIVE ) {
-                    e_monster[ n ].nAtkCursor++;  //用以判斷說要進行攻擊了的週期
-                    e_monster[ n ].nAtkCursor %= e_monster[ n ].nAtkTime;
+                    // move cursor
+                    e_monster[ n ].nMoveCursor++;
+                    e_monster[ n ].nMoveCursor %= e_monster[ n ].nMoveTime; //讓我們知道現在跑道time的哪一步
 
-                    if( e_monster[ n ].nAtkCursor == 0 ) {
+                    // switch cursor
+                    e_monster[ n ].nSwitchCursor++;  //用以判斷說要進行攻擊了的週期
+                    e_monster[ n ].nSwitchCursor %= e_monster[ n ].nSwitchTime;
+
+                    if( e_monster[ n ].nSwitchCursor == 0 ) {
                         e_monster[ n ].state = EMS_ATK;
-                        e_monster[ n ].nAtkanime = 0;
+                        e_monster[ n ].nAtkCursor = 0;
                     }
                 }
 
                 if( e_monster[ n ].state == EMS_ATK ) {
-                    e_monster[ n ].nAtkanime++;
-                    e_monster[ n ].nAtkanime %= e_monster[ n ].nAtkanime_time;
+                    e_monster[ n ].nAtkCursor++;
+                    e_monster[ n ].nAtkCursor %= e_monster[ n ].nAtkTime;
 
-                    if( e_monster[ n ].nAtkanime < e_monster[ n ].nAtkanime_time / 2 ) {
-                        e_monster[ n ].nSubState = 1;
-                    }
-                    else {
-                        e_monster[ n ].nSubState = 0;
-                    }
-
-                    if( e_monster[ n ].nAtkanime == 0 ) {
+                    if( e_monster[ n ].nAtkCursor == 0 ) {
                         e_monster[ n ].state = EMS_ALIVE;
+                        e_monster[ n ].nSwitchCursor = 0;
+                        e_monster[ n ].nMoveCursor = 0;
                     }
                 }
             }
@@ -1714,9 +1746,108 @@ void monster_CheckBlocker( const int nMonsterIdx )
     }
 }
 
+void monster_StateChangeImage( const int i )
+{
+    //    printf( "monster_StateChangeImage\n" );
+    EMonsterState NewState = ( EMonsterState )e_monster[ i ].state;
+
+    // update substate
+//    printf( "update substate\n" );
+    switch( NewState ) {
+    case EMS_ALIVE:
+        if( NewState != g_MonLastState ) {
+            e_monster[ i ].nSubState = 0;
+        }
+
+        if( e_monster[ i ].nMoveCursor < e_monster[ i ].nMoveTime / 2 ) {
+            e_monster[ i ].nSubState = 0;
+        }
+        else {
+            e_monster[ i ].nSubState = 1;
+        }
+        break;
+
+    case EMS_ATK:
+        if( NewState != g_MonLastState ) {
+            e_monster[ i ].nSubState = 0;
+        }
+
+        if( e_monster[ i ].nAtkCursor < e_monster[ i ].nAtkTime / 2 ) {
+            e_monster[ i ].nSubState = 0;
+        }
+        else {
+            e_monster[ i ].nSubState = 1;
+        }
+        break;
+
+    case EMS_DIE:
+        // do nothing
+        break;
+
+    default:
+        assert( false );
+        break;
+    }
+
+    // update xy
+//    printf( "update xy\n" );
+    switch( NewState ) {
+    case EMS_ALIVE:
+        // change state
+        if( g_MonLastState != NewState ||
+            ( g_MonLastState == NewState && ( g_nMonLastSubState != e_monster[ i ].nSubState ) ) ) {
+            if( e_monster[ i ].dir == false ) {
+                int nWidth = al_get_bitmap_width( e_monster[ i ].img_move[ e_monster[ i ].nSubState ] );
+                e_monster[ i ].x -= nWidth - e_monster[ i ].width;
+                e_monster[ i ].width = nWidth;
+            }
+            else {
+                int nWidth = al_get_bitmap_width( e_monster[ i ].img_move[ 0 ] );
+                e_monster[ i ].width = nWidth;
+            }
+        }
+        break;
+
+    case EMS_ATK:
+        // change state
+        if( g_MonLastState != NewState ||
+            ( g_MonLastState == NewState && ( g_nMonLastSubState != e_monster[ i ].nSubState ) ) ) {
+            if( e_monster[ i ].dir == false ) {
+                int nWidth = al_get_bitmap_width( e_monster[ i ].img_atk[ e_monster[ i ].nSubState ] );
+                e_monster[ i ].x -= nWidth - e_monster[ i ].width;
+                e_monster[ i ].width = nWidth;
+            }
+            else {
+                int nWidth = al_get_bitmap_width( e_monster[ i ].img_atk[ 0 ] );
+                e_monster[ i ].width = nWidth;
+            }
+        }
+        break;
+
+    case EMS_DIE:
+        // do nothing;
+        break;
+
+    default:
+        assert( false );
+        break;
+    }
+
+
+    g_MonLastState = NewState;
+    g_nMonLastSubState = e_pchara->nSubState;
+//    printf( "%d %d | ", g_LastState, g_nLastSubState );
+//    printf( "Character at x = %d, y = %d\n", e_pchara->x, e_pchara->y );
+//    printf( "character_StateChangeImage\n" );
+}
+
 void monster_draw( void )
 {
     //printf( "character_draw2\n" );
+    for( int i = 0; i < g_nMonsterCount; i++ ) {
+        monster_StateChangeImage( i );
+    }
+
     for( int n = 0; n < g_nMonsterCount; n++ ) {
     // with the state, draw corresponding image
         if( e_monster[ n ].state == EMS_ALIVE || e_monster[ n ].state == EMS_ATK ) {
@@ -1807,8 +1938,10 @@ void monster_destroy( void )
         for( int j = 0; j < 2; j++ ) {
             al_destroy_bitmap( e_monster[ i ].img_atk[ j ] );
         }
-        for( int j = 0; j < 2; j++ ) {
-            al_destroy_bitmap( e_monster[ i ].img_fire[ j ] );
+        if( e_monster[ i ].type == ESA_FIRE ) {
+            for( int j = 0; j < 2; j++ ) {
+                al_destroy_bitmap( e_monster[ i ].img_fire[ j ] );
+            }
         }
     }
     printf( "monster destroy success!\n" );
@@ -1817,5 +1950,8 @@ void monster_destroy( void )
 
 bool isCharacterAlive( void )
 {
+    if( e_pchara == NULL ) {
+        return false;
+    }
     return e_pchara->hp > 0;
 }

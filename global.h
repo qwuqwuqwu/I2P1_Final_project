@@ -62,11 +62,11 @@ enum EMonsterState {
     EMS_ATK = 2,
 };
 
-enum EMonsterType {
-    EMT_NORMAL = 0,
-    EMS_FRIE = 1,
-    EMS_BOMB = 2,
-};
+//enum EMonsterType {
+//    EMT_NORMAL = 0,
+//    EMT_FRIE = 1,
+//    EMT_BOMB = 2,
+//};
 
 enum EBlockType {
     EBT_GRASS = 1,
@@ -151,7 +151,10 @@ typedef struct _Character {
     ALLEGRO_BITMAP *img_store_HP[ HP + 1 ];
     ALLEGRO_BITMAP *img_store_LIFE[ LIFE + 1 ];
 
-    ALLEGRO_SAMPLE_INSTANCE *atk_Sound;
+    ALLEGRO_SAMPLE_INSTANCE *sound_inhale;
+    ALLEGRO_SAMPLE_INSTANCE *sound_slash;
+    ALLEGRO_SAMPLE_INSTANCE *sound_fire;
+    ALLEGRO_SAMPLE_INSTANCE *sound_transform;
 } Character;
 
 typedef struct _Mon {
@@ -160,17 +163,21 @@ typedef struct _Mon {
     int width, height; // the width and height of image
     bool dir; // left: false, right: true
     int state; // the state of character
+    int nSubState;
     int type;
-    int nAtkCursor; 		// attack cursor
-    int nAtkTime; 			// attack duration
-    int nAtkanime; 		// attack cursor
-    int nAtkanime_time;
+
+    int nMoveCursor; 		// switch cursor
+    int nMoveTime; 	        // attack duration
+
+    int nSwitchCursor;
+    int nSwitchTime;
+
+    int nAtkCursor; 		    // attack cursor
+    int nAtkTime;
     ALLEGRO_BITMAP *img_move[ 2 ];
     ALLEGRO_BITMAP *img_atk[ 2 ];
     ALLEGRO_BITMAP *img_fire[ 2 ];
-    int anime; // counting the time of animation
-    int anime_time; // indicate how long the animation
-    int nSubState;
+
     int hp;
     int nBombIdx;
 
@@ -196,6 +203,7 @@ typedef struct _Bomb {
     float vy;
     float vx;
     float FallingTick;
+    ALLEGRO_SAMPLE_INSTANCE *sound_explode;
 } Bom;
 
 // structure to represent ground
