@@ -2187,6 +2187,9 @@ void monster_destroy( void )
         al_destroy_bitmap( img_store_Boss_HP[ i ] );
     }
 
+    al_destroy_bitmap( e_monster[ g_nBossIdx ].img_hurt[ 0 ] );
+    al_destroy_bitmap( e_monster[ g_nBossIdx ].img_die[ 0 ] );
+
     g_nBossIdx = -1;
 
     printf( "monster destroy success!\n" );
