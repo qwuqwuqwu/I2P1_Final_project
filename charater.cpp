@@ -1148,7 +1148,7 @@ void character_attackMonster( void )
                             g_nBossImmortalCursor = 0;
                             e_monster[ i ].state = EMS_INJURED;
                             e_monster[ i ].nInjuredCursor = 0;
-e_							monster[ i ].hp -= ( ( int )e_pchara->NowSpecialAtk + 1 );
+                            e_monster[ i ].hp -= ( ( int )e_pchara->NowSpecialAtk + 1 );
                             //printf( "Injured by others, now hp is %d\n", e_pchara->hp );
                             //printf( "yo\n" );
                         }
@@ -2074,17 +2074,16 @@ void monster_draw( void )
 
     for( int n = 0; n < g_nMonsterCount; n++ ) {
     // with the state, draw corresponding image
-        if( e_monster[ n ].state == EMS_ALIVE || e_monster[ n ].state == EMS_ATK ) {
+        if( e_monster[ n ].state == EMS_ALIVE || e_monster[ n ].state == EMS_ATK || e_monster[ n ].state == EMS_INJURED ) {
 
             int nGroundY = FindAndDrawClosestGroundY( e_monster[ n ].x, e_monster[ n ].x + e_monster[ n ].width, e_monster[ n ].y + e_monster[ n ].height );
 
             monster_gravity( n, nGroundY );
             monster_CheckBlocker( n );
 
-
             monsrt_attackCharacter();
 
-            if( e_monster[ n ].state == EMS_ALIVE && e_monster[ n ].type != ESA_BOSS) {
+            if( e_monster[ n ].state == EMS_ALIVE && e_monster[ n ].type != ESA_BOSS ) {
 //                if( e_monster[ n ].anime < e_monster[ n ].anime_time / 2 ) {
                     int nSubState = e_monster[ n ].nSubState;
                     if( e_monster[ n ].dir == true ) { //如果面右
@@ -2149,12 +2148,13 @@ void monster_draw( void )
             else if ( e_monster[ n ].type == ESA_BOSS && e_monster[ n ].state != EMS_INJURED && e_monster[ n ].state!= EMS_DIE ) {
                 al_draw_bitmap( e_monster[ n ].img_move[ 0 ], e_monster[ n ].x, e_monster[ n ].y, 0 );
             }
-            else if ( e_monster[ n ].type == ESA_BOSS && e_monster[ n ].state != EMS_INJURED && e_monster[ n ].state!= EMS_DIE ) {
+            else if ( e_monster[ n ].type == ESA_BOSS && e_monster[ n ].state == EMS_INJURED ) {
                 al_draw_bitmap( e_monster[ n ].img_hurt[ 0 ], e_monster[ n ].x, e_monster[ n ].y, 0 );
-            } //add
-        }else if( e_monster[ n ].state==EMS_DIE && e_monster[ n ].type==ESA_BOSS){
-                al_draw_bitmap( e_monster[ n ].img_die[ 0 ], e_monster[ n ].x, e_monster[ n ].y, 0 );
-         }
+            }
+        }
+        else if( n == g_nBossIdx && e_monster[ n ].state == EMS_DIE ) {
+            al_draw_bitmap( e_monster[ n ].img_die[ 0 ], e_monster[ n ].x, e_monster[ n ].y, 0 );
+        }
     }
     Boss_drawhp();
 }
