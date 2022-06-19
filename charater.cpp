@@ -67,6 +67,7 @@ void CameraUpdate( float *CamPosition, int x, int y, int width, int height, int 
         al_attach_sample_instance_to_mixer( BossSampleInstance, al_get_default_mixer() );
         al_set_sample_instance_gain( BossSampleInstance, 0.7 );
         al_play_sample_instance( BossSampleInstance );
+        BossBomb_Trigger();
     }
 //    printf( "CameraUpdate\n" );
 }
@@ -300,7 +301,8 @@ void character_init( const int nTerrainWidth, const int nLife )
     e_pchara->nMoveWidth = e_pchara->width;
     e_pchara->height = al_get_bitmap_height(e_pchara->img_move[0]);
     e_pchara->nMoveHeight = e_pchara->height;
-    e_pchara->x = WIDTH/2-200; // todo: no magical number here!
+    e_pchara->x = 20000; // todo: no magical number here!
+//    e_pchara->x = WIDTH/2-200; // todo: no magical number here!
     e_pchara->y = HEIGHT/2;
     e_pchara->nMoveY = e_pchara->y;
     e_pchara->dir = false;
@@ -1431,21 +1433,30 @@ void charactor_show( void )
         //assert( false );
         break;
     } // end of switch
-
+//    printf( "x = %d, y = %d\n", e_pchara->x, e_pchara->y );
 }
 
 void character_destroy( void )
 {
 //    printf( "character_destory\n" );
-    al_destroy_sample_instance( e_pchara->sound_inhale );
-    al_destroy_sample_instance( e_pchara->sound_transform );
-    al_destroy_sample_instance( e_pchara->sound_slash );
-    al_destroy_sample_instance( e_pchara->sound_fire );
-
+    printf( "1\n" );
+    if( camera_move == 0 ) {
+//        al_stop_sample_instance( BossSampleInstance );
+        al_destroy_sample( BossSample );
+        al_destroy_sample_instance( BossSampleInstance );
+    }
+    printf( "1.5\n" );
+    al_destroy_sample_instance( e_pchara->sound_inhale ); printf( "1.6\n" );
+    al_destroy_sample( sample_inhale );
+    al_destroy_sample_instance( e_pchara->sound_transform );printf( "1.7\n" );
+    al_destroy_sample( sample_transform );
+    al_destroy_sample_instance( e_pchara->sound_slash );printf( "1.8\n" );
+    al_destroy_sample_instance( e_pchara->sound_fire );printf( "1.9\n" );
+    printf( "2\n" );
     al_identity_transform( &camera );
     al_translate_transform( &camera, 0, 0 );
     al_use_transform( &camera );
-
+    printf( "3\n" );
     // bit map
     for( int i = 0; i < 2; i++ ) {
         al_destroy_bitmap( e_pchara->img_inhale[ i ] );
@@ -1453,6 +1464,7 @@ void character_destroy( void )
     for( int i = 0; i < 2; i++ ) {
         al_destroy_bitmap( e_pchara->img_fire[ i ] );
     }
+    printf( "4\n" );
     // bit map store
     for( int i = 0; i < ESA_NUM; i++ ) {
         for( int j = 0; j < 2; j++ ) {
@@ -1476,15 +1488,19 @@ void character_destroy( void )
 
         al_destroy_bitmap( e_pchara->img_store_AtkWord[ i ] );
     }
+    printf( "5\n" );
 
     for( int i = 0; i < HP + 1; i++ ) {
         al_destroy_bitmap( e_pchara->img_store_HP[ i ] );
     }
-
+    printf( "6\n" );
     al_destroy_bitmap( e_pchara->img_LIFE );
+
+    printf( "7\n" );
 
     free( e_pchara );
     e_pchara = NULL;
+
     printf( "character destroy success!\n" );
 //    printf( "character_destory\n" );
 }
@@ -1724,6 +1740,9 @@ void monster_update( void )
 
 void monsrt_attackCharacter( void )
 {
+    if( g_bImmortal == true ) {
+        return;
+    }
     for( int i = 0; i < g_nMonsterCount; i++ ) {
         if( e_monster[ i ].state == EMS_ATK ) {
             Position CharacterPos, MonsterPos;
@@ -1766,7 +1785,7 @@ void monsrt_attackCharacter( void )
             CharacterPos.s = e_pchara->y + e_pchara->height - 8;
 
             if( CheckOverlap( &CharacterPos, &MonsterPos ) == true ) {
-                if( g_bImmortal == true || e_pchara->state == ECS_ATK || e_pchara->state == ECS_INHALE || e_pchara->state == ECS_SLIDE ) {
+                if( e_pchara->state == ECS_ATK || e_pchara->state == ECS_INHALE || e_pchara->state == ECS_SLIDE ) {
                     // do nothing
                 }
                 else {
@@ -1817,7 +1836,27 @@ void monsrt_attackCharacter( void )
                 ExplodeBomb( e_monster[ i ].nBombIdx );
             }
         }
+    }
+}
 
+void BossBomb_attackCharacter( void )
+{
+    // check boss bomb
+    Position CharacterPos;
+    CharacterPos.e = e_pchara->x + e_pchara->width;
+    CharacterPos.w = e_pchara->x;
+    CharacterPos.n = e_pchara->y;
+    CharacterPos.s = e_pchara->y + e_pchara->height;
+    int nBossHarm = CheckBossBomb( CharacterPos );
+    if( nBossHarm != 0 ) {
+        g_bImmortal = true;
+        g_nImortalCursor = 0;
+        e_pchara->state = ECS_INJURED;
+        e_pchara->nInjuredCursor = 0;
+        e_pchara->hp -= ( nBossHarm * 4 );
+
+        e_pchara->NowSpecialAtk = ESA_NORMAL;
+        e_pchara->img_atkWord = e_pchara->img_store_AtkWord[ e_pchara->NowSpecialAtk ];
     }
 }
 
@@ -2088,6 +2127,8 @@ void monster_draw( void )
 
         }
 }
+
+Boss Bomb_attackCharacter();
 //    printf( "character_draw2\n" );
 
 
