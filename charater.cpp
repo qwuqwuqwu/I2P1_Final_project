@@ -446,7 +446,7 @@ void charater_update( void )
 //    printf( "charater_update\n" );
     // use the idea of finite state machine to deal with different state
 
-    if( e_pchara->state == ECS_INHALE ) {
+    if( e_pchara->state == ECS_INHALE || e_pchara->state == ECS_ATK ) {
         return;
     }
     if( key_state[ALLEGRO_KEY_W] ) {
@@ -535,7 +535,10 @@ void charater_update( void )
             g_bForceImmortal = false;
             g_nImortalCursor = 0;
         }
-
+    }
+    // full blood
+    else if( key_state[ ALLEGRO_KEY_U ] ) {
+        e_pchara->hp = HP;
     }
 //    printf( "charater_update\n" );
 }
