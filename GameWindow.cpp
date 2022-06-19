@@ -16,7 +16,9 @@ ALLEGRO_BITMAP *img_over;
 int g_nLife = 3;
 
 int g_nWindow3Count = 0;
+int g_nWindow4Count = 0;
 #define MAX_COUNTOF_WINDOW3 ( 600 )
+#define MAX_COUNTOF_WINDOW4 ( 300 )
 
 // TODO
 // 1. release g_pMenuSample?
@@ -249,7 +251,8 @@ void Vicvideo_begin(){
     al_start_timer(fps);
 }
 void Vicdestroy_video(){
-    al_destroy_display(g_pDisplay);
+    printf( "YO\n" );
+    //al_destroy_display(g_pDisplay);
     al_destroy_event_queue(VicVideoQueue);
 }
 
@@ -265,6 +268,7 @@ void VictoryShow() {
             al_close_video(VicVideo);
             break;
         } else if( event.type == ALLEGRO_EVENT_VIDEO_FINISHED ) {
+            al_close_video(VicVideo);
             break;
         }
     }
@@ -293,6 +297,8 @@ void game_update( void )
             al_rest(2);
             game_scene_destroy();
             VictoryShow();
+            g_nWindow = 4;
+            return;
         }
         if( bAlive == false ) {
             g_nLife--;
@@ -350,6 +356,12 @@ int process_event( void )
     else if( g_nWindow == 3 ) {
         g_nWindow3Count++;
         if( g_nWindow3Count > MAX_COUNTOF_WINDOW3 ) {
+            return GAME_TERMINATE;
+        }
+    }
+    else if( g_nWindow == 4 ) {
+        g_nWindow4Count++;
+        if( g_nWindow4Count > MAX_COUNTOF_WINDOW4 ) {
             return GAME_TERMINATE;
         }
     }
