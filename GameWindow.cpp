@@ -216,7 +216,7 @@ void Vic_video_display(ALLEGRO_VIDEO *video) {
                           al_get_bitmap_width(frame),
                           al_get_bitmap_height(frame),
                           // the position of result image
-                          20480, 0,
+                          0, 0,
                           // the width and height of result image
                           al_get_display_width(g_pDisplay),
                           al_get_display_height(g_pDisplay), 0);
@@ -290,7 +290,9 @@ void game_update( void )
         bool bAlive = isCharacterAlive();
         bool bBossAlive = isBossAlive();
         if( bBossAlive == false ) {
-            printf( "DO SOMETHING!!!!!!\n" );
+            al_rest(2);
+            game_scene_destroy();
+            VictoryShow();
         }
         if( bAlive == false ) {
             g_nLife--;
@@ -300,6 +302,7 @@ void game_update( void )
                 al_stop_sample_instance( g_pMenuSampleInstance );
                 al_set_sample_instance_gain( DeathSampleInstance, 1 );
                 al_play_sample_instance( DeathSampleInstance );
+                al_rest(3);
 
                 game_scene_destroy();
 
@@ -314,6 +317,7 @@ void game_update( void )
                 al_stop_sample_instance( g_pMenuSampleInstance );
                 al_set_sample_instance_gain( DeathSampleInstance, 1 );
                 al_play_sample_instance( DeathSampleInstance );
+                al_rest(3);
 
                 //to be fetched
                 game_scene_destroy();
