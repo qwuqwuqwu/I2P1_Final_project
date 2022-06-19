@@ -6,21 +6,23 @@
 #define MAX_COUNTOF_GROUND          ( 600 )
 #define MAX_COUNTOF_FOOD            ( 100 )
 #define MAX_COUNTOF_CANDY           ( 100 )
+#define MAX_COUNTOF_BOMB            ( 100 )
 
 // the state of object
 enum {NORMAL = 0, HIGHLIGHT};
 
 Pos g_Ground[ MAX_COUNTOF_GROUND ];
-Bom g_Bomb;
+Bom g_Bomb[ MAX_COUNTOF_BOMB ];
 Pos g_Food[ MAX_COUNTOF_FOOD ];
 Pos g_Candy[ MAX_COUNTOF_CANDY ];
 
 int g_nGroundCount = 0;
 int g_nFoodCount = 0;
 int g_nCandyCount = 0;
+int g_nBombCount = 0;
 
 ALLEGRO_BITMAP *Ground[ MAX_COUNTOF_GROUND ] = { NULL };
-ALLEGRO_BITMAP *g_BombMap = NULL;
+ALLEGRO_BITMAP *g_BombMap[ MAX_COUNTOF_BOMB ] = { NULL };
 ALLEGRO_BITMAP *g_ExplodeMap[ 3 ] = { NULL };
 
 ALLEGRO_BITMAP *g_FoodMap[ MAX_COUNTOF_FOOD ] = { NULL };
@@ -310,30 +312,35 @@ void GroundSetup( void )
 
 void BombSetup( void )
 {
-    g_BombMap = al_load_bitmap("./image/bomb.png");
-    assert( g_BombMap != NULL );
-
-    g_Bomb.img = g_BombMap;
-    g_Bomb.nSubState = 0;
-    g_Bomb.x = 0;
-    g_Bomb.y = 0;
-    g_Bomb.y0 = 0;
-    g_Bomb.dir = true;
-    g_Bomb.FallingTick = 0;
-    g_Bomb.state = EBS_IDLE;
-    g_Bomb.vy = 0.0;
-    g_Bomb.width = al_get_bitmap_width( g_BombMap );
-    g_Bomb.height = al_get_bitmap_height( g_BombMap );
-    g_Bomb.nExplodeCursor = 0;
-    g_Bomb.nExplodeTime = 30;
-
     for( int i = 0; i < 3; i++ ) {
         char temp[ 50 ];
         sprintf( temp, "./image/explode%d.png", i + 1 );
         g_ExplodeMap[ i ] = al_load_bitmap( temp );
 
         assert( g_ExplodeMap[ i ] != NULL );
-        g_Bomb.img_explode[ i ] = g_ExplodeMap[ i ];
+    }
+
+    for( int i = 0; i < MAX_COUNTOF_BOMB; i++ ) {
+        g_BombMap[ i ] = al_load_bitmap("./image/bomb.png");
+        assert( g_BombMap[ i ] != NULL );
+
+        g_Bomb[ i ].img = g_BombMap[ i ];
+        g_Bomb[ i ].nSubState = 0;
+        g_Bomb[ i ].x = 0;
+        g_Bomb[ i ].y = 0;
+        g_Bomb[ i ].y0 = 0;
+        g_Bomb[ i ].dir = true;
+        g_Bomb[ i ].FallingTick = 0;
+        g_Bomb[ i ].state = EBS_IDLE;
+        g_Bomb[ i ].vy = 0.0;
+        g_Bomb[ i ].width = al_get_bitmap_width( g_BombMap[ i ] );
+        g_Bomb[ i ].height = al_get_bitmap_height( g_BombMap[ i ] );
+        g_Bomb[ i ].nExplodeCursor = 0;
+        g_Bomb[ i ].nExplodeTime = 30;
+
+        for( int j = 0; j < 3; j++ ) {
+            g_Bomb[ i ].img_explode[ j ] = g_ExplodeMap[ j ];
+        }
     }
 }
 
@@ -385,18 +392,30 @@ void CandySetup( void )
     fclose( fp );
 }
 
-void BombThrow( const int x, const int y, const bool bDir )
+int RegisterBomb( void )
 {
-    g_Bomb.dir = bDir;
-    g_Bomb.x = x;
-    g_Bomb.y = y;
-    g_Bomb.x0 = x;
-    g_Bomb.y0 = y;
-    g_Bomb.vx = bDir ? 50 : -50;
-    g_Bomb.vy = -100;
-    g_Bomb.FallingTick = 0;
-    g_Bomb.nExplodeCursor = 0;
-    g_Bomb.state = EBS_FLY;
+    int nTemp = g_nBombCount;
+    g_nBombCount++;
+    return nTemp;
+}
+
+void BombThrow( const int idx, const int x, const int y, const bool bDir )
+{
+    if( idx < 0 || idx >= g_nBombCount ) {
+        assert( false );
+        return;
+    }
+
+    g_Bomb[ idx ].dir = bDir;
+    g_Bomb[ idx ].x = x;
+    g_Bomb[ idx ].y = y;
+    g_Bomb[ idx ].x0 = x;
+    g_Bomb[ idx ].y0 = y;
+    g_Bomb[ idx ].vx = bDir ? 30 : -30;
+    g_Bomb[ idx ].vy = -100;
+    g_Bomb[ idx ].FallingTick = 0;
+    g_Bomb[ idx ].nExplodeCursor = 0;
+    g_Bomb[ idx ].state = EBS_FLY;
 }
 
 void Eat( const Position *plhs, int *pFoodCount, int *pCandyCount )
@@ -445,44 +464,48 @@ void Eat( const Position *plhs, int *pFoodCount, int *pCandyCount )
 bool BombUpdate( void )
 // advanced one tick
 {
-    if( g_Bomb.state == EBS_FLY ) {
-        // find ground first
-        int nGroundY = FindAndDrawClosestGroundY( g_Bomb.x, g_Bomb.x + g_Bomb.width, g_Bomb.y + g_Bomb.height );
-        if( nGroundY == -2 ) {
-            nGroundY = HEIGHT;
-        }
+    for( int i = 0; i < g_nBombCount; i++ ) {
+        if( g_Bomb[ i ].state == EBS_FLY ) {
+            // find ground first
+            int nGroundY = FindAndDrawClosestGroundY( g_Bomb[ i ].x, g_Bomb[ i ].x + g_Bomb[ i ].width,
+                                                      g_Bomb[ i ].y + g_Bomb[ i ].height );
+            if( nGroundY == -2 ) {
+                nGroundY = HEIGHT;
+            }
 
-        // ticktock
-        g_Bomb.FallingTick += g_Tick;
+            // ticktock
+            g_Bomb[ i ].FallingTick += g_Tick;
 
-        // velocity;
-        g_Bomb.vy += g_Gravity * g_Tick;
-        // position
-        g_Bomb.y = g_Bomb.y0
-            + ( int )( g_Bomb.vy * g_Bomb.FallingTick + ( 0.5 * g_Gravity * ( g_Bomb.FallingTick * g_Bomb.FallingTick ) ) );
-        g_Bomb.x = g_Bomb.x0 + g_Bomb.vx * g_Bomb.FallingTick;
+            // velocity;
+            g_Bomb[ i ].vy += g_Gravity * g_Tick;
+            // position
+            g_Bomb[ i ].y = g_Bomb[ i ].y0
+                            + ( int )( g_Bomb[ i ].vy * g_Bomb[ i ].FallingTick
+                                      + ( 0.5 * g_Gravity * ( g_Bomb[ i ].FallingTick * g_Bomb[ i ].FallingTick ) ) );
+            g_Bomb[ i ].x = g_Bomb[ i ].x0 + g_Bomb[ i ].vx * g_Bomb[ i ].FallingTick;
 
 
-        if( ( g_Bomb.y + g_Bomb.height ) >= nGroundY ) {
-            g_Bomb.y = nGroundY - ( e_pchara->height );
-            g_Bomb.y0 = e_pchara->y;
-            g_Bomb.vy = 0.0;
-            g_Bomb.FallingTick = 0;
-            g_Bomb.state = EBS_EXPLODE;
+            if( ( g_Bomb[ i ].y + g_Bomb[ i ].height ) >= nGroundY ) {
+                g_Bomb[ i ].y = nGroundY - ( g_Bomb[ i ].height );
+                g_Bomb[ i ].y0 = g_Bomb[ i ].height;
+                g_Bomb[ i ].vy = 0.0;
+                g_Bomb[ i ].FallingTick = 0;
+                g_Bomb[ i ].state = EBS_EXPLODE;
+            }
+            else {
+                // do nothing
+            }
         }
-        else {
-            // do nothing
-        }
-    }
-    else if( g_Bomb.state == EBS_EXPLODE ) {
-        if( g_Bomb.nExplodeCursor < g_Bomb.nExplodeTime / 3 ) {
-            g_Bomb.nSubState = 0;
-        }
-        else if( g_Bomb.nExplodeCursor < g_Bomb.nExplodeTime * 2 / 3 ) {
-            g_Bomb.nSubState = 1;
-        }
-        else {
-            g_Bomb.nSubState = 2;
+        else if( g_Bomb[ i ].state == EBS_EXPLODE ) {
+            if( g_Bomb[ i ].nExplodeCursor < g_Bomb[ i ].nExplodeTime / 3 ) {
+                g_Bomb[ i ].nSubState = 0;
+            }
+            else if( g_Bomb[ i ].nExplodeCursor < g_Bomb[ i ].nExplodeTime * 2 / 3 ) {
+                g_Bomb[ i ].nSubState = 1;
+            }
+            else {
+                g_Bomb[ i ].nSubState = 2;
+            }
         }
     }
 }
@@ -501,21 +524,23 @@ void object_draw( void ){
     }
 
     BombUpdate();
-//    printf( "bomb state = %d\n", g_Bomb.state );
-    if( g_Bomb.state == EBS_FLY ) {
-        if( g_Bomb.dir == false ) {
-            al_draw_bitmap( g_Bomb.img, g_Bomb.x, g_Bomb.y, 0 );
+    for( int i = 0; i < g_nBombCount; i++ ) {
+//        printf( "bomb %d state = %d, substate = %d\n", i, g_Bomb[ i ].state, g_Bomb[ i ].nSubState );
+        if( g_Bomb[ i ].state == EBS_FLY ) {
+            if( g_Bomb[ i ].dir == false ) {
+                al_draw_bitmap( g_Bomb[ i ].img, g_Bomb[ i ].x, g_Bomb[ i ].y, 0 );
+            }
+            else {
+                al_draw_bitmap( g_Bomb[ i ].img, g_Bomb[ i ].x, g_Bomb[ i ].y, ALLEGRO_FLIP_HORIZONTAL );
+            }
         }
-        else {
-            al_draw_bitmap( g_Bomb.img, g_Bomb.x, g_Bomb.y, ALLEGRO_FLIP_HORIZONTAL );
-        }
-    }
-    else if( g_Bomb.state == EBS_EXPLODE ) {
-        if( g_Bomb.dir == false ) {
-            al_draw_bitmap( g_Bomb.img_explode[ g_Bomb.nSubState ], g_Bomb.x, g_Bomb.y, 0 );
-        }
-        else {
-            al_draw_bitmap( g_Bomb.img_explode[ g_Bomb.nSubState ], g_Bomb.x, g_Bomb.y, ALLEGRO_FLIP_HORIZONTAL );
+        else if( g_Bomb[ i ].state == EBS_EXPLODE ) {
+            if( g_Bomb[ i ].dir == false ) {
+                al_draw_bitmap( g_Bomb[ i ].img_explode[ g_Bomb[ i ].nSubState ], g_Bomb[ i ].x, g_Bomb[ i ].y, 0 );
+            }
+            else {
+                al_draw_bitmap( g_Bomb[ i ].img_explode[ g_Bomb[ i ].nSubState ], g_Bomb[ i ].x, g_Bomb[ i ].y, ALLEGRO_FLIP_HORIZONTAL );
+            }
         }
     }
 
@@ -539,19 +564,39 @@ void object_destroy( void ){
     for( int i = 0; i < g_nGroundCount; i++ ) {
         al_destroy_bitmap( Ground[ i ] );
     }
+
+    // bomb
+    for( int i = 0; i < MAX_COUNTOF_BOMB; i++ ) {
+        al_destroy_bitmap( g_BombMap[ i ] );
+    }
+    for( int i = 0; i < 3; i++ ) {
+        al_destroy_bitmap( g_ExplodeMap[ i ] );
+    }
+
+    // food
+    for( int i = 0; i < g_nFoodCount; i++ ) {
+        al_destroy_bitmap( g_FoodMap[ i ] );
+    }
+
+    // candy
+    for( int i = 0; i < g_nCandyCount; i++ ) {
+        al_destroy_bitmap( g_CandyMap[ i ] );
+    }
 }
 
 void Object_process( ALLEGRO_EVENT event )
 {
     if( event.type == ALLEGRO_EVENT_TIMER ) {
         if( event.timer.source == fps ) {
+            for( int i = 0; i < g_nBombCount; i++ ) {
+                if( g_Bomb[ i ].state == EBS_EXPLODE ) {
+                    g_Bomb[ i ].nExplodeCursor++;
+                    g_Bomb[ i ].nExplodeCursor %= g_Bomb[ i ].nExplodeTime;
 
-            if( g_Bomb.state == EBS_EXPLODE ) {
-                g_Bomb.nExplodeCursor++;
-                g_Bomb.nExplodeCursor %= g_Bomb.nExplodeTime;
-
-                if( g_Bomb.nExplodeCursor == 0 ) {
-                    g_Bomb.state = EBS_IDLE;
+                    if( g_Bomb[ i ].nExplodeCursor == 0 ) {
+                        g_Bomb[ i ].state = EBS_IDLE;
+                        printf( "Bomb %d idle\n", i );
+                    }
                 }
             }
         }

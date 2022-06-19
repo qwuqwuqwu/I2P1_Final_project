@@ -104,6 +104,8 @@ typedef struct _Character {
     ESpecialAtk NowSpecialAtk;
     ESpecialAtk NextSpecailAtk;
 
+    int nBombIdx;
+
 	// cursor and time
     int nMoveCursor; 	    // counting the time of animation
     int nMoveTime; 		    // indicate how long the animation
@@ -168,6 +170,7 @@ typedef struct _Mon {
     int anime_time; // indicate how long the animation
     int nSubState;
     int hp;
+    int nBombIdx;
 
     int y0;
     float vy;

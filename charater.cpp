@@ -266,6 +266,8 @@ void character_init( const int nTerrainWidth ){
     e_pchara->hp = HP;
     e_pchara->life = LIFE;
 
+    e_pchara->nBombIdx = -1;
+
     // initial the animation component
     e_pchara->state = ECS_STOP;
     e_pchara->nSubState = 0;
@@ -916,7 +918,12 @@ void character_StateChangeImage( void )
             }
 
             if( e_pchara->nSubState == 1 && e_pchara->NowSpecialAtk == ESA_BOMB ) {
-                BombThrow( e_pchara->x, e_pchara->y, e_pchara->dir );
+                // first to to register bomb
+                if( e_pchara->nBombIdx == -1 ) {
+                    e_pchara->nBombIdx = RegisterBomb();
+                    assert( e_pchara->nBombIdx != -1 );
+                }
+                BombThrow( e_pchara->nBombIdx, e_pchara->x, e_pchara->y, e_pchara->dir );
             }
         }
 
@@ -1308,6 +1315,7 @@ void monster_init( void )
         e_monster[ n ].hp = 1; // TODO different type should have different hp
         e_monster[ n ].state = EMS_ALIVE;
         e_monster[ n ].nSubState = 0;
+        e_monster[ n ].nBombIdx = -1;
 
         e_monster[ n ].anime = 0;
         e_monster[ n ].anime_time = 30;
@@ -1511,6 +1519,17 @@ void monster_draw( void )
             else if( e_monster[ n ].state == EMS_ATK ) { //here is the bug
 //                printf("nice");
                 int nSubState = e_monster[ n ].nSubState;
+
+                // throw bomb
+                if( e_monster[ n ].nSubState == 1 && e_monster[ n ].type == ESA_BOMB ) {
+                    // first to to register bomb
+                    if( e_monster[ n ].nBombIdx == -1 ) {
+                        e_monster[ n ].nBombIdx = RegisterBomb();
+                        assert( e_monster[ n ].nBombIdx != -1 );
+                    }
+                    BombThrow( e_monster[ n ].nBombIdx, e_monster[ n ].x, e_monster[ n ].y, e_monster[ n ].dir );
+                }
+
                 if( e_monster[ n ].dir == true ) {
                     al_draw_bitmap( e_monster[ n ].img_atk[ nSubState ],
                                     e_monster[ n ].x + e_monster[ n ].width,
