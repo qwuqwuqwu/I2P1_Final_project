@@ -631,7 +631,7 @@ void Object_process( ALLEGRO_EVENT event )
 
                     if( g_Bomb[ i ].nExplodeCursor == 0 ) {
                         g_Bomb[ i ].state = EBS_IDLE;
-                        printf( "Bomb %d idle\n", i );
+//                        printf( "Bomb %d idle\n", i );
                     }
                 }
             }

@@ -62,11 +62,11 @@ enum EMonsterState {
     EMS_ATK = 2,
 };
 
-enum EMonsterType {
-    EMT_NORMAL = 0,
-    EMS_FRIE = 1,
-    EMS_BOMB = 2,
-};
+//enum EMonsterType {
+//    EMT_NORMAL = 0,
+//    EMT_FRIE = 1,
+//    EMT_BOMB = 2,
+//};
 
 enum EBlockType {
     EBT_GRASS = 1,
@@ -159,17 +159,21 @@ typedef struct _Mon {
     int width, height; // the width and height of image
     bool dir; // left: false, right: true
     int state; // the state of character
+    int nSubState;
     int type;
-    int nAtkCursor; 		// attack cursor
-    int nAtkTime; 			// attack duration
-    int nAtkanime; 		// attack cursor
-    int nAtkanime_time;
+
+    int nMoveCursor; 		// switch cursor
+    int nMoveTime; 	        // attack duration
+
+    int nSwitchCursor;
+    int nSwitchTime;
+
+    int nAtkCursor; 		    // attack cursor
+    int nAtkTime;
     ALLEGRO_BITMAP *img_move[ 2 ];
     ALLEGRO_BITMAP *img_atk[ 2 ];
     ALLEGRO_BITMAP *img_fire[ 2 ];
-    int anime; // counting the time of animation
-    int anime_time; // indicate how long the animation
-    int nSubState;
+
     int hp;
     int nBombIdx;
 

@@ -22,6 +22,9 @@ int g_nTerrainWidth = 0;
 ECharacterState g_LastState;
 int g_nLastSubState;
 
+EMonsterState g_MonLastState;
+int g_nMonLastSubState;
+
 bool g_bCDing = false;
 int g_nCDCursor = 0;
 int g_nCDTime = 20;
@@ -310,7 +313,8 @@ void character_init( const int nTerrainWidth, const int nLife ){
 //    printf( "character_init\n" );
 }
 
-void charater_process(ALLEGRO_EVENT event){
+void charater_process( ALLEGRO_EVENT event )
+{
 //    printf( "charater_process\n" );
     // process the animation
     if( event.type == ALLEGRO_EVENT_TIMER ) {
@@ -403,7 +407,8 @@ void charater_process(ALLEGRO_EVENT event){
 //    printf( "charater_process\n" );
 }
 
-void charater_update(){
+void charater_update( void )
+{
 //    printf( "charater_update\n" );
     // use the idea of finite state machine to deal with different state
 
@@ -1465,14 +1470,14 @@ void monster_init( void )
         e_monster[ n ].nSubState = 0;
         e_monster[ n ].nBombIdx = -1;
 
-        e_monster[ n ].anime = 0;
-        e_monster[ n ].anime_time = 30;
+        e_monster[ n ].nMoveCursor = 0;
+        e_monster[ n ].nMoveTime = 30;
 
-        e_monster[ n ].nAtkCursor = 0;
-        e_monster[ n ].nAtkTime = 300;
+        e_monster[ n ].nAtkCursor = 0; 		// attack cursor
+        e_monster[ n ].nAtkTime = 30;
 
-        e_monster[ n ].nAtkanime = 0; 		// attack cursor
-        e_monster[ n ].nAtkanime_time = 30;
+        e_monster[ n ].nSwitchCursor = 0;
+        e_monster[ n ].nSwitchTime = 300;
 
         // gravity
         e_monster[ n ].y0 = e_monster[ n ].y;
@@ -1489,39 +1494,30 @@ void monster_process( ALLEGRO_EVENT event )
     if( event.type == ALLEGRO_EVENT_TIMER ) { //根據fps+anime
         if( event.timer.source == fps ) {
             for( int n = 0; n < g_nMonsterCount; n++ ) {
-                e_monster[ n ].anime++;
-                e_monster[ n ].anime %= e_monster[ n ].anime_time; //讓我們知道現在跑道time的哪一步
-
-                if( e_monster[ n ].anime < e_monster[ n ].anime_time / 2 ) {
-                    e_monster[ n ].nSubState = 1;
-                }
-                else {
-                    e_monster[ n ].nSubState = 0;
-                }
 
                 if( e_monster[ n ].state == EMS_ALIVE ) {
-                    e_monster[ n ].nAtkCursor++;  //用以判斷說要進行攻擊了的週期
-                    e_monster[ n ].nAtkCursor %= e_monster[ n ].nAtkTime;
+                    // move cursor
+                    e_monster[ n ].nMoveCursor++;
+                    e_monster[ n ].nMoveCursor %= e_monster[ n ].nMoveTime; //讓我們知道現在跑道time的哪一步
 
-                    if( e_monster[ n ].nAtkCursor == 0 ) {
+                    // switch cursor
+                    e_monster[ n ].nSwitchCursor++;  //用以判斷說要進行攻擊了的週期
+                    e_monster[ n ].nSwitchCursor %= e_monster[ n ].nSwitchTime;
+
+                    if( e_monster[ n ].nSwitchCursor == 0 ) {
                         e_monster[ n ].state = EMS_ATK;
-                        e_monster[ n ].nAtkanime = 0;
+                        e_monster[ n ].nAtkCursor = 0;
                     }
                 }
 
                 if( e_monster[ n ].state == EMS_ATK ) {
-                    e_monster[ n ].nAtkanime++;
-                    e_monster[ n ].nAtkanime %= e_monster[ n ].nAtkanime_time;
+                    e_monster[ n ].nAtkCursor++;
+                    e_monster[ n ].nAtkCursor %= e_monster[ n ].nAtkTime;
 
-                    if( e_monster[ n ].nAtkanime < e_monster[ n ].nAtkanime_time / 2 ) {
-                        e_monster[ n ].nSubState = 1;
-                    }
-                    else {
-                        e_monster[ n ].nSubState = 0;
-                    }
-
-                    if( e_monster[ n ].nAtkanime == 0 ) {
+                    if( e_monster[ n ].nAtkCursor == 0 ) {
                         e_monster[ n ].state = EMS_ALIVE;
+                        e_monster[ n ].nSwitchCursor = 0;
+                        e_monster[ n ].nMoveCursor = 0;
                     }
                 }
             }
@@ -1628,9 +1624,108 @@ void monster_CheckBlocker( const int nMonsterIdx )
     }
 }
 
+void monster_StateChangeImage( const int i )
+{
+    //    printf( "monster_StateChangeImage\n" );
+    EMonsterState NewState = ( EMonsterState )e_monster[ i ].state;
+
+    // update substate
+//    printf( "update substate\n" );
+    switch( NewState ) {
+    case EMS_ALIVE:
+        if( NewState != g_MonLastState ) {
+            e_monster[ i ].nSubState = 0;
+        }
+
+        if( e_monster[ i ].nMoveCursor < e_monster[ i ].nMoveTime / 2 ) {
+            e_monster[ i ].nSubState = 0;
+        }
+        else {
+            e_monster[ i ].nSubState = 1;
+        }
+        break;
+
+    case EMS_ATK:
+        if( NewState != g_MonLastState ) {
+            e_monster[ i ].nSubState = 0;
+        }
+
+        if( e_monster[ i ].nAtkCursor < e_monster[ i ].nAtkTime / 2 ) {
+            e_monster[ i ].nSubState = 0;
+        }
+        else {
+            e_monster[ i ].nSubState = 1;
+        }
+        break;
+
+    case EMS_DIE:
+        // do nothing
+        break;
+
+    default:
+        assert( false );
+        break;
+    }
+
+    // update xy
+//    printf( "update xy\n" );
+    switch( NewState ) {
+    case EMS_ALIVE:
+        // change state
+        if( g_MonLastState != NewState ||
+            g_MonLastState == NewState && ( g_nMonLastSubState != e_monster[ i ].nSubState ) ) {
+            if( e_monster[ i ].dir == false ) {
+                int nWidth = al_get_bitmap_width( e_monster[ i ].img_move[ e_monster[ i ].nSubState ] );
+                e_monster[ i ].x -= nWidth - e_monster[ i ].width;
+                e_monster[ i ].width = nWidth;
+            }
+            else {
+                int nWidth = al_get_bitmap_width( e_monster[ i ].img_move[ 0 ] );
+                e_monster[ i ].width = nWidth;
+            }
+        }
+        break;
+
+    case EMS_ATK:
+        // change state
+        if( g_MonLastState != NewState ||
+            g_MonLastState == NewState && ( g_nMonLastSubState != e_monster[ i ].nSubState ) ) {
+            if( e_monster[ i ].dir == false ) {
+                int nWidth = al_get_bitmap_width( e_monster[ i ].img_atk[ e_monster[ i ].nSubState ] );
+                e_monster[ i ].x -= nWidth - e_monster[ i ].width;
+                e_monster[ i ].width = nWidth;
+            }
+            else {
+                int nWidth = al_get_bitmap_width( e_monster[ i ].img_atk[ 0 ] );
+                e_monster[ i ].width = nWidth;
+            }
+        }
+        break;
+
+    case EMS_DIE:
+        // do nothing;
+        break;
+
+    default:
+        assert( false );
+        break;
+    }
+
+
+    g_MonLastState = NewState;
+    g_nMonLastSubState = e_pchara->nSubState;
+//    printf( "%d %d | ", g_LastState, g_nLastSubState );
+//    printf( "Character at x = %d, y = %d\n", e_pchara->x, e_pchara->y );
+//    printf( "character_StateChangeImage\n" );
+}
+
 void monster_draw( void )
 {
     //printf( "character_draw2\n" );
+    for( int i = 0; i < g_nMonsterCount; i++ ) {
+        monster_StateChangeImage( i );
+    }
+
     for( int n = 0; n < g_nMonsterCount; n++ ) {
     // with the state, draw corresponding image
         if( e_monster[ n ].state == EMS_ALIVE || e_monster[ n ].state == EMS_ATK ) {
