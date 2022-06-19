@@ -1222,94 +1222,92 @@ void character_destroy( void )
 void monster_init( void )
 {
 //    printf( "character_init2\n" );
-
     FILE* fp = fopen( "./res/monster.txt", "r" );
     int nPosX = 0;
     int nPosY = 0;
     int nType = 0;
-    int nset= 1;
-    while( fscanf( fp, "%d%d%d", &nPosX, &nPosY,&nType ) != EOF && nset < MONSTER_NUMBERS ) {
-        e_monster[ nset ].x = nPosX;
-        e_monster[ nset ].y = nPosY;
-        e_monster[ nset ].type = nType;
-        nset++;
+    int nMonsterNumber = 0;
+    while( fscanf( fp, "%d%d%d", &nPosX, &nPosY, &nType ) != EOF ) {
+        e_monster[ nMonsterNumber ].x = nPosX;
+        e_monster[ nMonsterNumber ].y = nPosY;
+        e_monster[ nMonsterNumber ].type = nType;
+        nMonsterNumber++;
+
+        if( nMonsterNumber == MONSTER_NUMBERS ) {
+            break;
+        }
     }
     fclose( fp ); //記得關檔
 
     for( int n = 0; n < MONSTER_NUMBERS; n++ ) {
-
-        if(e_monster[n].type==ESA_NORMAL){
-            for(int i=0;i<2;i++)
-            {
+        if( e_monster[ n ].type == ESA_NORMAL ) {
+            for( int i = 0; i < 2; i++ ) {
                 char temp[ 50 ];
-
                 sprintf( temp, "./image/enemy_move%d.png",i+1);
                 e_monster[ n ].img_move[ i ] = al_load_bitmap( temp );
                 assert( e_monster[ n ].img_move[ i ] != NULL );
                 e_monster[ n ].width = al_get_bitmap_width( e_monster[ n ].img_move[ 0 ] );
                 e_monster[ n ].height = al_get_bitmap_height( e_monster[ n ].img_move[ 0 ] );
-
-
             }
-        }else if(e_monster[n].type==ESA_SWORD){
-            for(int i=0;i<2;i++)
-            {
+        }
+        else if( e_monster[ n ].type == ESA_SWORD ) {
+            for( int i = 0; i < 2; i++ ) {
                 char temp[ 50 ];
                 char tmpatk[ 50 ];
-                sprintf( temp, "./image/enemy_sword_move%d.png",i+1);
+                sprintf( temp, "./image/enemy_sword_move%d.png", i + 1 );
                 e_monster[ n ].img_move[ i ] = al_load_bitmap( temp );
                 assert( e_monster[ n ].img_move[ i ] != NULL );
                 e_monster[ n ].width = al_get_bitmap_width( e_monster[ n ].img_move[ 0 ] );
                 e_monster[ n ].height = al_get_bitmap_height( e_monster[ n ].img_move[ 0 ] );
 
-                sprintf( tmpatk, "./image/enemy_sword_slash%d.png",i+1);
+                sprintf( tmpatk, "./image/enemy_sword_slash%d.png", i + 1 );
                 e_monster[ n ].img_atk[ i ] = al_load_bitmap( tmpatk );
                 assert( e_monster[ n ].img_atk[ i ] != NULL );
             }
-        }else if(e_monster[n].type==ESA_BOMB){
-            for(int i=0;i<2;i++)
-            {
+        }
+        else if( e_monster[ n ].type == ESA_BOMB ) {
+            for( int i = 0; i < 2; i++ ) {
                 char temp[ 50 ];
                 char tmpatk[ 50 ];
-                sprintf( temp, "./image/enemy_bomb_move%d.png",i+1);
+                sprintf( temp, "./image/enemy_bomb_move%d.png", i + 1 );
                 e_monster[ n ].img_move[ i ] = al_load_bitmap( temp );
                 assert( e_monster[ n ].img_move[ i ] != NULL );
                 e_monster[ n ].width = al_get_bitmap_width( e_monster[ n ].img_move[ 0 ] );
                 e_monster[ n ].height = al_get_bitmap_height( e_monster[ n ].img_move[ 0 ] );
 
-                sprintf( tmpatk, "./image/enemy_bomb_throw%d.png",i+1);
+                sprintf( tmpatk, "./image/enemy_bomb_throw%d.png", i + 1 );
                 e_monster[ n ].img_atk[ i ] = al_load_bitmap( tmpatk );
                 assert( e_monster[ n ].img_atk[ i ] != NULL );
             }
-        }else if(e_monster[n].type==ESA_FIRE){
-            for(int i=0;i<2;i++)
-            {
+        }
+        else if( e_monster[ n ].type == ESA_FIRE ) {
+            for( int i = 0; i < 2; i++ ) {
                 char temp[ 50 ];
                 char tmpatk[ 50 ];
-                sprintf( temp, "./image/enemy_fire_move%d.png",i+1);
+                sprintf( temp, "./image/enemy_fire_move%d.png", i + 1 );
                 e_monster[ n ].img_move[ i ] = al_load_bitmap( temp );
                 assert( e_monster[ n ].img_move[ i ] != NULL );
                 e_monster[ n ].width = al_get_bitmap_width( e_monster[ n ].img_move[ 0 ] );
                 e_monster[ n ].height = al_get_bitmap_height( e_monster[ n ].img_move[ 0 ] );
 
-                sprintf( tmpatk, "./image/enemy_fire_spit%d.png",i+1);
+                sprintf( tmpatk, "./image/enemy_fire_spit%d.png", i + 1 );
                 e_monster[ n ].img_atk[ i ] = al_load_bitmap( tmpatk );
                 assert( e_monster[ n ].img_atk[ i ] != NULL );
             }
         }
 
         e_monster[ n ].dir = true;
-        e_monster[ n ].hp = 1;
+        e_monster[ n ].hp = 1; // TODO different type should have different hp
         e_monster[ n ].state = EMS_ALIVE;
 
         e_monster[ n ].anime = 0;
         e_monster[ n ].anime_time = 30;
 
-        e_monster[ n ].nAtkCursor=0;
-        e_monster[ n ].nAtkTime=300;
+        e_monster[ n ].nAtkCursor = 0;
+        e_monster[ n ].nAtkTime = 300;
 
-        e_monster[ n ].nAtkanime=0; 		// attack cursor
-        e_monster[ n ].nAtkanime_time=30;
+        e_monster[ n ].nAtkanime = 0; 		// attack cursor
+        e_monster[ n ].nAtkanime_time = 30;
 
         // gravity
         e_monster[ n ].y0 = e_monster[ n ].y;
@@ -1325,28 +1323,23 @@ void monster_process( ALLEGRO_EVENT event )
     // process the animation                //1.處理動畫
     if( event.type == ALLEGRO_EVENT_TIMER ){ //根據fps+anime
         if( event.timer.source == fps ){
-            for( int n = 0; n < MONSTER_NUMBERS; n++ ){
+            for( int n = 0; n < MONSTER_NUMBERS; n++ ) {
                 e_monster[ n ].anime++;
                 e_monster[ n ].anime %= e_monster[ n ].anime_time; //讓我們知道現在跑道time的哪一步
 
                 e_monster[ n ].nAtkCursor++;  //用以判斷說要進行攻擊了的週期
                 e_monster[ n ].nAtkCursor %= e_monster[ n ].nAtkTime;
 
+                if( e_monster[ n ].state == EMS_ATK ) {
+                    e_monster[ n ].nAtkanime++;
+                    e_monster[ n ].nAtkanime %= e_monster[ n ].nAtkanime_time;
 
-            if( e_monster[ n ].state == EMS_ATK ) {
-                e_monster[ n ].nAtkanime++;
-                e_monster[ n ].nAtkanime %= e_monster[ n ].nAtkanime_time;
-
-            if( e_monster[ n ].nAtkanime == 0 ) {
-                e_monster[ n ].state = EMS_ALIVE;
+                    if( e_monster[ n ].nAtkanime == 0 ) {
+                        e_monster[ n ].state = EMS_ALIVE;
+                    }
                 }
-              }
             }
-
         }
-
-
-
     }
 //    printf( "charater_process2\n" );
 }
@@ -1354,9 +1347,7 @@ void monster_process( ALLEGRO_EVENT event )
 void monster_update( void )
 {
     for( int i = 0; i < MONSTER_NUMBERS; i++ ) {
-        if( e_monster[ i ].state == EMS_ALIVE || e_monster[ i ].state == EMS_ATK) {
-
-
+        if( e_monster[ i ].state == EMS_ALIVE || e_monster[ i ].state == EMS_ATK ) {
             Position CharacterPosNoAtk,MonsterPosNoAtk;
             CharacterPosNoAtk.w = e_pchara->x;
             CharacterPosNoAtk.e = e_pchara->x + e_pchara->width;
@@ -1389,11 +1380,9 @@ void monster_update( void )
 
             }
 
-            if(e_monster[ i ].nAtkCursor == e_monster[ i ].nAtkTime-2){
+            if( e_monster[ i ].nAtkCursor == e_monster[ i ].nAtkTime - 2 ) {
                 e_monster[ i ].state = EMS_ATK;
-
             }
-
         }
 
     }
@@ -1462,45 +1451,49 @@ void monster_draw( void )
     //printf( "character_draw2\n" );
     for( int n = 0; n < MONSTER_NUMBERS; n++ ) {
     // with the state, draw corresponding image
-        if( e_monster[ n ].state == EMS_ALIVE || e_monster[ n ].state == EMS_ATK) {
+        if( e_monster[ n ].state == EMS_ALIVE || e_monster[ n ].state == EMS_ATK ) {
 
             int nGroundY = FindAndDrawClosestGroundY( e_monster[ n ].x, e_monster[ n ].x + e_monster[ n ].width, e_monster[ n ].y + e_monster[ n ].height );
 
             monster_gravity( n, nGroundY );
             monster_CheckBlocker( n );
 
-
-            if(e_monster[ n ].state == EMS_ALIVE){
-              if( e_monster[ n ].anime < e_monster[ n ].anime_time / 2 ){
-                if( e_monster[ n ].dir ) { //如果面右
-                    if( e_monster[ n ].x >= WIDTH / 2 + 50 + n * 240 ) {
-                        e_monster[ n ].dir = false;
-                        al_draw_bitmap( e_monster[ n ].img_move[ 0 ], e_monster[ n ].x, e_monster[ n ].y, 0 );
-                    }
-                    al_draw_bitmap( e_monster[ n ].img_move[ 0 ], e_monster[ n ].x, e_monster[ n ].y, ALLEGRO_FLIP_HORIZONTAL );
-                    e_monster[ n ].x += 1;
-                }else{//如果面左
-                    if( e_monster[ n ].x <= WIDTH / 2 + n * 240 ) {
-                        e_monster[ n ].dir = true;
+            if( e_monster[ n ].state == EMS_ALIVE ) {
+                if( e_monster[ n ].anime < e_monster[ n ].anime_time / 2 ) {
+                    if( e_monster[ n ].dir == true ) { //如果面右
+                        if( e_monster[ n ].x >= WIDTH / 2 + 50 + n * 240 ) {
+                            e_monster[ n ].dir = false;
+                            al_draw_bitmap( e_monster[ n ].img_move[ 0 ], e_monster[ n ].x, e_monster[ n ].y, 0 );
+                        }
                         al_draw_bitmap( e_monster[ n ].img_move[ 0 ], e_monster[ n ].x, e_monster[ n ].y, ALLEGRO_FLIP_HORIZONTAL );
+                        e_monster[ n ].x += 1;
                     }
-                    al_draw_bitmap( e_monster[ n ].img_move[ 0 ], e_monster[ n ].x, e_monster[ n ].y, 0 );
-                    e_monster[ n ].x -= 1;}
-              }else {
-                if( e_monster[ n ].dir ) { //如果面右
-                    if( e_monster[ n ].x >= WIDTH / 2 + 50 + n * 240 ) {
-                        e_monster[ n ].dir = false;
-                        al_draw_bitmap( e_monster[ n ].img_move[ 1 ], e_monster[ n ].x, e_monster[ n ].y, 0 );
+                    else {//如果面左
+                        if( e_monster[ n ].x <= WIDTH / 2 + n * 240 ) {
+                            e_monster[ n ].dir = true;
+                            al_draw_bitmap( e_monster[ n ].img_move[ 0 ], e_monster[ n ].x, e_monster[ n ].y, ALLEGRO_FLIP_HORIZONTAL );
+                        }
+                        al_draw_bitmap( e_monster[ n ].img_move[ 0 ], e_monster[ n ].x, e_monster[ n ].y, 0 );
+                        e_monster[ n ].x -= 1;
                     }
-                    al_draw_bitmap( e_monster[ n ].img_move[ 1 ], e_monster[ n ].x, e_monster[ n ].y, ALLEGRO_FLIP_HORIZONTAL );
-                    e_monster[ n ].x += 1;
-                }else{//如果面左
-                    if( e_monster[ n ].x <= WIDTH / 2 + n * 240 ) {
-                        e_monster[ n ].dir = true;
+                }
+                else {
+                    if( e_monster[ n ].dir == true ) { //如果面右
+                        if( e_monster[ n ].x >= WIDTH / 2 + 50 + n * 240 ) {
+                            e_monster[ n ].dir = false;
+                            al_draw_bitmap( e_monster[ n ].img_move[ 1 ], e_monster[ n ].x, e_monster[ n ].y, 0 );
+                        }
                         al_draw_bitmap( e_monster[ n ].img_move[ 1 ], e_monster[ n ].x, e_monster[ n ].y, ALLEGRO_FLIP_HORIZONTAL );
+                        e_monster[ n ].x += 1;
                     }
-                    al_draw_bitmap( e_monster[ n ].img_move[ 1 ], e_monster[ n ].x, e_monster[ n ].y, 0 );
-                    e_monster[ n ].x -= 1;}
+                    else{//如果面左
+                        if( e_monster[ n ].x <= WIDTH / 2 + n * 240 ) {
+                            e_monster[ n ].dir = true;
+                            al_draw_bitmap( e_monster[ n ].img_move[ 1 ], e_monster[ n ].x, e_monster[ n ].y, ALLEGRO_FLIP_HORIZONTAL );
+                        }
+                        al_draw_bitmap( e_monster[ n ].img_move[ 1 ], e_monster[ n ].x, e_monster[ n ].y, 0 );
+                        e_monster[ n ].x -= 1;
+                    }
                 }
 
 
