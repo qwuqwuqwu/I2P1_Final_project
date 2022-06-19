@@ -1416,15 +1416,13 @@ void charactor_show( void )
         break;
 
     case ECS_INJURED:
-        //printf("%d\n",e_pchara->anime);
-//        if( e_pchara->nInjuredCursor < 5 ) {
+
             if( e_pchara->dir ) {
                 al_draw_bitmap( e_pchara->img_move[ e_pchara->nSubState ], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL );
             }
             else {
                 al_draw_bitmap( e_pchara->img_move[ e_pchara->nSubState ], e_pchara->x, e_pchara->y, 0);
             }
-//        }
         break;
 
 
@@ -2114,21 +2112,19 @@ void monster_draw( void )
                                 e_monster[ n ].x,
                                 e_monster[ n ].y, 0);
                 }
-            }else if(e_monster[ n ].type == ESA_BOSS && e_monster[ n ].state!=EMS_INJURED){
-                int nSubState = e_monster[ n ].nSubState;
-                al_draw_bitmap( e_monster[ n ].img_move[ nSubState ], e_monster[ n ].x, e_monster[ n ].y, 0 );
+            }else if(e_monster[ n ].type == ESA_BOSS && e_monster[ n ].state!=EMS_INJURED && e_monster[ n ].state!= EMS_DIE){
+                al_draw_bitmap( e_monster[ n ].img_move[ 0 ], e_monster[ n ].x, e_monster[ n ].y, 0 );
             }
-        }else if(e_monster[ n ].state==EMS_INJURED){
-                int nSubState = e_monster[ n ].nSubState;
+        }/*else if( e_monster[ n ].state==EMS_INJURED ){
                 al_draw_bitmap( e_pchara->img_move[ e_pchara->nSubState ], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL );
-        break;}
+        break;}*/
 
 
 
         }
 }
 
-Boss Bomb_attackCharacter();
+//Boss Bomb_attackCharacter();
 //    printf( "character_draw2\n" );
 
 
