@@ -66,6 +66,7 @@ void CameraUpdate( float *CamPosition, int x, int y, int width, int height, int 
         al_attach_sample_instance_to_mixer( BossSampleInstance, al_get_default_mixer() );
         al_set_sample_instance_gain( BossSampleInstance, 0.7 );
         al_play_sample_instance( BossSampleInstance );
+        BossBomb_Trigger();
     }
 //    printf( "CameraUpdate\n" );
 }
@@ -299,7 +300,8 @@ void character_init( const int nTerrainWidth, const int nLife )
     e_pchara->nMoveWidth = e_pchara->width;
     e_pchara->height = al_get_bitmap_height(e_pchara->img_move[0]);
     e_pchara->nMoveHeight = e_pchara->height;
-    e_pchara->x = WIDTH/2-200; // todo: no magical number here!
+    e_pchara->x = 20000; // todo: no magical number here!
+//    e_pchara->x = WIDTH/2-200; // todo: no magical number here!
     e_pchara->y = HEIGHT/2;
     e_pchara->nMoveY = e_pchara->y;
     e_pchara->dir = false;
@@ -540,6 +542,8 @@ void charater_update( void )
     else if( key_state[ ALLEGRO_KEY_U ] ) {
         e_pchara->hp = HP;
     }
+
+    BossBomb_update();
 //    printf( "charater_update\n" );
 }
 
@@ -1395,7 +1399,7 @@ void charactor_show( void )
         //assert( false );
         break;
     } // end of switch
-
+    printf( "x = %d, y = %d\n", e_pchara->x, e_pchara->y );
 }
 
 void character_destroy( void )
@@ -1747,7 +1751,24 @@ void monsrt_attackCharacter( void )
                 ExplodeBomb( e_monster[ i ].nBombIdx );
             }
         }
+    }
 
+    // check boss bomb
+    Position CharacterPos;
+    CharacterPos.e = e_pchara->x + e_pchara->width;
+    CharacterPos.w = e_pchara->x;
+    CharacterPos.n = e_pchara->y;
+    CharacterPos.s = e_pchara->y + e_pchara->height;
+    int nBossHarm = CheckBossBomb( CharacterPos );
+    if( nBossHarm != 0 ) {
+        g_bImmortal = true;
+        g_nImortalCursor = 0;
+        e_pchara->state = ECS_INJURED;
+        e_pchara->nInjuredCursor = 0;
+        e_pchara->hp -= ( nBossHarm );
+
+        e_pchara->NowSpecialAtk = ESA_NORMAL;
+        e_pchara->img_atkWord = e_pchara->img_store_AtkWord[ e_pchara->NowSpecialAtk ];
     }
 }
 

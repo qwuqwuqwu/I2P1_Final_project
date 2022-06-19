@@ -20,3 +20,7 @@ void ExplodeBomb( const int idx );
 void Object_process( ALLEGRO_EVENT event );
 
 void Eat( const Position *plhs, int *pFoodCount, int *pCandyCount );
+
+void BossBomb_Trigger( void );
+void BossBomb_update( void );
+int CheckBossBomb( const Position CharPos );

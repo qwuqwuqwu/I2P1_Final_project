@@ -7,6 +7,8 @@
 #define MAX_COUNTOF_FOOD            ( 100 )
 #define MAX_COUNTOF_CANDY           ( 100 )
 #define MAX_COUNTOF_BOMB            ( 100 )
+#define MAX_COUNTOF_BOSSBOMB_ROW    ( 10 )
+#define MAX_COUNTOF_BOSSBOMB_COL    ( 10 )
 
 // the state of object
 enum {NORMAL = 0, HIGHLIGHT};
@@ -16,14 +18,24 @@ Bom g_Bomb[ MAX_COUNTOF_BOMB ];
 Pos g_Food[ MAX_COUNTOF_FOOD ];
 Pos g_Candy[ MAX_COUNTOF_CANDY ];
 
+Bom g_BossBomb[ MAX_COUNTOF_BOSSBOMB_ROW ][ MAX_COUNTOF_BOSSBOMB_COL ];
+
 int g_nGroundCount = 0;
 int g_nFoodCount = 0;
 int g_nCandyCount = 0;
 int g_nBombCount = 0;
+int g_nBossBombColCount[ MAX_COUNTOF_BOSSBOMB_ROW ];
+int g_nBossBombRow = 0;
+
+bool g_bStartFalling = false;
+int g_nFallingCursor = 0;
+int g_nFallingTime = 300;
+int g_nFallingRow = 0;
 
 ALLEGRO_BITMAP *Ground[ MAX_COUNTOF_GROUND ] = { NULL };
 ALLEGRO_BITMAP *g_BombMap[ MAX_COUNTOF_BOMB ] = { NULL };
 ALLEGRO_BITMAP *g_ExplodeMap[ 3 ] = { NULL };
+ALLEGRO_BITMAP *g_BossBombMap = NULL;
 
 ALLEGRO_BITMAP *g_FoodMap[ MAX_COUNTOF_FOOD ] = { NULL };
 ALLEGRO_BITMAP *g_CandyMap[ MAX_COUNTOF_CANDY ] = { NULL };
@@ -401,6 +413,51 @@ void CandySetup( void )
     }
 }
 
+void BossBombSetup( void )
+{
+    printf( "BossBombSetup\n" );
+    FILE* fp = fopen( "./res/bossbomb.txt", "r" );
+    int nPosX = 0;
+    int nCol = 0;
+    g_nBossBombRow = 0;
+    while( fscanf( fp, "%d", &nCol ) != EOF ) {
+        for( int i = 0; i < nCol; i++ ) {
+            fscanf( fp, "%d", &nPosX );
+            g_BossBomb[ g_nBossBombRow ][ i ].x = 20483 + 56 * nPosX;
+            printf( "x = %d\n", g_BossBomb[ g_nBossBombRow ][ i ].x );
+            g_BossBomb[ g_nBossBombRow ][ i ].img = al_load_bitmap( "./image/bomb.png" );
+            for( int j = 0; j < 3; j++ ) {
+                g_BossBomb[ g_nBossBombRow ][ i ].img_explode[ j ] = g_ExplodeMap[ j ];
+            }
+            g_BossBomb[ g_nBossBombRow ][ i ].nSubState = 0;
+            g_BossBomb[ g_nBossBombRow ][ i ].vx = 0;
+            g_BossBomb[ g_nBossBombRow ][ i ].y = -80;
+            g_BossBomb[ g_nBossBombRow ][ i ].y0 = 0;
+            g_BossBomb[ g_nBossBombRow ][ i ].dir = true;
+            g_BossBomb[ g_nBossBombRow ][ i ].FallingTick = 0;
+            g_BossBomb[ g_nBossBombRow ][ i ].state = EBS_IDLE;
+            g_BossBomb[ g_nBossBombRow ][ i ].vy = 0.0;
+            g_BossBomb[ g_nBossBombRow ][ i ].width = al_get_bitmap_width( g_BossBomb[ g_nBossBombRow ][ i ].img );
+            g_BossBomb[ g_nBossBombRow ][ i ].height = al_get_bitmap_height( g_BossBomb[ g_nBossBombRow ][ i ].img );
+            g_BossBomb[ g_nBossBombRow ][ i ].nExplodeCursor = 0;
+            g_BossBomb[ g_nBossBombRow ][ i ].nExplodeTime = 30;
+
+            ALLEGRO_SAMPLE *pTemp = al_load_sample( "./sound/explode.wav" );
+            g_BossBomb[ g_nBossBombRow ][ i ].sound_explode = al_create_sample_instance( pTemp );
+            al_set_sample_instance_playmode( g_BossBomb[ g_nBossBombRow ][ i ].sound_explode, ALLEGRO_PLAYMODE_ONCE );
+            al_set_sample_instance_gain( g_BossBomb[ g_nBossBombRow ][ i ].sound_explode, 0.4 );
+            al_attach_sample_instance_to_mixer( g_BossBomb[ g_nBossBombRow ][ i ].sound_explode, al_get_default_mixer() );
+        }
+        g_nBossBombColCount[ g_nBossBombRow ] = nCol;
+        g_nBossBombRow++;
+    }
+
+    fclose( fp );
+
+    g_bStartFalling = false;
+    g_nFallingCursor = 0;
+}
+
 int RegisterBomb( void )
 {
     int nTemp = g_nBombCount;
@@ -555,6 +612,110 @@ void object_init( void ){
     BombSetup();
     FoodSetup();
     CandySetup();
+    BossBombSetup();
+}
+
+void BossBomb_Trigger( void )
+{
+    g_bStartFalling = true;
+}
+
+void BossBomb_update( void )
+{
+    // update certain row
+    if( g_bStartFalling == false ) {
+        return;
+    }
+    g_nFallingCursor = ( g_nFallingCursor+ 1 ) % g_nFallingTime;
+    printf( "g_nFallingCursor = %d\n", g_nFallingCursor );
+    if( g_nFallingCursor == 0 ) {
+        printf( "Trigger Row %d\n", g_nFallingRow );
+        for( int i = 0; i < g_nBossBombColCount[ g_nFallingRow ]; i++ ) {
+            g_BossBomb[ g_nFallingRow ][ i ].state = EBS_FLY;
+            g_BossBomb[ g_nFallingRow ][ i ].y = 0;
+        }
+        g_nFallingRow = ( g_nFallingRow + 1 ) % g_nBossBombRow;
+    }
+
+    for( int i = 0; i < g_nBossBombRow; i++ ) {
+        for( int j = 0; j < g_nBossBombColCount[ i ]; j++ ) {
+            if( g_BossBomb[ i ][ j ].state == EBS_FLY ) {
+                // find ground first
+                int nGroundY = FindAndDrawClosestGroundY( g_BossBomb[ i ][ j ].x, g_BossBomb[ i ][ j ].x + g_BossBomb[ i ][ j ].width,
+                                                          g_BossBomb[ i ][ j ].y + g_BossBomb[ i ][ j ].height );
+                if( nGroundY == -2 ) {
+                    nGroundY = HEIGHT;
+                }
+
+                // ticktock
+                g_BossBomb[ i ][ j ].FallingTick += g_Tick;
+
+                // velocity;
+                g_BossBomb[ i ][ j ].vy += g_Gravity * g_Tick;
+                // position
+                g_BossBomb[ i ][ j ].y = g_BossBomb[ i ][ j ].y0
+                                + ( int )( g_BossBomb[ i ][ j ].vy * g_BossBomb[ i ][ j ].FallingTick
+                                          + ( 0.5 * g_Gravity * ( g_BossBomb[ i ][ j ].FallingTick * g_BossBomb[ i ][ j ].FallingTick ) ) );
+//                g_BossBomb[ i ][ j ].x = g_BossBomb[ i ][ j ].x0 + g_BossBomb[ i ][ j ].vx * g_BossBomb[ i ][ j ].FallingTick;
+
+//                printf( "bomb x = %d\n", g_BossBomb[ i ][ j ].x );
+                if( ( g_BossBomb[ i ][ j ].y + g_BossBomb[ i ][ j ].height ) >= nGroundY ) {
+                    g_BossBomb[ i ][ j ].y = nGroundY - ( g_BossBomb[ i ][ j ].height );
+                    g_BossBomb[ i ][ j ].y0 = g_BossBomb[ i ][ j ].height;
+                    g_BossBomb[ i ][ j ].vy = 0.0;
+                    g_BossBomb[ i ][ j ].FallingTick = 0;
+                    g_BossBomb[ i ][ j ].state = EBS_EXPLODE;
+                }
+                else {
+                    // do nothing
+                }
+            }
+            else if( g_BossBomb[ i ][ j ].state == EBS_EXPLODE ) {
+                if( g_BossBomb[ i ][ j ].nExplodeCursor < g_BossBomb[ i ][ j ].nExplodeTime / 3 ) {
+                    g_BossBomb[ i ][ j ].nSubState = 0;
+                }
+                else if( g_BossBomb[ i ][ j ].nExplodeCursor < g_BossBomb[ i ][ j ].nExplodeTime * 2 / 3 ) {
+                    g_BossBomb[ i ][ j ].nSubState = 1;
+                }
+                else {
+                    g_BossBomb[ i ][ j ].nSubState = 2;
+                }
+            }
+        }
+    }
+}
+
+void BossBomb_draw( void )
+{
+    if( g_bStartFalling == false ) {
+        return;
+    }
+    for( int j = 0; j < g_nBossBombRow; j++ ) {
+        for( int i = 0; i < g_nBossBombColCount[ j ]; i++ ) {
+            if( g_BossBomb[ j ][ i ].state == EBS_FLY ) {
+//                printf( "bomb %d %d\n", g_BossBomb[ j ][ i ].x, g_BossBomb[ j ][ i ].y );
+                if( g_BossBomb[ j ][ i ].dir == false ) {
+                    al_draw_bitmap( g_BossBomb[ j ][ i ].img, g_BossBomb[ j ][ i ].x, g_BossBomb[ j ][ i ].y, 0 );
+                }
+                else {
+                    al_draw_bitmap( g_BossBomb[ j ][ i ].img, g_BossBomb[ j ][ i ].x, g_BossBomb[ j ][ i ].y, ALLEGRO_FLIP_HORIZONTAL );
+                }
+            }
+            else if( g_BossBomb[ j ][ i ].state == EBS_EXPLODE ) {
+//                printf( "bomb %d %d\n", g_BossBomb[ j ][ i ].x, g_BossBomb[ j ][ i ].y );
+                if( g_BossBomb[ j ][ i ].dir == false ) {
+                    al_draw_bitmap( g_BossBomb[ j ][ i ].img_explode[ g_BossBomb[ j ][ i ].nSubState ], g_BossBomb[ j ][ i ].x, g_BossBomb[ j ][ i ].y, 0 );
+                }
+                else {
+                    al_draw_bitmap( g_BossBomb[ j ][ i ].img_explode[ g_BossBomb[ j ][ i ].nSubState ], g_BossBomb[ j ][ i ].x, g_BossBomb[ j ][ i ].y, ALLEGRO_FLIP_HORIZONTAL );
+                }
+                if( e_pchara->nSubState == 0 ) {
+                    al_play_sample_instance( g_BossBomb[ j ][ i ].sound_explode );
+                }
+            }
+        }
+    }
+
 }
 
 void object_draw( void )
@@ -601,6 +762,9 @@ void object_draw( void )
             al_draw_bitmap( g_CandyMap[ i ], g_Candy[ i ].x, g_Candy[ i ].y, 0 );
         }
     }
+
+    // draw boss bomb
+    BossBomb_draw();
 }
 
 void object_destroy( void )
@@ -629,6 +793,13 @@ void object_destroy( void )
         al_destroy_bitmap( g_CandyMap[ i ] );
     }
 
+    // boss bomb
+    for( int i = 0; i < g_nBossBombRow; i++ ) {
+        for( int j = 0; j < g_nBossBombColCount[ i ]; j++ ) {
+            al_destroy_bitmap( g_BossBomb[ i ][ j ].img );
+        }
+    }
+
     printf( "object destroy success!\n" );
 }
 
@@ -647,8 +818,49 @@ void Object_process( ALLEGRO_EVENT event )
                     }
                 }
             }
+
+            for( int i = 0; i < g_nBossBombRow; i++ ) {
+                for( int j = 0; j < g_nBossBombColCount[ i ]; j++ ) {
+                    if( g_BossBomb[ i ][ j ].state == EBS_EXPLODE ) {
+                        g_BossBomb[ i ][ j ].nExplodeCursor++;
+                        g_BossBomb[ i ][ j ].nExplodeCursor %= g_BossBomb[ i ][ j ].nExplodeTime;
+
+                        if( g_BossBomb[ i ][ j ].nExplodeCursor == 0 ) {
+                            g_BossBomb[ i ][ j ].state = EBS_IDLE;
+    //                        printf( "Bomb %d idle\n", i );
+                        }
+                    }
+                }
+            }
         }
     // process the keyboard event
     }
 }
 
+int CheckBossBomb( const Position CharPos )
+{
+    if( g_bStartFalling == false ) {
+        return 0;
+    }
+    int nHarm = 0;
+
+    // check bomb
+    for( int i = 0; i < g_nBossBombRow; i++ ) {
+        for( int j = 0; j < g_nBossBombColCount[ i ]; j++ ) {
+            if( g_BossBomb[ i ][ j ].state == EBS_FLY ) {
+                Position MonsterPos;
+
+                MonsterPos.e = g_BossBomb[ i ][ j ].x + g_BossBomb[ i ][ j ].width; // shrink boarder
+                MonsterPos.s = g_BossBomb[ i ][ j ].y + g_BossBomb[ i ][ j ].height;
+                MonsterPos.w = g_BossBomb[ i ][ j ].x;
+                MonsterPos.n = g_BossBomb[ i ][ j ].y;
+
+                if( CheckOverlap( &CharPos, &MonsterPos ) == true ) {
+                    g_BossBomb[ i ][ j ].state = EBS_EXPLODE;
+                    nHarm += 1;
+                }
+            }
+        }
+    }
+    return nHarm;
+}
