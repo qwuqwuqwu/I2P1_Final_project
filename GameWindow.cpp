@@ -31,10 +31,13 @@ int Game_establish( void )
     game_init();
     game_begin();
 
-    while( nMsg != GAME_TERMINATE ) {
+    while( nMsg != GAME_TERMINATE && nMsg != GAME_WIN ) {
         nMsg = game_run();
         if( nMsg == GAME_TERMINATE ) {
 			printf( "Game Over\n" );
+		}
+		else if( nMsg == GAME_WIN ) {
+            printf( "Game Win\n" );
 		}
     }
 
@@ -362,7 +365,7 @@ int process_event( void )
     else if( g_nWindow == 4 ) {
         g_nWindow4Count++;
         if( g_nWindow4Count > MAX_COUNTOF_WINDOW4 ) {
-            return GAME_TERMINATE;
+            return GAME_WIN;
         }
     }
 

@@ -11,6 +11,7 @@
 #include <allegro5/allegro_ttf.h>
 
 #define GAME_TERMINATE ( -1 )
+#define GAME_WIN       ( 1 )
 #define NUMOF_TRANSFORM_IMG ( 3 )
 #define HP          ( 6 )
 #define LIFE        ( 3 )

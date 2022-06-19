@@ -309,8 +309,8 @@ void character_init( const int nTerrainWidth, const int nLife )
     e_pchara->nMoveWidth = e_pchara->width;
     e_pchara->height = al_get_bitmap_height(e_pchara->img_move[0]);
     e_pchara->nMoveHeight = e_pchara->height;
-    e_pchara->x = 20000; // todo: no magical number here!
-//    e_pchara->x = WIDTH/2-200; // todo: no magical number here!
+//    e_pchara->x = 20000; // todo: no magical number here!
+    e_pchara->x = WIDTH/2-200; // todo: no magical number here!
     e_pchara->y = HEIGHT/2;
     e_pchara->nMoveY = e_pchara->y;
     e_pchara->dir = false;
