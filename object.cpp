@@ -335,7 +335,7 @@ void BombSetup( void )
     }
 
     for( int i = 0; i < MAX_COUNTOF_BOMB; i++ ) {
-        g_BombMap[ i ] = al_load_bitmap("./image/bomb.png");
+        g_BombMap[ i ] = al_load_bitmap( "./image/bomb.png" );
         assert( g_BombMap[ i ] != NULL );
 
         g_Bomb[ i ].img = g_BombMap[ i ];
@@ -356,8 +356,8 @@ void BombSetup( void )
             g_Bomb[ i ].img_explode[ j ] = g_ExplodeMap[ j ];
         }
 
-        ALLEGRO_SAMPLE *pTemp = al_load_sample( "./sound/explode.wav" );
-        g_Bomb[ i ].sound_explode = al_create_sample_instance( pTemp );
+        g_Bomb[ i ].sound_sample = al_load_sample( "./sound/explode.wav" );
+        g_Bomb[ i ].sound_explode = al_create_sample_instance( g_Bomb[ i ].sound_sample );
         al_set_sample_instance_playmode( g_Bomb[ i ].sound_explode, ALLEGRO_PLAYMODE_ONCE );
         al_set_sample_instance_gain( g_Bomb[ i ].sound_explode, 0.4 );
         al_attach_sample_instance_to_mixer( g_Bomb[ i ].sound_explode, al_get_default_mixer() );
@@ -424,7 +424,7 @@ void BossBombSetup( void )
         for( int i = 0; i < nCol; i++ ) {
             fscanf( fp, "%d", &nPosX );
             g_BossBomb[ g_nBossBombRow ][ i ].x = 20483 + 56 * nPosX;
-            printf( "x = %d\n", g_BossBomb[ g_nBossBombRow ][ i ].x );
+//            printf( "x = %d\n", g_BossBomb[ g_nBossBombRow ][ i ].x );
             g_BossBomb[ g_nBossBombRow ][ i ].img = al_load_bitmap( "./image/bomb.png" );
             for( int j = 0; j < 3; j++ ) {
                 g_BossBomb[ g_nBossBombRow ][ i ].img_explode[ j ] = g_ExplodeMap[ j ];
@@ -442,8 +442,8 @@ void BossBombSetup( void )
             g_BossBomb[ g_nBossBombRow ][ i ].nExplodeCursor = 0;
             g_BossBomb[ g_nBossBombRow ][ i ].nExplodeTime = 30;
 
-            ALLEGRO_SAMPLE *pTemp = al_load_sample( "./sound/explode.wav" );
-            g_BossBomb[ g_nBossBombRow ][ i ].sound_explode = al_create_sample_instance( pTemp );
+            g_BossBomb[ g_nBossBombRow ][ i ].sound_sample = al_load_sample( "./sound/explode.wav" );
+            g_BossBomb[ g_nBossBombRow ][ i ].sound_explode = al_create_sample_instance( g_BossBomb[ g_nBossBombRow ][ i ].sound_sample );
             al_set_sample_instance_playmode( g_BossBomb[ g_nBossBombRow ][ i ].sound_explode, ALLEGRO_PLAYMODE_ONCE );
             al_set_sample_instance_gain( g_BossBomb[ g_nBossBombRow ][ i ].sound_explode, 0.4 );
             al_attach_sample_instance_to_mixer( g_BossBomb[ g_nBossBombRow ][ i ].sound_explode, al_get_default_mixer() );
@@ -772,6 +772,7 @@ void object_draw( void )
 void object_destroy( void )
 {
     printf( "1\n" );
+    al_stop_samples();
     // ground
     for( int i = 0; i < g_nGroundCount; i++ ) {
         al_destroy_bitmap( Ground[ i ] );
@@ -779,8 +780,10 @@ void object_destroy( void )
     printf( "2\n" );
     // bomb
     for( int i = 0; i < MAX_COUNTOF_BOMB; i++ ) {
-        al_destroy_bitmap( g_BombMap[ i ] );
-        al_destroy_sample_instance( g_Bomb[ i ].sound_explode );
+        al_destroy_bitmap( g_BombMap[ i ] );printf( "2.1\n" );
+        al_stop_sample_instance( g_Bomb[ i ].sound_explode );
+//        al_destroy_sample( g_Bomb[ i ].sound_sample );printf( "2.2\n" );
+        al_destroy_sample_instance( g_Bomb[ i ].sound_explode );printf( "2.3\n" );
     }
     printf( "3\n" );
     for( int i = 0; i < 3; i++ ) {
@@ -802,6 +805,8 @@ void object_destroy( void )
     for( int i = 0; i < g_nBossBombRow; i++ ) {
         for( int j = 0; j < g_nBossBombColCount[ i ]; j++ ) {
             al_destroy_bitmap( g_BossBomb[ i ][ j ].img );
+            al_stop_sample_instance( g_BossBomb[ i ][ j ].sound_explode );
+//            al_destroy_sample( g_BossBomb[ i ][ j ].sound_sample );
             al_destroy_sample_instance( g_BossBomb[ i ][ j ].sound_explode );
         }
     }
@@ -845,12 +850,12 @@ void Object_process( ALLEGRO_EVENT event )
 
 int CheckBossBomb( const Position CharPos )
 {
-    printf( "check1\n" );
+//    printf( "check1\n" );
     if( g_bStartFalling == false ) {
         return 0;
     }
     int nHarm = 0;
-    printf( "check2\n" );
+//    printf( "check2\n" );
 
     // check bomb
     for( int i = 0; i < g_nBossBombRow; i++ ) {
