@@ -1685,8 +1685,7 @@ void monster_process( ALLEGRO_EVENT event )
 
                 if( e_monster[ n ].state == EMS_INJURED ) {
                     e_monster[ n ].nInjuredCursor++;
-                    e_monster[ n ].nInjuredCursor %= e_monster[ n ].nInjuredTime;
-//                printf( "e_pchara->nInjuredCursor = %d\n", e_pchara->nInjuredCursor );
+                    e_monster[ n ].nInjuredCursor %= e_monster[ n ].nInjuredTime;;
 
                     if( e_monster[ n ].nInjuredCursor == 0 ) {
                         e_monster[ n ].state = EMS_ALIVE;
@@ -2073,7 +2072,7 @@ void monster_draw( void )
                         e_monster[ n ].x -= 1;
                     }
             }
-            else if( e_monster[ n ].state == EMS_ATK ) {
+            else if( e_monster[ n ].state == EMS_ATK && e_monster[ n ].type != ESA_BOSS ) {
 //                printf("nice");
                 int nSubState = e_monster[ n ].nSubState;
 
@@ -2117,9 +2116,9 @@ void monster_draw( void )
             }else if(e_monster[ n ].type == ESA_BOSS && e_monster[ n ].state!=EMS_INJURED && e_monster[ n ].state!= EMS_DIE){
                 al_draw_bitmap( e_monster[ n ].img_move[ 0 ], e_monster[ n ].x, e_monster[ n ].y, 0 );
             }
-        }/*else if( e_monster[ n ].state==EMS_INJURED ){
+        }else if( e_monster[ n ].state==EMS_INJURED ){
                 al_draw_bitmap( e_pchara->img_move[ e_pchara->nSubState ], e_pchara->x, e_pchara->y, ALLEGRO_FLIP_HORIZONTAL );
-        break;}*/
+        break;}
 
 
 
