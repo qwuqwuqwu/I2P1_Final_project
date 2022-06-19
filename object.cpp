@@ -418,6 +418,35 @@ void BombThrow( const int idx, const int x, const int y, const bool bDir )
     g_Bomb[ idx ].state = EBS_FLY;
 }
 
+bool GetBombPosition( const int idx, Position *pBombPos )
+{
+    if( idx < 0 || idx >= g_nBombCount ) {
+        assert( false );
+        return false;
+    }
+
+    if( g_Bomb[ idx ].state != EBS_IDLE ) {
+        pBombPos->e = g_Bomb[ idx ].x + g_Bomb[ idx ].width;
+        pBombPos->s = g_Bomb[ idx ].y + g_Bomb[ idx ].height;
+        pBombPos->w = g_Bomb[ idx ].x;
+        pBombPos->n = g_Bomb[ idx ].x;
+        return true;
+    }
+}
+
+void ExplodeBomb( const int idx )
+{
+    if( idx < 0 || idx >= g_nBombCount ) {
+        assert( false );
+        return;
+    }
+    // if in EBS_EXPLODE, just let it explode
+    // only deal with fly condition
+    if( g_Bomb[ idx ].state == EBS_FLY ) {
+        g_Bomb[ idx ].state = EBS_EXPLODE;
+    }
+}
+
 void Eat( const Position *plhs, int *pFoodCount, int *pCandyCount )
 {
     int nFoodCount = 0;

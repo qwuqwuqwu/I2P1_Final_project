@@ -999,17 +999,8 @@ void character_StateChangeImage( void )
 
 void character_attackMonster( void )
 {
-    if( e_pchara->state != ECS_ATK ) {
-        return;
-    }
-
-    // while in bomb state, only bomb can attack
-    if( e_pchara->NowSpecialAtk == ESA_BOMB ) {
-        return;
-    }
-
     // plot fire
-    if( e_pchara->NowSpecialAtk == ESA_FIRE ) {
+    if( e_pchara->NowSpecialAtk == ESA_FIRE && e_pchara->state == ECS_ATK ) {
         if( e_pchara->dir == true ) {
             al_draw_bitmap( e_pchara->img_fire[ e_pchara->nSubState ],
                             e_pchara->x + e_pchara->width,
@@ -1025,53 +1016,97 @@ void character_attackMonster( void )
     }
 
     // check monster
-    for( int i = 0; i < g_nMonsterCount; i++ ) {
-        if( e_monster[ i ].state != EMS_DIE ) {
-            Position CharacterPos, MonsterPos;
-            if( e_pchara->NowSpecialAtk == ESA_FIRE ) {
-                if( e_pchara->dir == true ) {
-                    CharacterPos.w = e_pchara->x + e_pchara->width;
-                    CharacterPos.e = e_pchara->x + e_pchara->width
-                                     + al_get_bitmap_width( e_pchara->img_fire[ e_pchara->nSubState ] );
-
-                    CharacterPos.n = e_pchara->y
-                                    + ( e_pchara->height- al_get_bitmap_height( e_pchara->img_fire[ e_pchara->nSubState ] ) ) / 2;
-
-                    CharacterPos.s = e_pchara->y
-                                    + ( e_pchara->height+ al_get_bitmap_height( e_pchara->img_fire[ e_pchara->nSubState ] ) ) / 2;
+    if( e_pchara->state == ECS_ATK || e_pchara->state == ECS_SLIDE ) {
+        for( int i = 0; i < g_nMonsterCount; i++ ) {
+            if( e_monster[ i ].state != EMS_DIE ) {
+                Position CharacterPos, MonsterPos;
+                if( e_pchara->state == ECS_SLIDE ) {
+                    CharacterPos.w = e_pchara->x;
+                    CharacterPos.e = e_pchara->x + e_pchara->width;
+                    CharacterPos.n = e_pchara->y;
+                    CharacterPos.s = e_pchara->y + e_pchara->height;
                 }
+                // atk
                 else {
-                    CharacterPos.e = e_pchara->x;
-                    CharacterPos.w = e_pchara->x
-                                     - al_get_bitmap_width( e_pchara->img_fire[ e_pchara->nSubState ] );
+                    if( e_pchara->NowSpecialAtk == ESA_FIRE ) {
+                        if( e_pchara->dir == true ) {
+                            CharacterPos.w = e_pchara->x + e_pchara->width;
+                            CharacterPos.e = e_pchara->x + e_pchara->width
+                                             + al_get_bitmap_width( e_pchara->img_fire[ e_pchara->nSubState ] );
 
-                    CharacterPos.n = e_pchara->y
-                                    + ( e_pchara->height- al_get_bitmap_height( e_pchara->img_fire[ e_pchara->nSubState ] ) ) / 2;
+                            CharacterPos.n = e_pchara->y
+                                            + ( e_pchara->height- al_get_bitmap_height( e_pchara->img_fire[ e_pchara->nSubState ] ) ) / 2;
 
-                    CharacterPos.s = e_pchara->y
-                                    + ( e_pchara->height+ al_get_bitmap_height( e_pchara->img_fire[ e_pchara->nSubState ] ) ) / 2;
+                            CharacterPos.s = e_pchara->y
+                                            + ( e_pchara->height+ al_get_bitmap_height( e_pchara->img_fire[ e_pchara->nSubState ] ) ) / 2;
+                        }
+                        else {
+                            CharacterPos.e = e_pchara->x;
+                            CharacterPos.w = e_pchara->x
+                                             - al_get_bitmap_width( e_pchara->img_fire[ e_pchara->nSubState ] );
+
+                            CharacterPos.n = e_pchara->y
+                                            + ( e_pchara->height- al_get_bitmap_height( e_pchara->img_fire[ e_pchara->nSubState ] ) ) / 2;
+
+                            CharacterPos.s = e_pchara->y
+                                            + ( e_pchara->height+ al_get_bitmap_height( e_pchara->img_fire[ e_pchara->nSubState ] ) ) / 2;
+                        }
+                    }
+                    // normal, sword
+                    else {
+                        CharacterPos.w = e_pchara->x;
+                        CharacterPos.e = e_pchara->x + e_pchara->width;
+                        CharacterPos.n = e_pchara->y;
+                        CharacterPos.s = e_pchara->y + e_pchara->height;
+                    }
                 }
-            }
-            // normal, sword
-            else {
-                CharacterPos.w = e_pchara->x;
-                CharacterPos.e = e_pchara->x + e_pchara->width;
-                CharacterPos.n = e_pchara->y;
-                CharacterPos.s = e_pchara->y + e_pchara->height;
-            }
 
-            MonsterPos.e = e_monster[ i ].x + e_monster[ i ].width - 8;
-            MonsterPos.w = e_monster[ i ].x + 8;
-            MonsterPos.n = e_monster[ i ].y + 8;
-            MonsterPos.s = e_monster[ i ].y + e_monster[ i ].height - 8;
+                MonsterPos.e = e_monster[ i ].x + e_monster[ i ].width - 8;
+                MonsterPos.w = e_monster[ i ].x + 8;
+                MonsterPos.n = e_monster[ i ].y + 8;
+                MonsterPos.s = e_monster[ i ].y + e_monster[ i ].height - 8;
 
-            if( CheckOverlap( &CharacterPos, &MonsterPos ) == true ) {
-                e_monster[ i ].hp -= ( ( int )e_pchara->NowSpecialAtk + 1 );
+                if( CheckOverlap( &CharacterPos, &MonsterPos ) == true ) {
+                    e_monster[ i ].hp -= ( ( int )e_pchara->NowSpecialAtk + 1 );
+                }
             }
         }
     }
 
-    // check monster bomb
+    // check bomb
+    if( e_pchara->nBombIdx != -1 ) {
+        Position CharacterPos, MonsterPos;
+
+        bool bEffectiveBomb = GetBombPosition( e_pchara->nBombIdx, &CharacterPos );
+        if( bEffectiveBomb == false ) {
+            return;
+        }
+        CharacterPos.e += 0;
+        CharacterPos.s += 0;
+        CharacterPos.w -= 0;
+        CharacterPos.n -= 0;
+
+        for( int i = 0; i < g_nMonsterCount; i++ ) {
+            if( e_monster[ i ].state == EMS_DIE ) {
+                continue;
+            }
+            MonsterPos.e = e_monster[ i ].x + e_monster[ i ].width - 16;
+            MonsterPos.w = e_monster[ i ].x + 16;
+            MonsterPos.n = e_monster[ i ].y + 16;
+            MonsterPos.s = e_monster[ i ].y + e_monster[ i ].height - 16;
+
+            if( CheckOverlap( &CharacterPos, &MonsterPos ) == true ) {
+                e_monster[ i ].hp -= 3;
+
+                // explode bomb
+                if( e_pchara->NowSpecialAtk == ESA_BOMB ) {
+                    printf( "Trigger Explode\n" );
+                    ExplodeBomb( e_pchara->nBombIdx );
+                }
+            }
+        }
+        printf( "%d %d %d %d\n", CharacterPos.e, CharacterPos.s, CharacterPos.w, CharacterPos.n );
+    }
 }
 
 void character_attack_move( void )

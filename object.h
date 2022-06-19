@@ -15,6 +15,8 @@ void object_destroy( void );
 
 int RegisterBomb( void );
 void BombThrow( const int idx, const int x, const int y, const bool bDir );
+bool GetBombPosition( const int idx, Position *pBombPos );
+void ExplodeBomb( const int idx );
 void Object_process( ALLEGRO_EVENT event );
 
 void Eat( const Position *plhs, int *pFoodCount, int *pCandyCount );
