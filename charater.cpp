@@ -16,6 +16,8 @@ ALLEGRO_SAMPLE *sample_transform = NULL;
 ALLEGRO_SAMPLE_INSTANCE *BossSampleInstance = NULL;
 ALLEGRO_SAMPLE *BossSample = NULL;
 
+ALLEGRO_BITMAP *img_store_Boss_HP[ HP + 1 ];
+
 bool g_bMute = false;
 //float e_pchara->CamPos = 0.0;
 ALLEGRO_TRANSFORM camera;
@@ -39,6 +41,7 @@ bool g_bForceImmortal = false;
 int g_nImortalCursor = 0;
 int g_nImortalTime = 10 * FPS; // 10 sec
 
+int g_nBossIdx = 0;
 bool g_bBossImmortal = false;
 int g_nBossImmortalCursor = 0;
 int g_nBossImmortalTime = 2 * FPS;
@@ -1145,7 +1148,7 @@ void character_attackMonster( void )
                             g_nBossImmortalCursor = 0;
                             e_monster[ i ].state = EMS_INJURED;
                             e_monster[ i ].nInjuredCursor = 0;
-                            e_monster[ i ].hp --;
+e_							monster[ i ].hp -= ( ( int )e_pchara->NowSpecialAtk + 1 );
                             //printf( "Injured by others, now hp is %d\n", e_pchara->hp );
                             //printf( "yo\n" );
                         }
@@ -1183,23 +1186,28 @@ void character_attackMonster( void )
             MonsterPos.s = e_monster[ i ].y + e_monster[ i ].height - 16;
 
             if( CheckOverlap( &CharacterPos, &MonsterPos ) == true ) {
-                e_monster[ i ].hp -= 3;
-                if( e_pchara->NowSpecialAtk == ESA_BOMB ) {
-                    printf( "Trigger Explode\n" );
-                    ExplodeBomb( e_pchara->nBombIdx );
-                }
-
                 if( e_monster[ i ].type == ESA_BOSS ) {
                     if( g_bBossImmortal == true ) {
                         printf("nothing");
                     }
                     else {
                         printf( "%d ", e_monster[ i ].hp );
-                        g_bImmortal = true;
-                        g_nImortalCursor = 0;
+                        g_bBossImmortal = true;
+                        g_nBossImmortalCursor = 0;
                         e_monster[ i ].state = EMS_INJURED;
                         e_monster[ i ].nInjuredCursor = 0;
-                        e_monster[ i ].hp --;
+                        e_monster[ i ].hp -= 3;
+                        if( e_pchara->NowSpecialAtk == ESA_BOMB ) {
+                            printf( "Trigger Explode\n" );
+                            ExplodeBomb( e_pchara->nBombIdx );
+                        }                    }
+                }
+                // other
+                else {
+                    e_monster[ i ].hp -= 3;
+                    if( e_pchara->NowSpecialAtk == ESA_BOMB ) {
+                        printf( "Trigger Explode\n" );
+                        ExplodeBomb( e_pchara->nBombIdx );
                     }
                 }
             }
@@ -1542,6 +1550,13 @@ void monster_init( void )
     }
     fclose( fp ); //記得關檔
 
+    // hp
+    for( int i = 0; i <= HP; i++ ) {
+        char temp[ 50 ];
+        sprintf( temp, "./image/hp%d.png", i );
+        img_store_Boss_HP[ i ] = al_load_bitmap( temp );
+        assert( img_store_Boss_HP[ i ] != NULL );
+    }
 
     for( int n = 0; n < g_nMonsterCount; n++ ) {
         if( e_monster[ n ].type == ESA_NORMAL ) {
@@ -1627,6 +1642,7 @@ void monster_init( void )
         }
 
         if( e_monster[ n ].type == ESA_BOSS ) {
+            g_nBossIdx = n;
             e_monster[ n ].hp = 5;
             e_monster[ n ].dir = false;
             e_monster[ n ].nInjuredCursor = 0;
@@ -2140,6 +2156,7 @@ void monster_draw( void )
                 al_draw_bitmap( e_monster[ n ].img_die[ 0 ], e_monster[ n ].x, e_monster[ n ].y, 0 );
          }
     }
+    Boss_drawhp();
 }
 
 //Boss Bomb_attackCharacter();
@@ -2163,6 +2180,12 @@ void monster_destroy( void )
             }
         }
     }
+
+    // hp
+    for( int i = 0; i <= HP; i++) {
+        al_destroy_bitmap( img_store_Boss_HP[ i ] );
+    }
+
     printf( "monster destroy success!\n" );
 //    printf( "character_destory2\n" );
 }
@@ -2173,4 +2196,29 @@ bool isCharacterAlive( void )
         return false;
     }
     return e_pchara->hp > 0;
+}
+
+void Boss_drawhp( void )
+{
+    if( e_monster[ g_nBossIdx ].hp >= 6 ) {
+        al_draw_bitmap( img_store_Boss_HP[ 6 ], e_pchara->CamPos + 480, HEIGHT - g_nWordHeight - 20, 0 );
+    }
+	else if( e_monster[ g_nBossIdx ].hp ==5) {
+        al_draw_bitmap( img_store_Boss_HP[ 5 ], e_pchara->CamPos + 480, HEIGHT - g_nWordHeight - 20, 0 );
+    }
+	else if( e_monster[ g_nBossIdx ].hp == 4 ) {
+        al_draw_bitmap( img_store_Boss_HP[ 4 ], e_pchara->CamPos + 480, HEIGHT - g_nWordHeight - 20, 0 );
+    }
+    else if( e_monster[ g_nBossIdx ].hp == 3 ) {
+        al_draw_bitmap( img_store_Boss_HP[ 3 ], e_pchara->CamPos + 480, HEIGHT - g_nWordHeight - 20, 0 );
+    }
+    else if( e_monster[ g_nBossIdx ].hp == 2 ) {
+        al_draw_bitmap( img_store_Boss_HP[ 2 ], e_pchara->CamPos + 480, HEIGHT - g_nWordHeight - 20, 0 );
+    }
+    else if( e_monster[ g_nBossIdx ].hp == 1 ) {
+        al_draw_bitmap( img_store_Boss_HP[ 1 ], e_pchara->CamPos + 480, HEIGHT - g_nWordHeight - 20, 0 );
+    }
+    else {
+        al_draw_bitmap( img_store_Boss_HP[ 0 ], e_pchara->CamPos + 480, HEIGHT - g_nWordHeight - 20, 0 );
+    }
 }
