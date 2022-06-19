@@ -224,9 +224,12 @@ void Vic_video_display(ALLEGRO_VIDEO *video) {
 }
 
 void Vicinit_video(){
+    al_init_video_addon();
     al_set_new_bitmap_flags(ALLEGRO_MIN_LINEAR | ALLEGRO_MAG_LINEAR);
+    const char *vfilename = "dance.ogv";
+
     printf("reading video.....\n");
-    VicVideo = al_open_video("dance.ogv");
+    VicVideo = al_open_video( vfilename );
     if( VicVideo )
         printf("read video succeed\n");
     else
@@ -289,10 +292,11 @@ void game_update( void )
             g_nLife--;
 
             if( g_nLife == 0 ) {
+
                 al_stop_sample_instance( g_pMenuSampleInstance );
                 al_set_sample_instance_gain( DeathSampleInstance, 1 );
                 al_play_sample_instance( DeathSampleInstance );
-                al_rest(3);
+
                 game_scene_destroy();
 
                 g_nWindow = 3;
@@ -303,15 +307,14 @@ void game_update( void )
             }
             // still have lives
             else {
-                al_rest(1);
                 al_stop_sample_instance( g_pMenuSampleInstance );
                 al_set_sample_instance_gain( DeathSampleInstance, 1 );
                 al_play_sample_instance( DeathSampleInstance );
 
-
                 //to be fetched
                 game_scene_destroy();
                 game_scene_init( g_nLife );
+
                 al_play_sample_instance( g_pMenuSampleInstance );
                 al_set_sample_instance_gain( g_pMenuSampleInstance, 1 );
             }
