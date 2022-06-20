@@ -578,6 +578,7 @@ void character_gravity( int nGroundY ) {
                 if( g_bImmortal == false ) {
                     e_pchara->state = ECS_INJURED;
                     e_pchara->hp--;
+                    printf( "4\n" );
                     g_bImmortal = true;
                     g_nImortalCursor = 0;
                 }
@@ -1171,10 +1172,10 @@ void character_attackMonster( void )
             return;
         }
 
-        CharacterPos.e -= 30; // shrink boarder
-        CharacterPos.s -= 30;
-        CharacterPos.w += 30;
-        CharacterPos.n += 30;
+        CharacterPos.e -= 0; // shrink boarder
+        CharacterPos.s -= 0;
+        CharacterPos.w += 0;
+        CharacterPos.n += 0;
 
         for( int i = 0; i < g_nMonsterCount; i++ ) {
             if( e_monster[ i ].state == EMS_DIE || e_monster[ i ].state == EMS_INJURED ) {
@@ -1756,6 +1757,10 @@ void monster_update( void )
                     e_pchara->state = ECS_INJURED;
                     e_pchara->nInjuredCursor = 0;
                     e_pchara->hp--;
+
+                    e_pchara->NowSpecialAtk = ESA_NORMAL;
+                    e_pchara->img_atkWord = e_pchara->img_store_AtkWord[ e_pchara->NowSpecialAtk ];
+                    printf( "5\n" );
                    // printf( "yo\n" );
                 }
             }
@@ -1826,6 +1831,7 @@ void monsrt_attackCharacter( void )
                     e_pchara->state = ECS_INJURED;
                     e_pchara->nInjuredCursor = 0;
                     e_pchara->hp = e_pchara->hp - ( e_monster[ i ].type + 1 );
+                    printf( "1\n" );
 
                     e_pchara->NowSpecialAtk = ESA_NORMAL;
                     e_pchara->img_atkWord = e_pchara->img_store_AtkWord[ e_pchara->NowSpecialAtk ];
@@ -1859,6 +1865,7 @@ void monsrt_attackCharacter( void )
                 e_pchara->state = ECS_INJURED;
                 e_pchara->nInjuredCursor = 0;
                 e_pchara->hp -= 3;
+                printf( "2\n" );
 
                 e_pchara->NowSpecialAtk = ESA_NORMAL;
                 e_pchara->img_atkWord = e_pchara->img_store_AtkWord[ e_pchara->NowSpecialAtk ];
@@ -1888,6 +1895,7 @@ void BossBomb_attackCharacter( void )
         e_pchara->state = ECS_INJURED;
         e_pchara->nInjuredCursor = 0;
         e_pchara->hp -= ( nBossHarm );
+        printf( "3\n" );
 
         e_pchara->NowSpecialAtk = ESA_NORMAL;
         e_pchara->img_atkWord = e_pchara->img_store_AtkWord[ e_pchara->NowSpecialAtk ];
