@@ -47,9 +47,31 @@ void game_scene_init( const int nLife )
     }
     g_nBackgroundWidth = al_get_bitmap_width( g_background[ 0 ] );
 
+    clock_t t;
+    clock_t temp;
+    clock_t test;
+    t = clock();
+    temp = t;
     character_init( COUNOF_BACKGROUND * g_nBackgroundWidth, nLife );
+    t = clock();
+    test = t - temp;
+    temp = t;
+    double time_taken = ((double)test)/CLOCKS_PER_SEC; // in seconds
+    printf("character_init took %f seconds to execute \n", time_taken);
+
     monster_init();
+    t = clock();
+    test = t - temp;
+    temp = t;
+    time_taken = ((double)test)/CLOCKS_PER_SEC; // in seconds
+    printf("monster_init() took %f seconds to execute \n", time_taken);
+
     object_init();
+    t = clock();
+    test = t - temp;
+    temp = t;
+    time_taken = ((double)test)/CLOCKS_PER_SEC; // in seconds
+    printf("object_init() took %f seconds to execute \n", time_taken);
 }
 
 void game_scene_draw( void ){

@@ -1,6 +1,7 @@
 #ifndef GLOBAL_H_INCLUDED
 #define GLOBAL_H_INCLUDED
 #include <stdio.h>
+#include <time.h>
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_image.h>

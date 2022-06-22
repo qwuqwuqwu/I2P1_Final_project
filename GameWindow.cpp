@@ -149,6 +149,8 @@ void game_begin( void )
     init_video();
     video_begin();
 
+
+
     while( true ){
 		ALLEGRO_EVENT event;
         al_wait_for_event( g_pVideoQueue, &event );
@@ -165,13 +167,18 @@ void game_begin( void )
         }
         else if( event.type == ALLEGRO_EVENT_KEY_UP ) {
             if( event.keyboard.keycode == ALLEGRO_KEY_SPACE ) {
-                al_close_video( g_pVideo );
+                //al_close_video( g_pVideo );
                 break;
             }
         }
     }
     al_stop_timer( fps );
+    al_unregister_event_source( g_pVideoQueue, al_get_video_event_source( g_pVideo ) );
+    al_unregister_event_source( g_pVideoQueue, al_get_display_event_source( g_pDisplay ) );
+    al_unregister_event_source( g_pVideoQueue, al_get_keyboard_event_source() );
+    al_unregister_event_source( g_pVideoQueue, al_get_timer_event_source( fps ) );
     al_destroy_event_queue( g_pVideoQueue );
+    printf( "end closing video\n" );
 
     // register event of game g_nWindow
     al_register_event_source( event_queue, al_get_display_event_source( g_pDisplay ) );
@@ -180,17 +187,14 @@ void game_begin( void )
     al_register_event_source( event_queue, al_get_timer_event_source( fps ) ) ;
     al_start_timer( fps );
 
-    // Load sound
+    clock_t t;
+    t = clock();
+
     g_pMenuSample = al_load_sample( "./sound/overworld.mp3" );
-    al_reserve_samples( 20 );
+    al_reserve_samples( 1 );
     g_pMenuSampleInstance = al_create_sample_instance( g_pMenuSample );
     // Loop the song until the display closes
     al_set_sample_instance_playmode( g_pMenuSampleInstance, ALLEGRO_PLAYMODE_LOOP );
-    al_restore_default_mixer();
-    al_attach_sample_instance_to_mixer( g_pMenuSampleInstance, al_get_default_mixer() );
-    // set the volume of instance
-    al_set_sample_instance_gain( g_pMenuSampleInstance, 0.8 );
-    al_play_sample_instance( g_pMenuSampleInstance );
 
     DeathSample = al_load_sample( "./sound/death.wav" );
     DeathSampleInstance = al_create_sample_instance( DeathSample );
@@ -201,10 +205,21 @@ void game_begin( void )
     OverSampleInstance = al_create_sample_instance( OverSample );
     al_set_sample_instance_playmode( OverSampleInstance, ALLEGRO_PLAYMODE_ONCE );
     al_attach_sample_instance_to_mixer( OverSampleInstance, al_get_default_mixer() );
-    //al_start_timer(fps);
+
+
+    al_restore_default_mixer();
+    al_attach_sample_instance_to_mixer( g_pMenuSampleInstance, al_get_default_mixer() );
+    // set the volume of instance
+    al_set_sample_instance_gain( g_pMenuSampleInstance, 0.8 );
+    al_play_sample_instance( g_pMenuSampleInstance );
 
     // initialize the menu before entering the loop
     menu_init();
+
+    t = clock() - t;
+    double time_taken = ((double)t)/CLOCKS_PER_SEC; // in seconds
+
+    printf("fun() took %f seconds to execute \n", time_taken);
 }
 void Vic_video_display(ALLEGRO_VIDEO *video) {
     ALLEGRO_BITMAP *frame = al_get_video_frame(video);
@@ -286,7 +301,16 @@ void game_update( void )
             // not back menu anymore, therefore destroy it
             menu_destroy();
             // initialize next scene
+            al_stop_timer( fps );
+
             game_scene_init( g_nLife );
+
+            al_register_event_source( event_queue, al_get_display_event_source( g_pDisplay ) );
+            al_register_event_source( event_queue, al_get_keyboard_event_source() );
+            al_register_event_source( event_queue, al_get_mouse_event_source() );
+            al_register_event_source( event_queue, al_get_timer_event_source( fps ) ) ;
+            al_start_timer( fps );
+
             judge_next_window = false;
             g_nWindow = 2;
         }

@@ -84,6 +84,10 @@ void character_init( const int nTerrainWidth, const int nLife )
 {
 //    printf( "character_init\n" );
 
+
+    clock_t t;
+    t = clock();
+
     // new e_pchara
     e_pchara = ( Character * )malloc( sizeof( Character ) );
     g_bImmortal = false;
@@ -351,6 +355,11 @@ void character_init( const int nTerrainWidth, const int nLife )
     e_pchara->nTransformTime = 30;
     e_pchara->NowSpecialAtk = ESA_NORMAL;
     e_pchara->NextSpecailAtk = ESA_NORMAL;
+
+    t = clock() - t;
+    double time_taken = ((double)t)/CLOCKS_PER_SEC; // in seconds
+
+    printf("character init took %f seconds to execute \n", time_taken);
 
 //    printf( "test\n" );
 
