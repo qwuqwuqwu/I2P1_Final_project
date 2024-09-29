@@ -1,4 +1,4 @@
-# I2P1_Final_project
+# Allergo Kirby I2P1_Final_project
 Introduction to programming 1 final project
 ## Rules
 - You can only use C language to do this project, otherwise you will get 0 point.
